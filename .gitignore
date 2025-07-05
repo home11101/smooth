@@ -1,0 +1,26 @@
+# .gitignore auto
+.dart_tool/
+build/
+.pub/
+.packages
+.idea/
+.vscode/
+*.iml
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+*.lock
+*.log
+
+# Fichiers sensibles
+*.key
+*.csr
+*.pem
+*.p12
+*.mobileprovision
+.env
+secrets/
+config/

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Smooth AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .content-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        nav a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        nav a:hover {
+            color: #764ba2;
+            transform: translateY(-2px);
+        }
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        nav a:hover::after {
+            width: 100%;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 30px 0 10px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+        .last-updated {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .faq-toc {
+            background: linear-gradient(135deg, #f8f9ff, #e8f0fe);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        .faq-toc h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .faq-toc a {
+            color: #555;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: block;
+            border: 1px solid transparent;
+        }
+        .faq-toc a:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-color: rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
+        }
+        .faq-section {
+            margin-bottom: 40px;
+            scroll-margin-top: 100px;
+            background: linear-gradient(135deg, #f8f9ff, #e8f0fe);
+            border-radius: 15px;
+            padding: 30px 30px 20px 30px;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.07);
+            border: 1px solid rgba(102, 126, 234, 0.08);
+            position: relative;
+        }
+        .faq-section h2 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .faq-section h2 .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .faq-section p {
+            color: #444;
+            font-size: 1.08em;
+        }
+        .info-box {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            border: 1px solid #17a2b8;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 18px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .info-box::before {
+            content: 'ℹ️';
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            font-size: 1.3em;
+        }
+        .success-box {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 1px solid #28a745;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 18px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .success-box::before {
+            content: '✅';
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            font-size: 1.3em;
+        }
+        .danger-box {
+            background: linear-gradient(135deg, #f8d7da, #f1b0b7);
+            border: 1px solid #dc3545;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 18px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .danger-box::before {
+            content: '🚫';
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            font-size: 1.3em;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            .content-wrapper {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 2.2em;
+            }
+            .toc-grid {
+                grid-template-columns: 1fr;
+            }
+            nav a {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html">🏠 Accueil</a>
+            <a href="privacy.html">🔒 Confidentialité</a>
+            <a href="terms.html">📋 Conditions</a>
+            <a href="faq.html">❓ FAQ</a>
+        </nav>
+        <div class="content-wrapper">
+            <div class="header">
+                <h1>Foire aux questions (FAQ)</h1>
+                <span class="last-updated">Dernière mise à jour : 1er juillet 2025</span>
+            </div>
+            <div class="faq-toc">
+                <h3>📋 Sommaire</h3>
+                <div class="toc-grid">
+                    <a href="#q1">Qu'est-ce que Smooth AI ?</a>
+                    <a href="#q2">Comment télécharger l'application ?</a>
+                    <a href="#q3">Mes données sont-elles protégées ?</a>
+                    <a href="#q4">Comment contacter le support ?</a>
+                    <a href="#q5">Que deviennent mes captures ?</a>
+                    <a href="#q6">Où trouver plus d'informations ?</a>
+                    <a href="#q7">Quels sont mes droits ?</a>
+                    <a href="#q8">Mes données sortent-elles de l’Europe ?</a>
+                    <a href="#q9">L’application est-elle conforme à la loi ?</a>
+                    <a href="#q10">Qui édite et héberge Smooth AI ?</a>
+                    <a href="#q11">Comment supprimer mon compte ?</a>
+                    <a href="#q12">Que faire en cas de litige ?</a>
+                    <a href="#q13">Où consulter les documents légaux ?</a>
+                    <a href="#q14">Comment mes données sont-elles sécurisées ?</a>
+                    <a href="#q15">Puis-je contacter la CNIL ?</a>
+                </div>
+            </div>
+            <div id="q1" class="faq-section"><h2><span class="icon">🤖</span>1. Qu'est-ce que Smooth AI&nbsp;?</h2><p>Smooth AI est une application mobile et web qui aide à améliorer la communication et les interactions sociales grâce à l'intelligence artificielle.</p></div>
+<div id="q2" class="faq-section"><h2><span class="icon">⬇️</span>2. Comment puis-je télécharger l'application&nbsp;?</h2><p>Vous pouvez télécharger l'application sur l'<a href="https://apps.apple.com/app/idTON_ID">App Store</a> ou sur <a href="https://play.google.com/store/apps/details?id=TON_ID">Google Play</a>.</p></div>
+<div id="q3" class="faq-section"><h2><span class="icon">🔒</span>3. Mes données sont-elles protégées&nbsp;?</h2><div class="success-box"><p>Oui, vos données sont chiffrées et traitées conformément à notre <a href="privacy.html">politique de confidentialité</a>.</p></div></div>
+<div id="q4" class="faq-section"><h2><span class="icon">📞</span>4. Comment contacter le support&nbsp;?</h2><div class="info-box"><p>Contactez-nous à support@smoothai.com ou via le chat intégré à l'application.</p></div></div>
+<div id="q5" class="faq-section"><h2><span class="icon">🖼️</span>5. Que deviennent mes captures de conversations&nbsp;?</h2><div class="info-box"><p>Les captures envoyées sont utilisées uniquement pour l’analyse par l’IA et la génération de conseils personnalisés. Elles sont supprimées automatiquement sous 30 jours maximum, conformément à notre <a href="privacy.html">politique de confidentialité</a>.</p></div></div>
+<div id="q6" class="faq-section"><h2><span class="icon">🔎</span>6. Où trouver plus d'informations&nbsp;?</h2><p>Pour toute question sur la gestion de vos données personnelles, consultez notre <a href="privacy.html">politique de confidentialité</a>. Pour les règles d'utilisation, consultez nos <a href="terms.html">conditions d'utilisation</a>.</p></div>
+<div id="q7" class="faq-section"><h2><span class="icon">📝</span>7. Quels sont mes droits sur mes données&nbsp;?</h2><div class="info-box"><p>Vous pouvez demander l’accès, la correction ou la suppression de vos données à tout moment, ou retirer votre consentement. Plus d’infos dans la <a href="privacy.html">politique de confidentialité</a>.</p></div></div>
+<div id="q8" class="faq-section"><h2><span class="icon">🇪🇺</span>8. Mes données sortent-elles de l’Europe&nbsp;?</h2><p>Non, vos données sont hébergées dans l’Union Européenne ou dans des pays offrant un niveau de protection adéquat.</p></div>
+<div id="q9" class="faq-section"><h2><span class="icon">⚖️</span>9. L’application est-elle conforme à la législation française&nbsp;?</h2><div class="success-box"><p>Oui, Smooth AI respecte la réglementation française et européenne, notamment le RGPD pour la protection des données personnelles. Toutes les informations légales sont disponibles dans nos <a href="terms.html">conditions d'utilisation</a> et notre <a href="privacy.html">politique de confidentialité</a>.</p></div></div>
+<div id="q10" class="faq-section"><h2><span class="icon">🏢</span>10. Qui édite et héberge Smooth AI&nbsp;?</h2><div class="info-box"><p><strong>Éditeur :</strong> Smooth AI SAS, 12 rue de Paris, 75000 Paris, France – SIRET : 123 456 789 00012<br><strong>Directeur de la publication :</strong> Jean Dupont<br><strong>Hébergeur :</strong> OVH, 2 rue Kellermann, 59100 Roubaix, France</p></div></div>
+<div id="q11" class="faq-section"><h2><span class="icon">🗑️</span>11. Comment supprimer mon compte&nbsp;?</h2><div class="danger-box"><p>Vous pouvez demander la suppression de votre compte et de vos données à tout moment en envoyant un email à dpo@smoothai.com. Votre demande sera traitée dans les meilleurs délais, conformément à la loi.</p></div></div>
+<div id="q12" class="faq-section"><h2><span class="icon">🤝</span>12. Que faire en cas de litige&nbsp;?</h2><div class="info-box"><p>En cas de litige, vous pouvez contacter notre support. Si aucun accord n’est trouvé, vous pouvez recourir gratuitement à un médiateur de la consommation. Plus d’informations dans nos <a href="terms.html">conditions d’utilisation</a>.</p></div></div>
+<div id="q13" class="faq-section"><h2><span class="icon">📄</span>13. Où puis-je consulter les documents légaux&nbsp;?</h2><p>Toutes les informations légales, y compris les conditions d’utilisation, la politique de confidentialité et les mentions légales, sont accessibles en bas de chaque page du site.</p></div>
+<div id="q14" class="faq-section"><h2><span class="icon">🛡️</span>14. Comment mes données sont-elles sécurisées&nbsp;?</h2><div class="success-box"><p>Nous utilisons des mesures techniques et organisationnelles avancées pour garantir la sécurité de vos données (chiffrement, accès restreint, audits réguliers, etc.).</p></div></div>
+<div id="q15" class="faq-section"><h2><span class="icon">🇫🇷</span>15. Puis-je contacter la CNIL&nbsp;?</h2><div class="info-box"><p>Oui, si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir la CNIL (<a href="https://www.cnil.fr/">www.cnil.fr</a>).</p></div></div>
+            <footer style="text-align:center; margin-top:40px; color:#888; font-size:0.95em;">
+                &copy; 2025 Smooth AI SAS. Tous droits réservés.
+            </footer>
+        </div>
+    </div>
+</body>
+</html>
