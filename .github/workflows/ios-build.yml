@@ -76,18 +76,19 @@ jobs:
                    CODE_SIGN_STYLE="Automatic" \
                    archive
                    
-    - name: Configure Apple account
-      run: |
-        # Configure Apple account for automatic signing
-        xcrun altool --signin "${{ secrets.APPLE_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" --asc-provider "7BHY8D9X9V"
-        
     - name: Export IPA
       run: |
         cd ios
+        # Get the certificate identity from the imported certificate
+        CERT_IDENTITY=$(security find-identity -v -p codesigning login.keychain | grep "iPhone Distribution" | head -1 | cut -d'"' -f2)
+        echo "Using certificate: $CERT_IDENTITY"
+        
         xcodebuild -exportArchive \
                    -archivePath Runner.xcarchive \
                    -exportPath ./build/ios/ipa \
-                   -exportOptionsPlist exportOptions.plist
+                   -exportOptionsPlist exportOptions.plist \
+                   CODE_SIGN_IDENTITY="$CERT_IDENTITY" \
+                   DEVELOPMENT_TEAM="7BHY8D9X9V"
                    
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
