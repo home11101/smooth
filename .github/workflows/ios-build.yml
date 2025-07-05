@@ -32,27 +32,17 @@ jobs:
         security unlock-keychain -p "" build.keychain
         security set-keychain-settings build.keychain
         
-        # Import distribution certificate (only if secrets are available)
-        if [ -n "${{ secrets.DISTRIBUTION_CERTIFICATE }}" ]; then
-          echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 -d > distribution.cer
-          security import distribution.cer -k build.keychain -T /usr/bin/codesign
-        else
-          echo "⚠️  No distribution certificate found, building without code signing"
-        fi
+        # Import distribution certificate
+        echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 -d > distribution.cer
+        security import distribution.cer -k build.keychain -T /usr/bin/codesign
         
-        # Import provisioning profile (only if secrets are available)
-        if [ -n "${{ secrets.PROVISIONING_PROFILE }}" ]; then
-          echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 -d > Smooth_AI_App_Store-2.mobileprovision
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp Smooth_AI_App_Store-2.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-        else
-          echo "⚠️  No provisioning profile found, building without code signing"
-        fi
+        # Import provisioning profile
+        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 -d > Smooth_AI_App_Store-2.mobileprovision
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        cp Smooth_AI_App_Store-2.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
         
-        # Set code signing identity (only if certificate was imported)
-        if [ -f "distribution.cer" ]; then
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
-        fi
+        # Set code signing identity
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
         
     - name: Build iOS app
       run: |
@@ -62,49 +52,26 @@ jobs:
     - name: Archive and sign
       run: |
         cd ios
-        if [ -n "${{ secrets.DISTRIBUTION_CERTIFICATE }}" ] && [ -n "${{ secrets.PROVISIONING_PROFILE }}" ]; then
-          # Full signing
-          xcodebuild -workspace Runner.xcworkspace \
-                     -scheme Runner \
-                     -configuration Release \
-                     -archivePath Runner.xcarchive \
-                     -destination generic/platform=iOS \
-                     -allowProvisioningUpdates \
-                     -allowProvisioningDeviceRegistration \
-                     CODE_SIGN_IDENTITY="Apple Distribution: Henri-Vincent Kanda (7BHY8D9X9V)" \
-                     PROVISIONING_PROFILE_SPECIFIER="Smooth_AI_App_Store-2" \
-                     DEVELOPMENT_TEAM="7BHY8D9X9V" \
-                     archive
-        else
-          # Build without signing
-          echo "🔨 Building archive without code signing..."
-          xcodebuild -workspace Runner.xcworkspace \
-                     -scheme Runner \
-                     -configuration Release \
-                     -archivePath Runner.xcarchive \
-                     -destination generic/platform=iOS \
-                     archive
-        fi
+        xcodebuild -workspace Runner.xcworkspace \
+                   -scheme Runner \
+                   -configuration Release \
+                   -archivePath Runner.xcarchive \
+                   -destination generic/platform=iOS \
+                   -allowProvisioningUpdates \
+                   -allowProvisioningDeviceRegistration \
+                   CODE_SIGN_IDENTITY="Apple Distribution: Henri-Vincent Kanda (7BHY8D9X9V)" \
+                   PROVISIONING_PROFILE_SPECIFIER="Smooth_AI_App_Store-2" \
+                   DEVELOPMENT_TEAM="7BHY8D9X9V" \
+                   archive
                    
     - name: Export IPA
       run: |
         cd ios
-        if [ -n "${{ secrets.DISTRIBUTION_CERTIFICATE }}" ] && [ -n "${{ secrets.PROVISIONING_PROFILE }}" ]; then
-          # Export with signing
-          xcodebuild -exportArchive \
-                     -archivePath Runner.xcarchive \
-                     -exportPath ./build/ios/ipa \
-                     -exportOptionsPlist exportOptions.plist
-        else
-          # Export without signing (for testing)
-          echo "📦 Creating unsigned IPA for testing..."
-          mkdir -p ./build/ios/ipa
-          cp Runner.xcarchive/Products/Applications/Runner.app ./build/ios/ipa/
-          cd ./build/ios/ipa
-          zip -r Runner.ipa Runner.app
-          cd ../../..
-        fi
-        
+        xcodebuild -exportArchive \
+                   -archivePath Runner.xcarchive \
+                   -exportPath ./build/ios/ipa \
+                   -exportOptionsPlist exportOptions.plist
+                   
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
@@ -112,7 +79,7 @@ jobs:
         path: ios/build/ios/ipa/Runner.ipa
         
     - name: Upload to App Store Connect
-      if: github.ref == 'refs/heads/main' && secrets.DISTRIBUTION_CERTIFICATE != ''
+      if: github.ref == 'refs/heads/main'
       run: |
         xcrun altool --upload-app \
                      --type ios \
