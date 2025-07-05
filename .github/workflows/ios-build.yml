@@ -58,6 +58,9 @@ jobs:
         sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' Runner.xcodeproj/project.pbxproj
         sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "Smooth AI App Store";/PROVISIONING_PROFILE_SPECIFIER = "";/g' Runner.xcodeproj/project.pbxproj
         sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = 7BHY8D9X9V;/g' Runner.xcodeproj/project.pbxproj
+        # Remove manual code signing identity
+        sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Distribution";/CODE_SIGN_IDENTITY = "";/g' Runner.xcodeproj/project.pbxproj
+        sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Distribution";/CODE_SIGN_IDENTITY = "";/g' Runner.xcodeproj/project.pbxproj
         
     - name: Archive and sign
       run: |
