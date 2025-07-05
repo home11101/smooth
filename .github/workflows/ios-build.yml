@@ -56,7 +56,7 @@ jobs:
         cd ios
         # Set automatic signing for the Runner target
         sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' Runner.xcodeproj/project.pbxproj
-        sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "Smooth_AI_App_Store-2";/PROVISIONING_PROFILE_SPECIFIER = "";/g' Runner.xcodeproj/project.pbxproj
+        sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "Smooth AI App Store";/PROVISIONING_PROFILE_SPECIFIER = "";/g' Runner.xcodeproj/project.pbxproj
         sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = 7BHY8D9X9V;/g' Runner.xcodeproj/project.pbxproj
         
     - name: Archive and sign
