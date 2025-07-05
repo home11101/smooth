@@ -4,10 +4,24 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
-import '../config/openai_config.dart';
 import '../models/chat_message.dart';
 import '../models/openai_response.dart';
 import '../utils/constants.dart';
+
+// Configuration OpenAI intégrée
+class OpenAIConfig {
+  static const String baseUrl = 'https://api.openai.com/v1/chat/completions';
+  static const String defaultModel = 'gpt-3.5-turbo';
+  static const String advancedModel = 'gpt-4';
+  static const double defaultTemperature = 0.7;
+  static const double analysisTemperature = 0.5;
+  static const int defaultMaxTokens = 500;
+  static const int analysisMaxTokens = 800;
+  static const int maxContextTokens = 4000;
+  static const int safetyMarginTokens = 500;
+  static const int maxRequestsPerMinute = 10;
+  static const int cacheDuration = 300; // 5 minutes
+}
 
 class RateLimitExceededException implements Exception {
   final String message;
