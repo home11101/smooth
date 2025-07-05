@@ -6,7 +6,7 @@ const String supabaseUrl = 'https://oahmneimzzfahkuervii.supabase.co';
 const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haG1uZWltenpmYWhrdWVydmlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1OTQ0MjAsImV4cCI6MjA2NjE3MDQyMH0.PgXFnAoQ88vYjAjXeEmfqlIfvLX7mQYxScvcm5duFIY';
 
 // Configuration OpenAI - VOTRE VRAIE CLÉ
-const String openAIApiKey = 'YOUR_OPENAI_API_KEY_HERE';
+const String openAIApiKey = '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';
 
 // Configuration Google ML Kit
 const String googleMLKitApiKey = 'YOUR_GOOGLE_ML_KIT_API_KEY';
