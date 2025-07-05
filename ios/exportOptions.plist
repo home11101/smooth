@@ -14,5 +14,7 @@
 	<true/>
 	<key>compileBitcode</key>
 	<false/>
+	<key>distributionBundleIdentifier</key>
+	<string>com.henrikanda.smoothai</string>
 </dict>
 </plist> 

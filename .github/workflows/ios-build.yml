@@ -82,7 +82,11 @@ jobs:
         xcodebuild -exportArchive \
                    -archivePath Runner.xcarchive \
                    -exportPath ./build/ios/ipa \
-                   -exportOptionsPlist exportOptions.plist
+                   -exportOptionsPlist exportOptions.plist \
+                   -allowProvisioningUpdates \
+                   -allowProvisioningDeviceRegistration \
+                   DEVELOPMENT_TEAM="7BHY8D9X9V" \
+                   CODE_SIGN_STYLE="Automatic"
                    
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
