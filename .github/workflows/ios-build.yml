@@ -76,17 +76,18 @@ jobs:
                    CODE_SIGN_STYLE="Automatic" \
                    archive
                    
+    - name: Configure Apple account
+      run: |
+        # Configure Apple account for automatic signing
+        xcrun altool --signin "${{ secrets.APPLE_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" --asc-provider "7BHY8D9X9V"
+        
     - name: Export IPA
       run: |
         cd ios
         xcodebuild -exportArchive \
                    -archivePath Runner.xcarchive \
                    -exportPath ./build/ios/ipa \
-                   -exportOptionsPlist exportOptions.plist \
-                   -allowProvisioningUpdates \
-                   -allowProvisioningDeviceRegistration \
-                   DEVELOPMENT_TEAM="7BHY8D9X9V" \
-                   CODE_SIGN_STYLE="Automatic"
+                   -exportOptionsPlist exportOptions.plist
                    
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
