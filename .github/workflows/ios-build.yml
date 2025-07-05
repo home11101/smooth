@@ -32,7 +32,7 @@ jobs:
         security unlock-keychain -p "" build.keychain
         security set-keychain-settings build.keychain
         
-        # Import distribution certificate
+        # Import distribution certificate (.cer)
         echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 -d > distribution.cer
         security import distribution.cer -k build.keychain -T /usr/bin/codesign
         
@@ -41,8 +41,9 @@ jobs:
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
         cp Smooth_AI_App_Store-2.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
         
-        # Set code signing identity
+        # Set code signing identity and trust the certificate
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+        security add-trusted-cert -d -r trustRoot -k build.keychain distribution.cer
         
     - name: Build iOS app
       run: |
