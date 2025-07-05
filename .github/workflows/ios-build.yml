@@ -32,6 +32,10 @@ jobs:
         security unlock-keychain -p "" build.keychain
         security set-keychain-settings build.keychain
         
+        # Import distribution certificate
+        echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 -d > distribution_certificate.p12
+        security import distribution_certificate.p12 -k build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+        
         # Import provisioning profile
         echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 -d > Smooth_AI_App_Store-2.mobileprovision
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
@@ -39,6 +43,9 @@ jobs:
         
         # Set code signing identity
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+        
+        # List certificates to verify import
+        security find-identity -v -p codesigning build.keychain
         
     - name: Build iOS app
       run: |
@@ -55,7 +62,7 @@ jobs:
                    -destination generic/platform=iOS \
                    -allowProvisioningUpdates \
                    -allowProvisioningDeviceRegistration \
-                   CODE_SIGN_IDENTITY="Apple Development" \
+                   CODE_SIGN_IDENTITY="iPhone Distribution" \
                    PROVISIONING_PROFILE_SPECIFIER="Smooth_AI_App_Store-2" \
                    DEVELOPMENT_TEAM="7BHY8D9X9V" \
                    archive
