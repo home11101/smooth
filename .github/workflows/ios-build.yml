@@ -22,7 +22,10 @@ jobs:
         channel: 'stable'
         
     - name: Install dependencies
-      run: flutter pub get
+      run: |
+        flutter pub get
+        cd ios
+        pod install
       
     - name: Configure Apple account
       run: |
@@ -41,8 +44,7 @@ jobs:
     - name: Build iOS app
       run: |
         cd ios
-        flutter build ios --release
-        # Also run xcodebuild to ensure proper signing
+        # Use xcodebuild directly instead of flutter build to enable automatic signing
         xcodebuild -workspace Runner.xcworkspace \
                    -scheme Runner \
                    -configuration Release \
