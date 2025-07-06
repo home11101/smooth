@@ -84,7 +84,11 @@ jobs:
       with:
         p12-file-base64: ${{ secrets.DISTRIBUTION_CERTIFICATE }}
         p12-password: ${{ secrets.CERTIFICATE_PASSWORD }}
-        mobileprovision-base64: ${{ secrets.PROVISIONING_PROFILE }}
+
+    - name: Install provisioning profile
+      run: |
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
     - name: Debug Xcode accounts and profiles
       run: |
