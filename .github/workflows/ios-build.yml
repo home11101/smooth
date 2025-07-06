@@ -61,13 +61,47 @@ jobs:
         
     - name: Configure Apple account for automatic signing
       run: |
-        # Configure Apple account for automatic signing
+        # Set environment variables for Xcode
+        export DEVELOPER_DIR="/Applications/Xcode_15.4.app/Contents/Developer"
+        export PATH="$DEVELOPER_DIR/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        
+        # Configure Apple account using xcrun
         xcrun altool --store-password-in-keychain-item "AC_PASSWORD" \
           -u "${{ secrets.APPLE_ID }}" \
           -p "${{ secrets.APP_SPECIFIC_PASSWORD }}"
         
         # Verify account configuration
         xcrun altool --list-providers -u "${{ secrets.APPLE_ID }}" -p "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+        
+        # Set environment variables for the build
+        echo "DEVELOPMENT_TEAM=7BHY8D9X9V" >> $GITHUB_ENV
+        echo "CODE_SIGN_STYLE=Automatic" >> $GITHUB_ENV
+        echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> $GITHUB_ENV
+        echo "FASTLANE_USER=${{ secrets.APPLE_ID }}" >> $GITHUB_ENV
+        echo "FASTLANE_PASSWORD=${{ secrets.APP_SPECIFIC_PASSWORD }}" >> $GITHUB_ENV
+        
+    - name: Configure Xcode account
+      run: |
+        # Try to configure Xcode account using different methods
+        xcrun simctl list devices
+        xcrun xcodebuild -version
+        
+        # Try to resolve dependencies and configure account
+        cd ios
+        xcrun xcodebuild -workspace Runner.xcworkspace \
+          -scheme Runner \
+          -resolvePackageDependencies
+        
+        # Try to configure account using xcrun
+        xcrun xcodebuild -workspace Runner.xcworkspace \
+          -scheme Runner \
+          -configuration Release \
+          -destination generic/platform=iOS \
+          -allowProvisioningUpdates \
+          -allowProvisioningDeviceRegistration \
+          DEVELOPMENT_TEAM="7BHY8D9X9V" \
+          CODE_SIGN_STYLE="Automatic" \
+          -showBuildSettings | grep -E "(DEVELOPMENT_TEAM|CODE_SIGN_STYLE|PRODUCT_BUNDLE_IDENTIFIER)"
         
     - name: Debug Xcode accounts and profiles
       run: |
@@ -85,9 +119,11 @@ jobs:
           -scheme Runner \
           -configuration Release \
           -destination generic/platform=iOS \
+          -allowProvisioningUpdates \
+          -allowProvisioningDeviceRegistration \
           DEVELOPMENT_TEAM="7BHY8D9X9V" \
           CODE_SIGN_STYLE="Automatic" \
-          -allowProvisioningUpdates \
+          PRODUCT_BUNDLE_IDENTIFIER="com.henrikanda.smoothai" \
           build
         
     - name: Archive and sign
