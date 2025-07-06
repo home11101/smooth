@@ -21,6 +21,16 @@ jobs:
         flutter-version: '3.24.5'
         channel: 'stable'
         
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        bundler-cache: true
+        
+    - name: Install Fastlane
+      run: |
+        gem install fastlane
+        
     - name: Install dependencies
       run: |
         flutter pub get
@@ -35,19 +45,18 @@ jobs:
         security unlock-keychain -p "" apple.keychain
         security set-keychain-settings apple.keychain
         
-        # Configure Apple account for automatic signing
-        xcrun notarytool store-credentials "apple-account" \
-          --apple-id "${{ secrets.APPLE_ID }}" \
-          --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" \
-          --team-id "7BHY8D9X9V"
-        
-        # Also configure using xcrun altool for broader compatibility
+        # Configure Apple account using xcrun
         xcrun altool --store-password-in-keychain-item "AC_PASSWORD" \
           -u "${{ secrets.APPLE_ID }}" \
           -p "${{ secrets.APP_SPECIFIC_PASSWORD }}"
         
         # Verify account configuration
         xcrun altool --list-providers -u "${{ secrets.APPLE_ID }}" -p "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+        
+        # Set environment variables for Xcode
+        echo "DEVELOPMENT_TEAM=7BHY8D9X9V" >> $GITHUB_ENV
+        echo "CODE_SIGN_STYLE=Automatic" >> $GITHUB_ENV
+        echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> $GITHUB_ENV
         
     - name: Configure Xcode account
       run: |
@@ -58,8 +67,9 @@ jobs:
         # Set up Xcode account using xcrun
         xcrun xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner
         
-        # Try to configure account using xcrun
-        xcrun xcodebuild -workspace ios/Runner.xcworkspace \
+        # Try to configure account using xcrun with environment variables
+        cd ios
+        xcrun xcodebuild -workspace Runner.xcworkspace \
                -scheme Runner \
                -configuration Release \
                -destination generic/platform=iOS \
@@ -67,7 +77,7 @@ jobs:
                -allowProvisioningDeviceRegistration \
                DEVELOPMENT_TEAM="7BHY8D9X9V" \
                CODE_SIGN_STYLE="Automatic" \
-               -dry-run
+               -showBuildSettings | grep -E "(DEVELOPMENT_TEAM|CODE_SIGN_STYLE|PRODUCT_BUNDLE_IDENTIFIER)"
         
     - name: Build iOS app
       run: |
