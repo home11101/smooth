@@ -1,0 +1,68 @@
+name: iOS Build with Fastlane
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.5'
+        channel: 'stable'
+        
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        bundler-cache: true
+        
+    - name: Install dependencies
+      run: |
+        flutter pub get
+        cd ios
+        pod install
+        
+    - name: Setup Fastlane
+      run: |
+        cd ios
+        gem install fastlane
+        
+    - name: Build with Fastlane
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        FASTLANE_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        FASTLANE_USER: ${{ secrets.APPLE_ID }}
+      run: |
+        cd ios
+        fastlane build
+        
+    - name: Upload IPA artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: smooth-ai-ipa
+        path: ios/build/ios/ipa/SmoothAI.ipa
+        
+    - name: Upload to App Store Connect
+      if: github.ref == 'refs/heads/main'
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        FASTLANE_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        FASTLANE_USER: ${{ secrets.APPLE_ID }}
+      run: |
+        cd ios
+        fastlane upload 

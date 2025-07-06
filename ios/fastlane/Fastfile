@@ -1,0 +1,38 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and archive iOS app"
+  lane :build do
+    # Setup code signing
+    setup_ci if is_ci
+    
+    # Build the app
+    gym(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        method: "app-store",
+        teamID: "7BHY8D9X9V"
+      },
+      clean: true,
+      output_directory: "build/ios/ipa",
+      output_name: "SmoothAI.ipa"
+    )
+  end
+
+  desc "Upload to App Store Connect"
+  lane :upload do
+    pilot(
+      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Build and upload to App Store Connect"
+  lane :build_and_upload do
+    build
+    upload
+  end
+end 
