@@ -42,6 +42,16 @@ jobs:
       run: |
         cd ios
         flutter build ios --release
+        # Also run xcodebuild to ensure proper signing
+        xcodebuild -workspace Runner.xcworkspace \
+                   -scheme Runner \
+                   -configuration Release \
+                   -destination generic/platform=iOS \
+                   -allowProvisioningUpdates \
+                   -allowProvisioningDeviceRegistration \
+                   DEVELOPMENT_TEAM="7BHY8D9X9V" \
+                   CODE_SIGN_STYLE="Automatic" \
+                   build
         
     - name: Archive and sign
       run: |
