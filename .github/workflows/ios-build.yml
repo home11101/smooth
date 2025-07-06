@@ -45,9 +45,15 @@ jobs:
         security unlock-keychain -p "" build.keychain
         security set-keychain-settings build.keychain
         
-        # Import certificate
+        # Import certificate with better error handling
         echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
-        security import certificate.p12 -k build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+        echo "Certificate file size: $(wc -c < certificate.p12) bytes"
+        
+        # Try to import with verbose output
+        security import certificate.p12 -k build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign -v || {
+          echo "Failed to import certificate. Trying alternative method..."
+          security import certificate.p12 -k build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" || true
+        }
         
         # Set key partition list (ignore specific error that doesn't affect signing)
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain || true
@@ -111,7 +117,9 @@ jobs:
     - name: Debug Xcode accounts and profiles
       run: |
         echo "=== Available signing identities ==="
-        security find-identity -v -p codesigning
+        security find-identity -v -p codesigning build.keychain || echo "No identities found in build.keychain"
+        security find-identity -v -p codesigning || echo "No identities found in default keychains"
+        
         echo "=== Installed provisioning profiles ==="
         ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
         echo "=== Keychain list ==="
@@ -122,9 +130,13 @@ jobs:
         for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
           if [ -f "$profile" ]; then
             echo "Profile: $profile"
-            security cms -D -i "$profile" | grep -A 5 "Name"
+            security cms -D -i "$profile" | grep -A 5 "Name" || echo "Could not decode profile"
           fi
         done
+        
+        echo "=== Certificate debug ==="
+        echo "Checking if certificate was properly imported..."
+        security find-certificate -a build.keychain || echo "No certificates found in build.keychain"
         
     - name: Build iOS app
       run: |
