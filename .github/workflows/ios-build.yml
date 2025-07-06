@@ -79,19 +79,29 @@ jobs:
                CODE_SIGN_STYLE="Automatic" \
                -showBuildSettings | grep -E "(DEVELOPMENT_TEAM|CODE_SIGN_STYLE|PRODUCT_BUNDLE_IDENTIFIER)"
         
+    - name: Import code signing certificates
+      uses: apple-actions/import-codesign-certs@v2
+      with:
+        p12-file-base64: ${{ secrets.DISTRIBUTION_CERTIFICATE }}
+        p12-password: ${{ secrets.CERTIFICATE_PASSWORD }}
+        mobileprovision-base64: ${{ secrets.PROVISIONING_PROFILE }}
+
+    - name: Debug Xcode accounts and profiles
+      run: |
+        security find-identity -v -p codesigning
+        ls ~/Library/MobileDevice/Provisioning\ Profiles
+
     - name: Build iOS app
       run: |
         cd ios
-        # Use xcodebuild directly instead of flutter build to enable automatic signing
         xcodebuild -workspace Runner.xcworkspace \
-                   -scheme Runner \
-                   -configuration Release \
-                   -destination generic/platform=iOS \
-                   -allowProvisioningUpdates \
-                   -allowProvisioningDeviceRegistration \
-                   DEVELOPMENT_TEAM="7BHY8D9X9V" \
-                   CODE_SIGN_STYLE="Automatic" \
-                   build
+          -scheme Runner \
+          -configuration Release \
+          -destination generic/platform=iOS \
+          -allowProvisioningUpdates \
+          DEVELOPMENT_TEAM="7BHY8D9X9V" \
+          CODE_SIGN_STYLE="Automatic" \
+          build
         
     - name: Archive and sign
       run: |
