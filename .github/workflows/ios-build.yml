@@ -24,43 +24,24 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
       
-    - name: Setup iOS certificates
+    - name: Configure Apple account
       run: |
-        # Import distribution certificate to system keychain
-        echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 -d > distribution_certificate.p12
-        security import distribution_certificate.p12 -k login.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign -A || true
+        # Create keychain for Apple account
+        security create-keychain -p "" apple.keychain
+        security default-keychain -s apple.keychain
+        security unlock-keychain -p "" apple.keychain
+        security set-keychain-settings apple.keychain
         
-        # Import provisioning profile
-        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 -d > Smooth_AI_App_Store-2.mobileprovision
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp Smooth_AI_App_Store-2.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-        
-        # List certificates to verify import (ignore errors)
-        echo "Available certificates:"
-        security find-identity -v -p codesigning login.keychain || true
-        
-        # Verify provisioning profile
-        echo "Provisioning profiles:"
-        ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
-        
-        # Set environment variables for code signing
-        echo "CERTIFICATE_NAME=$(security find-identity -v -p codesigning login.keychain | grep 'iPhone Distribution' | head -1 | cut -d'"' -f2)" >> $GITHUB_ENV
+        # Configure Apple account for automatic signing
+        xcrun notarytool store-credentials "apple-account" \
+          --apple-id "${{ secrets.APPLE_ID }}" \
+          --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" \
+          --team-id "7BHY8D9X9V"
         
     - name: Build iOS app
       run: |
         cd ios
-        flutter build ios --release --no-codesign
-        
-    - name: Configure Xcode project for automatic signing
-      run: |
-        cd ios
-        # Set automatic signing for the Runner target
-        sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' Runner.xcodeproj/project.pbxproj
-        sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "Smooth AI App Store";/PROVISIONING_PROFILE_SPECIFIER = "";/g' Runner.xcodeproj/project.pbxproj
-        sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = 7BHY8D9X9V;/g' Runner.xcodeproj/project.pbxproj
-        # Remove manual code signing identity
-        sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Distribution";/CODE_SIGN_IDENTITY = "";/g' Runner.xcodeproj/project.pbxproj
-        sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Distribution";/CODE_SIGN_IDENTITY = "";/g' Runner.xcodeproj/project.pbxproj
+        flutter build ios --release
         
     - name: Archive and sign
       run: |
@@ -79,20 +60,6 @@ jobs:
     - name: Export IPA
       run: |
         cd ios
-        # Debug: Check all keychains
-        echo "=== Checking all keychains ==="
-        security list-keychains
-        echo "=== Login keychain certificates ==="
-        security find-identity -v -p codesigning login.keychain || true
-        echo "=== System keychain certificates ==="
-        security find-identity -v -p codesigning /Library/Keychains/System.keychain || true
-        
-        # Try to find any distribution certificate
-        echo "=== Searching for any distribution certificate ==="
-        security find-identity -v -p codesigning | grep -i "distribution" || echo "No distribution certificates found in any keychain"
-        
-        # Try to use automatic signing instead
-        echo "=== Trying automatic signing ==="
         xcodebuild -exportArchive \
                    -archivePath Runner.xcarchive \
                    -exportPath ./build/ios/ipa \
