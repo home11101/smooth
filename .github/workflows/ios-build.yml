@@ -37,64 +37,37 @@ jobs:
         cd ios
         pod install
       
-    - name: Configure Apple account
+    - name: Setup code signing
       run: |
-        # Create keychain for Apple account
-        security create-keychain -p "" apple.keychain
-        security default-keychain -s apple.keychain
-        security unlock-keychain -p "" apple.keychain
-        security set-keychain-settings apple.keychain
+        # Create keychain for code signing
+        security create-keychain -p "" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "" build.keychain
+        security set-keychain-settings build.keychain
         
-        # Configure Apple account using xcrun
-        xcrun altool --store-password-in-keychain-item "AC_PASSWORD" \
-          -u "${{ secrets.APPLE_ID }}" \
-          -p "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+        # Import certificate
+        echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
+        security import certificate.p12 -k build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
         
-        # Verify account configuration
-        xcrun altool --list-providers -u "${{ secrets.APPLE_ID }}" -p "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+        # Set key partition list
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
         
-        # Set environment variables for Xcode
-        echo "DEVELOPMENT_TEAM=7BHY8D9X9V" >> $GITHUB_ENV
-        echo "CODE_SIGN_STYLE=Automatic" >> $GITHUB_ENV
-        echo "APPLE_ID=${{ secrets.APPLE_ID }}" >> $GITHUB_ENV
-        
-    - name: Configure Xcode account
-      run: |
-        # Configure Xcode to use the Apple account
-        xcrun simctl list devices
-        xcrun xcodebuild -version
-        
-        # Set up Xcode account using xcrun
-        xcrun xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner
-        
-        # Try to configure account using xcrun with environment variables
-        cd ios
-        xcrun xcodebuild -workspace Runner.xcworkspace \
-               -scheme Runner \
-               -configuration Release \
-               -destination generic/platform=iOS \
-               -allowProvisioningUpdates \
-               -allowProvisioningDeviceRegistration \
-               DEVELOPMENT_TEAM="7BHY8D9X9V" \
-               CODE_SIGN_STYLE="Automatic" \
-               -showBuildSettings | grep -E "(DEVELOPMENT_TEAM|CODE_SIGN_STYLE|PRODUCT_BUNDLE_IDENTIFIER)"
-        
-    - name: Import code signing certificates
-      uses: apple-actions/import-codesign-certs@v2
-      with:
-        p12-file-base64: ${{ secrets.DISTRIBUTION_CERTIFICATE }}
-        p12-password: ${{ secrets.CERTIFICATE_PASSWORD }}
-
-    - name: Install provisioning profile
-      run: |
+        # Install provisioning profile
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
         echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-
+        
+        # Clean up
+        rm certificate.p12
+        
     - name: Debug Xcode accounts and profiles
       run: |
+        echo "=== Available signing identities ==="
         security find-identity -v -p codesigning
-        ls ~/Library/MobileDevice/Provisioning\ Profiles
-
+        echo "=== Installed provisioning profiles ==="
+        ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
+        echo "=== Keychain list ==="
+        security list-keychains
+        
     - name: Build iOS app
       run: |
         cd ios
@@ -102,9 +75,10 @@ jobs:
           -scheme Runner \
           -configuration Release \
           -destination generic/platform=iOS \
-          -allowProvisioningUpdates \
           DEVELOPMENT_TEAM="7BHY8D9X9V" \
-          CODE_SIGN_STYLE="Automatic" \
+          CODE_SIGN_STYLE="Manual" \
+          CODE_SIGN_IDENTITY="iPhone Distribution" \
+          PROVISIONING_PROFILE_SPECIFIER="profile" \
           build
         
     - name: Archive and sign
