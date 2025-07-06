@@ -79,24 +79,26 @@ jobs:
     - name: Export IPA
       run: |
         cd ios
-        # Verify certificate is imported
-        echo "Available certificates:"
-        security find-identity -v -p codesigning login.keychain
+        # Debug: Check all keychains
+        echo "=== Checking all keychains ==="
+        security list-keychains
+        echo "=== Login keychain certificates ==="
+        security find-identity -v -p codesigning login.keychain || true
+        echo "=== System keychain certificates ==="
+        security find-identity -v -p codesigning /Library/Keychains/System.keychain || true
         
-        # Get the certificate identity from the imported certificate
-        CERT_IDENTITY=$(security find-identity -v -p codesigning login.keychain | grep "iPhone Distribution" | head -1 | cut -d'"' -f2)
-        echo "Using certificate: $CERT_IDENTITY"
+        # Try to find any distribution certificate
+        echo "=== Searching for any distribution certificate ==="
+        security find-identity -v -p codesigning | grep -i "distribution" || echo "No distribution certificates found in any keychain"
         
-        if [ -z "$CERT_IDENTITY" ]; then
-          echo "Error: No iPhone Distribution certificate found"
-          exit 1
-        fi
-        
+        # Try to use automatic signing instead
+        echo "=== Trying automatic signing ==="
         xcodebuild -exportArchive \
                    -archivePath Runner.xcarchive \
                    -exportPath ./build/ios/ipa \
                    -exportOptionsPlist exportOptions.plist \
-                   CODE_SIGN_IDENTITY="$CERT_IDENTITY" \
+                   -allowProvisioningUpdates \
+                   -allowProvisioningDeviceRegistration \
                    DEVELOPMENT_TEAM="7BHY8D9X9V"
                    
     - name: Upload IPA artifact
