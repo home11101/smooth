@@ -6,13 +6,6 @@
 	<string>app-store</string>
 	<key>teamID</key>
 	<string>7BHY8D9X9V</string>
-	<key>signingStyle</key>
-	<string>manual</string>
-	<key>provisioningProfiles</key>
-	<dict>
-		<key>com.henrikanda.smoothai</key>
-		<string>Smooth AI App Store</string>
-	</dict>
 	<key>uploadBitcode</key>
 	<false/>
 	<key>uploadSymbols</key>

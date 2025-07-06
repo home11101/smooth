@@ -79,9 +79,18 @@ jobs:
     - name: Export IPA
       run: |
         cd ios
+        # Verify certificate is imported
+        echo "Available certificates:"
+        security find-identity -v -p codesigning login.keychain
+        
         # Get the certificate identity from the imported certificate
         CERT_IDENTITY=$(security find-identity -v -p codesigning login.keychain | grep "iPhone Distribution" | head -1 | cut -d'"' -f2)
         echo "Using certificate: $CERT_IDENTITY"
+        
+        if [ -z "$CERT_IDENTITY" ]; then
+          echo "Error: No iPhone Distribution certificate found"
+          exit 1
+        fi
         
         xcodebuild -exportArchive \
                    -archivePath Runner.xcarchive \
