@@ -41,6 +41,34 @@ jobs:
           --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" \
           --team-id "7BHY8D9X9V"
         
+        # Also configure using xcrun altool for broader compatibility
+        xcrun altool --store-password-in-keychain-item "AC_PASSWORD" \
+          -u "${{ secrets.APPLE_ID }}" \
+          -p "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+        
+        # Verify account configuration
+        xcrun altool --list-providers -u "${{ secrets.APPLE_ID }}" -p "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+        
+    - name: Configure Xcode account
+      run: |
+        # Configure Xcode to use the Apple account
+        xcrun simctl list devices
+        xcrun xcodebuild -version
+        
+        # Set up Xcode account using xcrun
+        xcrun xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner
+        
+        # Try to configure account using xcrun
+        xcrun xcodebuild -workspace ios/Runner.xcworkspace \
+               -scheme Runner \
+               -configuration Release \
+               -destination generic/platform=iOS \
+               -allowProvisioningUpdates \
+               -allowProvisioningDeviceRegistration \
+               DEVELOPMENT_TEAM="7BHY8D9X9V" \
+               CODE_SIGN_STYLE="Automatic" \
+               -dry-run
+        
     - name: Build iOS app
       run: |
         cd ios
