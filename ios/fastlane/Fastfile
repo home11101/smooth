@@ -6,7 +6,16 @@ platform :ios do
     # Setup code signing
     setup_ci if is_ci
     
-    # Build the app
+    # Configure automatic signing
+    update_code_signing_settings(
+      use_automatic_signing: true,
+      team_id: "7BHY8D9X9V",
+      targets: ["Runner"],
+      build_configurations: ["Release"],
+      path: "Runner.xcodeproj" # Ajout du path pour plus de clarté
+    )
+    
+    # Build the app with automatic signing
     gym(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -14,11 +23,21 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         method: "app-store",
-        teamID: "7BHY8D9X9V"
+        teamID: "7BHY8D9X9V",
+        signingStyle: "automatic",
+        # Ajout d'options recommandées pour App Store
+        compileBitcode: true,
+        uploadBitcode: true,
+        uploadSymbols: true,
+        stripSwiftSymbols: true
       },
       clean: true,
       output_directory: "build/ios/ipa",
-      output_name: "SmoothAI.ipa"
+      output_name: "SmoothAI.ipa",
+      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Automatic",
+      # Ajout pour une meilleure gestion des erreurs
+      silent: false,
+      skip_package_ipa: false
     )
   end
 
@@ -26,7 +45,13 @@ platform :ios do
   lane :upload do
     pilot(
       api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
-      skip_waiting_for_build_processing: true
+      skip_waiting_for_build_processing: true,
+      # Ajout pour lier explicitement à l'IPA généré
+      ipa: lane_context[SharedValues::IPA_OUTPUT_PATH],
+      # Options recommandées pour TestFlight
+      distribute_external: false,
+      notify_external_testers: false,
+      skip_submission: true
     )
   end
 
@@ -35,4 +60,14 @@ platform :ios do
     build
     upload
   end
-end 
+  
+  # Lane bonus pour debug
+  desc "Debug code signing setup"
+  lane :debug_signing do
+    puts "Team ID: 7BHY8D9X9V"
+    puts "Bundle ID: com.henrikanda.smoothai"
+    puts "Xcode version: #{sh('xcodebuild -version')}"
+    puts "Available provisioning profiles:"
+    sh('security find-identity -v -p codesigning')
+  end
+end
