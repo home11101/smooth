@@ -26,34 +26,25 @@ jobs:
       
     - name: Setup iOS certificates
       run: |
-        # Create keychain
-        security create-keychain -p "" build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "" build.keychain
-        security set-keychain-settings build.keychain
-        
-        # Import distribution certificate with proper trust settings
+        # Import distribution certificate to system keychain
         echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 -d > distribution_certificate.p12
-        security import distribution_certificate.p12 -k build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign -A
+        security import distribution_certificate.p12 -k login.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign -A || true
         
         # Import provisioning profile
         echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 -d > Smooth_AI_App_Store-2.mobileprovision
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
         cp Smooth_AI_App_Store-2.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
         
-        # Set key partition list for code signing
-        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
-        
-        # List certificates to verify import
+        # List certificates to verify import (ignore errors)
         echo "Available certificates:"
-        security find-identity -v -p codesigning build.keychain
+        security find-identity -v -p codesigning login.keychain || true
         
         # Verify provisioning profile
         echo "Provisioning profiles:"
         ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
         
         # Set environment variables for code signing
-        echo "CERTIFICATE_NAME=$(security find-identity -v -p codesigning build.keychain | grep 'iPhone Distribution' | head -1 | cut -d'"' -f2)" >> $GITHUB_ENV
+        echo "CERTIFICATE_NAME=$(security find-identity -v -p codesigning login.keychain | grep 'iPhone Distribution' | head -1 | cut -d'"' -f2)" >> $GITHUB_ENV
         
     - name: Build iOS app
       run: |
@@ -90,10 +81,10 @@ jobs:
         cd ios
         # Verify certificate is imported
         echo "Available certificates:"
-        security find-identity -v -p codesigning build.keychain
+        security find-identity -v -p codesigning login.keychain
         
         # Get the certificate identity from the imported certificate
-        CERT_IDENTITY=$(security find-identity -v -p codesigning build.keychain | grep "iPhone Distribution" | head -1 | cut -d'"' -f2)
+        CERT_IDENTITY=$(security find-identity -v -p codesigning login.keychain | grep "iPhone Distribution" | head -1 | cut -d'"' -f2)
         echo "Using certificate: $CERT_IDENTITY"
         
         if [ -z "$CERT_IDENTITY" ]; then
