@@ -3,9 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:math';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../main_navigation_screen.dart';
+import '../../utils/app_theme.dart';
+import 'dart:math' as math;
 
 void main() {
   runApp(const FigmaToCodeApp());
@@ -31,116 +30,297 @@ class FigmaToCodeApp extends StatelessWidget {
 }
 
 class SplashScreen1 extends StatefulWidget {
-  const SplashScreen1({super.key});
+  const SplashScreen1({Key? key}) : super(key: key);
 
   @override
   State<SplashScreen1> createState() => _SplashScreen1State();
 }
 
-class _SplashScreen1State extends State<SplashScreen1> with TickerProviderStateMixin {
-  late AnimationController _scanController;
-  late AnimationController _fadeController;
-  double _opacity = 1.0;
+class _SplashScreen1State extends State<SplashScreen1>
+    with TickerProviderStateMixin {
+  late AnimationController _logoController;
+  late AnimationController _cardsController;
+  late Animation<double> _logoAnimation;
+  
+  List<FloatingCard> _floatingCards = [];
+  final List<String> _messages = [
+    "Salut ! Comment ça va ? 😊",
+    "J'adore ton profil ! 💕",
+    "Merci Smooth IA ! 🚀",
+    "Super conversation ! 💬",
+    "Message parfait ! 🎯"
+  ];
 
   @override
   void initState() {
     super.initState();
-    _scanController = AnimationController(
+    
+    // Animation du logo
+    _logoController = AnimationController(
+      duration: Duration(seconds: 2),
       vsync: this,
-      duration: const Duration(seconds: 5),
-    )..forward();
-
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
     );
+    
+    _logoAnimation = Tween<double>(
+      begin: -1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _logoController,
+      curve: Curves.easeOutBack,
+    ));
 
-    Timer(const Duration(seconds: 5), () {
-      _fadeController.forward();
-      setState(() => _opacity = 0.0);
-      Future.delayed(const Duration(milliseconds: 800), () async {
+
+    
+    // Animation des cartes
+    _cardsController = AnimationController(
+      duration: Duration(seconds: 1),
+      vsync: this,
+    );
+    
+    // Démarrer les animations
+    Future.delayed(Duration(milliseconds: 500), () {
+      _logoController.forward();
+    });
+    
+    // Navigation vers l'écran suivant après l'animation
+    Future.delayed(Duration(seconds: 4), () {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/onboarding');
+      }
+    });
+    
+    // Créer les cartes initiales
+    _createInitialCards();
+    
+    // Créer de nouvelles cartes périodiquement
+    _startCardCreation();
+  }
+
+  void _createInitialCards() {
+    for (int i = 0; i < 3; i++) {
+      _createFloatingCard(delay: i * 4000);
+    }
+  }
+
+  void _startCardCreation() {
+    Future.delayed(Duration(seconds: 6), () {
         if (mounted) {
-          final prefs = await SharedPreferences.getInstance();
-          final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
-          if (hasSeenOnboarding) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-            );
-          } else {
-            await prefs.setBool('hasSeenOnboarding', true);
-            Navigator.of(context).pushReplacementNamed('/onboarding');
-          }
-        }
+        _createFloatingCard();
+        _startCardCreation();
+      }
+    });
+  }
+
+  void _createFloatingCard({int delay = 0}) {
+    final random = math.Random();
+    final message = _messages[random.nextInt(_messages.length)];
+    final startX = random.nextDouble() * 0.7 + 0.15; // Entre 15% et 85%
+    final duration = random.nextInt(3000) + 11000; // Entre 11-14 secondes
+    
+    Future.delayed(Duration(milliseconds: delay), () {
+      if (mounted) {
+        setState(() {
+          _floatingCards.add(FloatingCard(
+            message: message,
+            startX: startX,
+            duration: duration,
+            onComplete: () {
+              setState(() {
+                _floatingCards.removeWhere((card) => card.message == message);
+              });
+            },
+          ));
       });
+      }
     });
   }
 
   @override
   void dispose() {
-    _scanController.dispose();
-    _fadeController.dispose();
+    _logoController.dispose();
+    _cardsController.dispose();
     super.dispose();
   }
 
-  Widget _buildParticles() {
-    return SizedBox(
-      width: 260,
-      height: 260,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: AppTheme.buildPickupScreenBackground(
       child: Stack(
-        children: List.generate(14, (i) {
-          final angle = 2 * pi * i / 14;
-          return AnimatedBuilder(
-            animation: _scanController,
+          children: [
+            // Particules scintillantes
+            ..._buildSparkles(),
+            
+            // Cartes flottantes
+            ..._floatingCards,
+            
+            // Logo central
+            Center(
+              child: AnimatedBuilder(
+                animation: _logoController,
             builder: (context, child) {
-              final orbit = 100 + 10 * sin(_scanController.value * 2 * pi + angle * 2);
-              return Positioned(
-                left: 130 + orbit * cos(angle) - 6,
-                top: 130 + orbit * sin(angle) - 6,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.cyanAccent.withOpacity(0.18 + 0.18 * sin(_scanController.value * 2 * pi + angle)),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.cyanAccent.withOpacity(0.25),
-                        blurRadius: 8,
-                        spreadRadius: 2,
+                  return Transform.translate(
+                    offset: Offset(0, _logoAnimation.value * MediaQuery.of(context).size.height),
+                    child: Transform.scale(
+                      scale: _logoController.isCompleted
+                          ? (1.0 + 0.05 * math.sin(_logoController.value * 4 * math.pi))
+                          : 1.0,
+                                            child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 160,
+                            height: 160,
+                            child: Image.asset(
+                              'assets/images/logo.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'DATING ASSISTANT',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF64748B),
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 3,
+                            ),
                       ),
                     ],
                   ),
                 ),
               );
             },
-          );
-        }),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildScanEffect() {
+  List<Widget> _buildSparkles() {
+    return List.generate(5, (index) {
+      final random = math.Random(index);
+      return AnimatedSparkle(
+        left: random.nextDouble() * 0.9 + 0.05,
+        top: random.nextDouble() * 0.9 + 0.05,
+        delay: random.nextInt(2000),
+      );
+    });
+  }
+}
+
+class FloatingCard extends StatefulWidget {
+  final String message;
+  final double startX;
+  final int duration;
+  final VoidCallback onComplete;
+
+  const FloatingCard({
+    Key? key,
+    required this.message,
+    required this.startX,
+    required this.duration,
+    required this.onComplete,
+  }) : super(key: key);
+
+  @override
+  _FloatingCardState createState() => _FloatingCardState();
+}
+
+class _FloatingCardState extends State<FloatingCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animationY;
+  late Animation<double> _animationScale;
+  late Animation<double> _animationOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(milliseconds: widget.duration),
+      vsync: this,
+    );
+
+    _animationY = Tween<double>(
+      begin: 1.0,
+      end: -0.1,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    _animationScale = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Interval(0.0, 0.15, curve: Curves.easeOut),
+    ));
+
+    _animationOpacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Interval(0.0, 0.15, curve: Curves.easeOut),
+    ));
+
+    _controller.forward().then((_) {
+      widget.onComplete();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _scanController,
+      animation: _controller,
       builder: (context, child) {
-        final scanY = 80 + 100 * _scanController.value;
         return Positioned(
-          left: 0,
-          right: 0,
-          top: scanY,
+          left: widget.startX * MediaQuery.of(context).size.width - 140,
+          top: _animationY.value * MediaQuery.of(context).size.height,
+          child: Transform.scale(
+            scale: _animationScale.value,
           child: Opacity(
-            opacity: 0.5 * (1 - (_scanController.value - 0.5).abs()),
+              opacity: _animationOpacity.value,
             child: Container(
-              height: 28,
+                constraints: BoxConstraints(
+                  maxWidth: 200,
+                  minWidth: 100,
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.cyanAccent.withOpacity(0.0),
-                    Colors.cyanAccent.withOpacity(0.7),
-                    Colors.cyanAccent.withOpacity(0.0),
+                  color: Color(0xFF3B82F6).withOpacity(0.95),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(4),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFF3B82F6).withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    ),
                   ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                ),
+                child: Text(
+                  widget.message,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    height: 1.3,
+                  ),
                 ),
               ),
             ),
@@ -149,102 +329,78 @@ class _SplashScreen1State extends State<SplashScreen1> with TickerProviderStateM
       },
     );
   }
+}
+
+class AnimatedSparkle extends StatefulWidget {
+  final double left;
+  final double top;
+  final int delay;
+
+  const AnimatedSparkle({
+    Key? key,
+    required this.left,
+    required this.top,
+    required this.delay,
+  }) : super(key: key);
+
+  @override
+  _AnimatedSparkleState createState() => _AnimatedSparkleState();
+}
+
+class _AnimatedSparkleState extends State<AnimatedSparkle>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(seconds: 3),
+      vsync: this,
+    );
+
+    _animation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) {
+        _controller.repeat(reverse: true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF121F2F),
-      body: AnimatedOpacity(
-        opacity: _opacity,
-        duration: const Duration(milliseconds: 800),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Dégradé animé
-            AnimatedBuilder(
-              animation: _scanController,
+    return Positioned(
+      left: widget.left * MediaQuery.of(context).size.width,
+      top: widget.top * MediaQuery.of(context).size.height,
+      child: AnimatedBuilder(
+        animation: _animation,
               builder: (context, child) {
-                return Container(
+          return Transform.scale(
+            scale: _animation.value,
+            child: Container(
+              width: 4,
+              height: 4,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color.lerp(const Color(0xFF121F2F), const Color(0xFF00E1FF), 0.5 + 0.5 * sin(_scanController.value * 2 * pi))!,
-                        Color.lerp(const Color(0xFF00E1FF), const Color(0xFF7F5FFF), 0.5 + 0.5 * cos(_scanController.value * 2 * pi))!,
-                        Color.lerp(const Color(0xFF7F5FFF), const Color(0xFF121F2F), 0.5 + 0.5 * sin(_scanController.value * 2 * pi + pi / 2))!,
-                      ],
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 );
               },
-            ),
-            Center(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  _buildParticles(),
-                  Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.cyanAccent.withOpacity(0.5),
-                          blurRadius: 48,
-                          spreadRadius: 16,
-                        ),
-                      ],
-                      gradient: const RadialGradient(
-                        colors: [
-                          Color(0xFF00E1FF),
-                          Color(0xFF121F2F),
-                        ],
-                        radius: 0.8,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                  _buildScanEffect(),
-                  Positioned(
-                    bottom: -70,
-                    child: FadeTransition(
-                      opacity: Tween<double>(begin: 0, end: 1).animate(
-                        CurvedAnimation(
-                          parent: _scanController,
-                          curve: const Interval(0.3, 0.8, curve: Curves.easeIn),
-                        ),
-                      ),
-                      child: Text(
-                        "Smooth AI – L'assistant de rencontres intelligent",
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.92),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          letterSpacing: 1.1,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

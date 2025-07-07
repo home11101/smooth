@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smooth AI - Assistant de Rencontres Intelligent</title>
+    <meta name="description" content="Smooth AI analyse vos conversations de dating et vous donne des conseils personnalisés pour améliorer vos relations.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/images/logo.png" alt="Smooth AI" class="logo">
+                <span>Smooth AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Fonctionnalités</a>
+                <a href="#how-it-works">Comment ça marche</a>
+                <a href="faq.html">FAQ</a>
+                <a href="privacy.html">Confidentialité</a>
+                <a href="terms.html">Conditions</a>
+                <a href="app/" class="cta-button">Essayer l'app</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Votre Assistant de Rencontres Intelligent</h1>
+                <p class="hero-subtitle">Analysez vos conversations, améliorez vos relations et trouvez l'amour avec l'aide de l'IA</p>
+                <div class="hero-buttons">
+                    <a href="app/" class="primary-button">Commencer maintenant</a>
+                    <a href="#how-it-works" class="secondary-button">En savoir plus</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="assets/images/chat-mockups.jpeg" alt="Smooth AI en action">
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2>Fonctionnalités principales</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Analyse de conversations</h3>
+                    <p>Analysez vos échanges pour comprendre les signaux et améliorer votre communication</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Conseils personnalisés</h3>
+                    <p>Recevez des recommandations adaptées à votre style de communication</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Rapports détaillés</h3>
+                    <p>Obtenez des insights sur vos patterns de communication et vos progrès</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Amélioration continue</h3>
+                    <p>Apprenez et évoluez grâce à l'analyse de vos conversations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <h2>Comment ça marche</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Uploadez vos conversations</h3>
+                    <p>Partagez vos échanges depuis Tinder, Instagram ou d'autres apps de dating</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Analyse automatique</h3>
+                    <p>Notre IA analyse vos messages et identifie les opportunités d'amélioration</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Recevez des conseils</h3>
+                    <p>Obtenez des recommandations personnalisées pour améliorer vos relations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Prêt à améliorer vos relations ?</h2>
+            <p>Rejoignez des milliers d'utilisateurs qui ont transformé leur vie amoureuse</p>
+            <a href="app/" class="primary-button">Commencer gratuitement</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Smooth AI</h4>
+                    <p>Votre assistant de rencontres intelligent</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Liens utiles</h4>
+                    <a href="faq.html">FAQ</a>
+                    <a href="privacy.html">Confidentialité</a>
+                    <a href="terms.html">Conditions</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>support@smoothai.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Smooth AI. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling pour les ancres
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

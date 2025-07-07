@@ -20,9 +20,9 @@ platform :ios do
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       configuration: "Release",
-      export_method: "app-store",
+      export_method: "ad-hoc",
       export_options: {
-        method: "app-store",
+        method: "ad-hoc",
         teamID: "7BHY8D9X9V",
         signingStyle: "automatic",
         # Ajout d'options recommandées pour App Store

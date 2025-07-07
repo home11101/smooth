@@ -1,0 +1,10 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build Android app"
+  lane :build do
+    gradle(
+      task: "assembleRelease"
+    )
+  end
+end
