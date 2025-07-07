@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart'
     show canLaunchUrl, launchUrl, LaunchMode;
 import '../screens/help_faq_screen.dart';
 import '../screens/premium_screen.dart';
+import '../screens/referral_screen.dart';
 
 // Classe principale du menu modal
 class SmoothModalMenu extends StatelessWidget {
@@ -201,6 +202,19 @@ class SmoothModalMenu extends StatelessWidget {
                                 if (onUpgrade != null) {
                                   Future.delayed(const Duration(milliseconds: 200), onUpgrade!);
                                 }
+                              },
+                            ),
+                            _SmoothMenuItem(
+                              icon: Icons.card_giftcard,
+                              label: 'Parrainage',
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ReferralScreen(),
+                                  ),
+                                );
                               },
                             ),
                             _SmoothMenuItem(

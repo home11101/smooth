@@ -7,11 +7,15 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import '../services/in_app_purchase_service.dart';
 import '../services/premium_provider.dart';
 import '../services/promo_code_service.dart';
+import '../services/referral_service.dart';
 import '../widgets/promo_code_input_widget.dart';
+import '../widgets/referral_success_dialog.dart';
 import 'dart:ui';
 import 'dart:async';
+import 'dart:convert';
 import '../services/subscription_service.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:flutter/services.dart';
 
 class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
@@ -27,9 +31,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   final PremiumProvider _premiumProvider = PremiumProvider();
   final PromoCodeService _promoCodeService = PromoCodeService();
+  final ReferralService _referralService = ReferralService();
   
   PromoCodeValidation? _appliedPromoCode;
   bool _showPromoCodeInput = false;
+  bool _showReferralDialog = false;
 
   @override
   void initState() {
@@ -62,12 +68,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
       await purchaseService.buyProduct(product);
       // La validation du paiement est gérée par InAppPurchaseService via PremiumProvider
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Achat réussi !'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // Afficher le dialogue de parrainage après un achat réussi
+        _showReferralSuccessDialog();
       }
     } catch (e) {
       if (mounted) {
@@ -83,6 +85,26 @@ class _PremiumScreenState extends State<PremiumScreen> {
         premiumProvider.setProcessing(false);
       }
     }
+  }
+
+  void _showReferralSuccessDialog() {
+    setState(() {
+      _showReferralDialog = true;
+    });
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ReferralSuccessDialog(
+          onClose: () {
+            setState(() {
+              _showReferralDialog = false;
+            });
+          },
+        );
+      },
+    );
   }
 
   void _onPromoCodeValidated(PromoCodeValidation validation) {
@@ -290,6 +312,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     const SizedBox(height: 12),
                     // Offres de prix
                     _buildPricingOptions(),
+                    const SizedBox(height: 12),
+                    // Section parrainage
+                    _buildReferralSection(),
                     const SizedBox(height: 12),
                     // Bouton restaurer visible
                     SizedBox(
@@ -760,6 +785,173 @@ class _PremiumScreenState extends State<PremiumScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildReferralSection() {
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: _referralService.getCurrentUserReferralStats(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final stats = snapshot.data;
+        if (stats == null) {
+          return const SizedBox.shrink();
+        }
+
+        final availablePoints = stats['available_points'] ?? 0;
+        final totalReferrals = stats['total_referrals'] ?? 0;
+        final referralCode = stats['referral_code'];
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF1E3A8A),
+                Color(0xFF3B82F6),
+                Color(0xFF8B5CF6),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.card_giftcard,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    '🎁 Programme de parrainage',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Statistiques
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildReferralStat('Points', '$availablePoints/5'),
+                  _buildReferralStat('Parrainages', '$totalReferrals'),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Code de parrainage
+              if (referralCode != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Votre code : ',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          referralCode,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          await Clipboard.setData(ClipboardData(text: referralCode));
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Code copié !'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.copy,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+              
+              // Instructions
+              const Text(
+                '💡 Partagez votre code et gagnez des points !\n'
+                '• 1 ami premium = 1 point\n'
+                '• 5 points = 5% de réduction',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildReferralStat(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white70,
+          ),
+        ),
+      ],
     );
   }
 
