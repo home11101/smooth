@@ -46,8 +46,8 @@ export default function DashboardPage() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>Dashboard</Typography>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
+      <Grid container spacing={3} columns={12}>
+        <Grid xs={12} md={4}>
           <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#0A192F', color: '#fff' }}>
             <PaymentIcon fontSize="large" />
             <Box>
@@ -56,7 +56,7 @@ export default function DashboardPage() {
             </Box>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#0A192F', color: '#fff' }}>
             <MonetizationOnIcon fontSize="large" />
             <Box>
@@ -65,7 +65,7 @@ export default function DashboardPage() {
             </Box>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#0A192F', color: '#fff' }}>
             <PeopleIcon fontSize="large" />
             <Box>
