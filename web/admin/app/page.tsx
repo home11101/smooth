@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import PeopleIcon from '@mui/icons-material/People';
@@ -46,8 +46,8 @@ export default function DashboardPage() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>Dashboard</Typography>
-      <Grid2 container spacing={3} columns={12}>
-        <Grid2 xs={12} md={4}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#0A192F', color: '#fff' }}>
             <PaymentIcon fontSize="large" />
             <Box>
@@ -55,8 +55,8 @@ export default function DashboardPage() {
               <Typography variant="h4">{paymentsCount !== null ? paymentsCount : '...'}</Typography>
             </Box>
           </Paper>
-        </Grid2>
-        <Grid2 xs={12} md={4}>
+        </Grid>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#0A192F', color: '#fff' }}>
             <MonetizationOnIcon fontSize="large" />
             <Box>
@@ -64,8 +64,8 @@ export default function DashboardPage() {
               <Typography variant="h4">{totalRevenue !== null ? totalRevenue.toFixed(2) + ' €' : '...'}</Typography>
             </Box>
           </Paper>
-        </Grid2>
-        <Grid2 xs={12} md={4}>
+        </Grid>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#0A192F', color: '#fff' }}>
             <PeopleIcon fontSize="large" />
             <Box>
@@ -73,8 +73,8 @@ export default function DashboardPage() {
               <Typography variant="h4">{uniqueDevices !== null ? uniqueDevices : '...'}</Typography>
             </Box>
           </Paper>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 }
