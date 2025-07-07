@@ -162,22 +162,22 @@ export default function PromoCodesPage() {
     setNotif({ open: true, message: `Code ${code.is_active ? 'désactivé' : 'activé'}`, severity: 'success' });
   }
 
-  function handleConfirmAction() {
+  async function handleConfirmAction() {
     if (confirmDialog.code && confirmDialog.action) {
       if (confirmDialog.action === 'toggle') {
-        handleToggleActive(confirmDialog.code);
+        await handleToggleActive(confirmDialog.code);
       }
       // Ajouter d'autres actions si nécessaire
     }
     setConfirmDialog({ open: false, code: null, action: null });
   }
 
-  function handleUndo() {
+  async function handleUndo() {
     if (undoStack.length > 0) {
       const lastAction = undoStack[undoStack.length - 1];
       if (lastAction.action === 'toggle') {
-        supabase.from('promo_codes').update({ is_active: lastAction.code.is_active }).eq('id', lastAction.code.id);
-        fetchCodes();
+        await supabase.from('promo_codes').update({ is_active: lastAction.code.is_active }).eq('id', lastAction.code.id);
+        await fetchCodes();
         setNotif({ open: true, message: 'Action annulée', severity: 'info' });
       }
       setUndoStack(prev => prev.slice(0, -1));
@@ -442,16 +442,16 @@ export default function PromoCodesPage() {
           rowsPerPageOptions={[5, 10, 25, 50]}
         />
       </Paper>
-      <FadeTransition in={confirmDialog.open}>
-        <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({open:false,code:null,action:null})}>
-          <DialogTitle>Confirmer l'action</DialogTitle>
-          <DialogContent>Voulez-vous vraiment {confirmDialog.action === 'delete' ? 'supprimer' : 'désactiver'} ce code promo ?</DialogContent>
-          <DialogActions>
-            <Button onClick={() => setConfirmDialog({open:false,code:null,action:null})} tabIndex={0}>Annuler</Button>
-            <Button onClick={handleConfirmAction} color="error" tabIndex={0}>Confirmer</Button>
-          </DialogActions>
-        </Dialog>
-      </FadeTransition>
+      <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({open:false,code:null,action:null})}>
+        <DialogTitle>Confirmer l'action</DialogTitle>
+        <DialogContent>
+          Voulez-vous vraiment {confirmDialog.action === 'delete' ? 'supprimer' : confirmDialog.action === 'toggle' ? (confirmDialog.code?.is_active ? 'désactiver' : 'activer') : 'modifier'} ce code promo ?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialog({open:false,code:null,action:null})} tabIndex={0}>Annuler</Button>
+          <Button onClick={handleConfirmAction} color="error" tabIndex={0}>Confirmer</Button>
+        </DialogActions>
+      </Dialog>
       <Snackbar open={undoStack.length > 0} autoHideDuration={5000} onClose={handleUndoClose} message="Action annulable">
         <Button onClick={handleUndo} color="secondary" tabIndex={0}>Annuler</Button>
       </Snackbar>

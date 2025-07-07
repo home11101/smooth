@@ -91,7 +91,7 @@ export default function DashboardPage() {
       </Box>
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'primary.main', color: '#fff' }}>
+          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
             <PaymentIcon fontSize="large" aria-label="Paiements" />
             <Box>
               <Typography variant="h6">Paiements</Typography>
@@ -100,7 +100,7 @@ export default function DashboardPage() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'primary.main', color: '#fff' }}>
+          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
             <MonetizationOnIcon fontSize="large" aria-label="Chiffre d'affaires" />
             <Box>
               <Typography variant="h6">Chiffre d'affaires</Typography>
@@ -109,7 +109,7 @@ export default function DashboardPage() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'primary.main', color: '#fff' }}>
+          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
             <PeopleIcon fontSize="large" aria-label="Appareils uniques" />
             <Box>
               <Typography variant="h6">Appareils uniques</Typography>
