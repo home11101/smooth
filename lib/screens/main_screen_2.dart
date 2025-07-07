@@ -76,7 +76,12 @@ class _MainScreen2State extends State<MainScreen2> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: AppTheme.buildPickupScreenBackground(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: AppTheme.mainBackgroundGradient,
+        ),
         child: SafeArea(
           child: Stack(
             children: [

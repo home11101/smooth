@@ -59,7 +59,7 @@ class CustomBottomNav extends StatelessWidget {
               ),
               child: Icon(
                 Icons.chat_bubble_outline,
-                color: currentIndex == 1 ? Colors.white : Colors.grey[400],
+                color: currentIndex == 1 ? Color(0xFF2196F3) : Colors.grey[400],
                 size: ResponsiveHelper.responsiveFontSize(context, 28),
               ),
             ),

@@ -5,9 +5,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'premium_provider.dart';
 import 'notification_service.dart';
+import 'promo_code_service.dart';
 
 class InAppPurchaseService {
   // IDs des produits
@@ -25,6 +27,8 @@ class InAppPurchaseService {
 
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;
+
+  double? _lastPurchaseAmount;
 
   // Singleton
   static final InAppPurchaseService _instance = InAppPurchaseService._internal();
@@ -89,6 +93,8 @@ class InAppPurchaseService {
     premiumProvider.setProcessing(true);
     final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
     try {
+      // Stocke le montant réel du produit (en nombre)
+      _lastPurchaseAmount = double.tryParse(productDetails.price.replaceAll(RegExp(r'[^0-9.]'), ''));
       await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
     } catch (e) {
       debugPrint('Erreur lors du lancement de l\'achat: $e');
@@ -145,6 +151,47 @@ class InAppPurchaseService {
     }
   }
 
+  /// Enregistre le paiement dans Supabase
+  Future<void> savePaymentToSupabase(PurchaseDetails purchase, double amount) async {
+    const supabaseUrl = 'https://qlomkoexurbxqsezavdi.supabase.co/rest/v1/payments';
+    const supabaseApiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsb21rb2V4dXJieHFzZXphdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzODYxOTYsImV4cCI6MjA2Njk2MjE5Nn0.eVV4vRp1a_5FVMqqRcSHFC5cjaBEOKCODHZQ76fpED8';
+
+    String deviceId = 'unknown_device';
+    try {
+      deviceId = await PromoCodeService()._getDeviceId();
+    } catch (_) {}
+
+    // Récupère le user_id Supabase si connecté
+    final user = Supabase.instance.client.auth.currentUser;
+    final userId = user?.id;
+
+    final response = await http.post(
+      Uri.parse(supabaseUrl),
+      headers: {
+        'apikey': supabaseApiKey,
+        'Authorization': 'Bearer $supabaseApiKey',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: jsonEncode({
+        'user_id': userId,
+        'device_id': deviceId,
+        'product_id': purchase.productID,
+        'amount': amount,
+        'currency': 'EUR',
+        'platform': Platform.isIOS ? 'ios' : 'android',
+        'receipt': purchase.verificationData.serverVerificationData,
+        'status': 'validated',
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      debugPrint('✅ Paiement enregistré dans Supabase');
+    } else {
+      debugPrint('❌ Erreur lors de l\'enregistrement du paiement : \\${response.body}');
+    }
+  }
+
   /// Valide le reçu via le backend et met à jour le statut premium
   Future<bool> _validateAndGrantPremium(PurchaseDetails purchase) async {
     const String validationUrl = 'https://qlomkoexurbxqsezavdi.supabase.co/functions/v1/validate-receipt';
@@ -180,6 +227,9 @@ class InAppPurchaseService {
           
           // Configurer les notifications de renouvellement
           await _setupRenewalNotifications(purchase);
+          
+          // Enregistrement du paiement dans Supabase avec le vrai montant
+          await savePaymentToSupabase(purchase, _lastPurchaseAmount ?? 0.0);
           
           return true;
         }
