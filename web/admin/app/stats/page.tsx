@@ -58,12 +58,13 @@ export default function StatsPage() {
     return acc;
   }, {} as {[key: string]: number})).map(([platform, count]) => ({ platform, count }));
   // Top codes promo utilisés
-  const topCodes = Object.entries(usages.reduce((acc, u) => {
+  type CodeCount = { code: string, count: number };
+  const topCodes: CodeCount[] = Object.entries(usages.reduce((acc, u) => {
     acc[u.promo_code_id] = (acc[u.promo_code_id] || 0) + 1;
     return acc;
   }, {} as {[key: string]: number})).map(([codeId, count]) => {
     const code = codes.find((c) => c.id === codeId);
-    return { code: code?.code || codeId, count };
+    return { code: code?.code || codeId, count: count as number };
   }).sort((a, b) => b.count - a.count).slice(0, 7);
 
   return (
