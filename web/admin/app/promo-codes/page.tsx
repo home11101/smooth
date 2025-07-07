@@ -217,7 +217,7 @@ export default function PromoCodesPage() {
       <FadeTransition in={notif.open}>
         <Notification open={notif.open} message={notif.message} severity={notif.severity} onClose={() => setNotif({...notif, open: false})} aria-live="polite" />
       </FadeTransition>
-      <Typography variant="h4" gutterBottom>Codes Promo</Typography>
+      <Typography variant="h4" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>Codes Promo</Typography>
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpenDialog(true)}>
           Nouveau code promo

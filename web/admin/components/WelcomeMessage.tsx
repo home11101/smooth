@@ -54,7 +54,7 @@ export default function WelcomeMessage() {
         </Box>
       ) : (
         <Box display="flex" gap={2} alignItems="center">
-          <Typography variant="h6" tabIndex={0}>{message}</Typography>
+          <Typography variant="h6" tabIndex={0} sx={{ color: 'text.primary' }}>{message}</Typography>
           <Button onClick={() => setEditing(true)} variant="outlined" size="small" tabIndex={0}>Modifier</Button>
         </Box>
       )}

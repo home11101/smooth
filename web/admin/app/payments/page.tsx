@@ -141,7 +141,7 @@ export default function PaymentsPage() {
       <FadeTransition in={notif.open}>
         <Notification open={notif.open} message={notif.message} severity={notif.severity} onClose={() => setNotif({...notif, open: false})} aria-live="polite" />
       </FadeTransition>
-      <Typography variant="h4" gutterBottom>Paiements</Typography>
+      <Typography variant="h4" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>Paiements</Typography>
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         <TextField
           label="Recherche"

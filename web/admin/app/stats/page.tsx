@@ -124,7 +124,7 @@ export default function StatsPage() {
       <FadeTransition in={notif.open}>
         <Notification open={notif.open} message={notif.message} severity={notif.severity} onClose={() => setNotif({...notif, open: false})} aria-live="polite" />
       </FadeTransition>
-      <Typography variant="h4" gutterBottom tabIndex={0}>Statistiques</Typography>
+      <Typography variant="h4" gutterBottom tabIndex={0} sx={{ color: 'text.primary', fontWeight: 'bold' }}>Statistiques</Typography>
       <Box display="flex" gap={2} mb={2} flexWrap="wrap">
         <TextField select label="Plateforme" value={platformFilter} onChange={e => setPlatformFilter(e.target.value)} size="small" sx={{minWidth:120}} aria-label="Filtrer par plateforme">
           <MenuItem value="">Toutes</MenuItem>
