@@ -8,6 +8,12 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import PrintIcon from '@mui/icons-material/Print';
+import Loader from '../../components/Loader';
+import Notification from '../../components/Notification';
+import FadeTransition from '../../components/FadeTransition';
+import { useRef } from 'react';
+import { Snackbar } from '@mui/material';
 
 const supabaseUrl = 'https://qlomkoexurbxqsezavdi.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsb21rb2V4dXJieHFzZXphdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzODYxOTYsImV4cCI6MjA2Njk2MjE5Nn0.eVV4vRp1a_5FVMqqRcSHFC5cjaBEOKCODHZQ76fpED8';
@@ -35,14 +41,31 @@ export default function PromoCodesPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [newCode, setNewCode] = useState({ ...defaultNewCode });
   const [creating, setCreating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [notif, setNotif] = useState<{open: boolean, message: string, severity?: 'success'|'info'|'warning'|'error'}>({open: false, message: ''});
+  const [confirmDialog, setConfirmDialog] = useState<{open: boolean, code: any | null, action: 'toggle'|'delete'|null}>({open: false, code: null, action: null});
+  const [undoStack, setUndoStack] = useState<any[]>([]);
+  const [sortBy, setSortBy] = useState<string>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('desc');
 
   useEffect(() => {
     fetchCodes();
   }, []);
 
   async function fetchCodes() {
-    const { data, error } = await supabase.from('promo_codes').select('*').order('created_at', { ascending: false });
-    setCodes(data || []);
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase.from('promo_codes').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      setCodes(data || []);
+    } catch (e: any) {
+      setError(e.message || 'Erreur lors du chargement des codes promo');
+      setNotif({open: true, message: e.message || 'Erreur lors du chargement', severity: 'error'});
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function fetchUsages(codeId: string) {
@@ -88,26 +111,31 @@ export default function PromoCodesPage() {
   }
 
   function exportCSV() {
-    const rows = filterCodes();
-    const header = ['Code', 'Description', 'Type', 'Valeur', 'Utilisations', 'Statut', 'Valide jusqu\'à'];
-    const csv = [header.join(',')].concat(
-      rows.map((c) => [
-        c.code,
-        c.description,
-        c.discount_type,
-        c.discount_value,
-        c.current_uses,
-        c.is_active ? 'Actif' : 'Inactif',
-        c.valid_until,
-      ].map(x => '"' + (x ?? '') + '"').join(','))
-    ).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'codes_promo.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
+    try {
+      const rows = filterCodes();
+      const header = ['Code', 'Description', 'Type', 'Valeur', 'Utilisations', 'Statut', 'Valide jusqu\'à'];
+      const csv = [header.join(',')].concat(
+        rows.map((c) => [
+          c.code,
+          c.description,
+          c.discount_type,
+          c.discount_value,
+          c.current_uses,
+          c.is_active ? 'Actif' : 'Inactif',
+          c.valid_until,
+        ].map(x => '"' + (x ?? '') + '"').join(','))
+      ).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'codes_promo.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setNotif({open: true, message: 'Export CSV effectué', severity: 'success'});
+    } catch (e: any) {
+      setNotif({open: true, message: e.message || 'Erreur export CSV', severity: 'error'});
+    }
   }
 
   async function handleCreateCode() {
@@ -125,16 +153,70 @@ export default function PromoCodesPage() {
   }
 
   async function handleToggleActive(code: any) {
+    // Sauvegarder l'état précédent pour undo
+    const previousState = { ...code };
+    setUndoStack(prev => [...prev, { action: 'toggle', code: previousState }]);
+    
     await supabase.from('promo_codes').update({ is_active: !code.is_active }).eq('id', code.id);
     await fetchCodes();
+    setNotif({ open: true, message: `Code ${code.is_active ? 'désactivé' : 'activé'}`, severity: 'success' });
+  }
+
+  function handleConfirmAction() {
+    if (confirmDialog.code && confirmDialog.action) {
+      if (confirmDialog.action === 'toggle') {
+        handleToggleActive(confirmDialog.code);
+      }
+      // Ajouter d'autres actions si nécessaire
+    }
+    setConfirmDialog({ open: false, code: null, action: null });
+  }
+
+  function handleUndo() {
+    if (undoStack.length > 0) {
+      const lastAction = undoStack[undoStack.length - 1];
+      if (lastAction.action === 'toggle') {
+        supabase.from('promo_codes').update({ is_active: lastAction.code.is_active }).eq('id', lastAction.code.id);
+        fetchCodes();
+        setNotif({ open: true, message: 'Action annulée', severity: 'info' });
+      }
+      setUndoStack(prev => prev.slice(0, -1));
+    }
+  }
+
+  function handleUndoClose() {
+    setUndoStack([]);
   }
 
   const typeList = Array.from(new Set(codes.map(c => c.discount_type))).filter(Boolean);
-  const filtered = filterCodes();
+  const filtered = getSortedCodes();
   const paginated = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  function handleSort(col: string) {
+    if (sortBy === col) setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(col); setSortOrder('asc'); }
+  }
+
+  function getSortedCodes() {
+    return [...filterCodes()].sort((a, b) => {
+      if (a[sortBy] < b[sortBy]) return sortOrder === 'asc' ? -1 : 1;
+      if (a[sortBy] > b[sortBy]) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  function handlePrint() {
+    window.print();
+  }
+
+  if (loading) return <Loader />;
+  if (error) return <Box p={4} color="error.main" aria-live="assertive">{error}</Box>;
 
   return (
     <Box>
+      <FadeTransition in={notif.open}>
+        <Notification open={notif.open} message={notif.message} severity={notif.severity} onClose={() => setNotif({...notif, open: false})} aria-live="polite" />
+      </FadeTransition>
       <Typography variant="h4" gutterBottom>Codes Promo</Typography>
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpenDialog(true)}>
@@ -181,6 +263,7 @@ export default function PromoCodesPage() {
         <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportCSV}>
           Export CSV
         </Button>
+        <Button variant="outlined" onClick={handlePrint} startIcon={<PrintIcon />} tabIndex={0}>Imprimer</Button>
       </Box>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Nouveau code promo</DialogTitle>
@@ -209,13 +292,69 @@ export default function PromoCodesPage() {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Code</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Valeur</TableCell>
-                <TableCell>Utilisations</TableCell>
-                <TableCell>Statut</TableCell>
-                <TableCell>Valide jusqu'à</TableCell>
+                <TableCell
+                  onClick={() => handleSort('code')}
+                  aria-sort={sortBy === 'code' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  tabIndex={0}
+                  style={{ cursor: 'pointer', outline: 'none' }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSort('code'); }}
+                >
+                  Code {sortBy === 'code' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                </TableCell>
+                <TableCell
+                  onClick={() => handleSort('description')}
+                  aria-sort={sortBy === 'description' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  tabIndex={0}
+                  style={{ cursor: 'pointer', outline: 'none' }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSort('description'); }}
+                >
+                  Description {sortBy === 'description' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                </TableCell>
+                <TableCell
+                  onClick={() => handleSort('discount_type')}
+                  aria-sort={sortBy === 'discount_type' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  tabIndex={0}
+                  style={{ cursor: 'pointer', outline: 'none' }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSort('discount_type'); }}
+                >
+                  Type {sortBy === 'discount_type' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                </TableCell>
+                <TableCell
+                  onClick={() => handleSort('discount_value')}
+                  aria-sort={sortBy === 'discount_value' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  tabIndex={0}
+                  style={{ cursor: 'pointer', outline: 'none' }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSort('discount_value'); }}
+                >
+                  Valeur {sortBy === 'discount_value' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                </TableCell>
+                <TableCell
+                  onClick={() => handleSort('current_uses')}
+                  aria-sort={sortBy === 'current_uses' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  tabIndex={0}
+                  style={{ cursor: 'pointer', outline: 'none' }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSort('current_uses'); }}
+                >
+                  Utilisations {sortBy === 'current_uses' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                </TableCell>
+                <TableCell
+                  onClick={() => handleSort('is_active')}
+                  aria-sort={sortBy === 'is_active' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  tabIndex={0}
+                  style={{ cursor: 'pointer', outline: 'none' }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSort('is_active'); }}
+                >
+                  Statut {sortBy === 'is_active' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                </TableCell>
+                <TableCell
+                  onClick={() => handleSort('valid_until')}
+                  aria-sort={sortBy === 'valid_until' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  tabIndex={0}
+                  style={{ cursor: 'pointer', outline: 'none' }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSort('valid_until'); }}
+                >
+                  Valide jusqu'à {sortBy === 'valid_until' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+                </TableCell>
                 <TableCell>Usages</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -240,7 +379,11 @@ export default function PromoCodesPage() {
                       </IconButton>
                     </TableCell>
                     <TableCell>
-                      <IconButton onClick={() => handleToggleActive(c)} color={c.is_active ? 'success' : 'default'}>
+                      <IconButton
+                        onClick={() => setConfirmDialog({ open: true, code: c, action: 'toggle' })}
+                        tabIndex={0}
+                        aria-label={`${c.is_active ? 'Désactiver' : 'Activer'} le code ${c.code}`}
+                      >
                         {c.is_active ? <ToggleOnIcon /> : <ToggleOffIcon />}
                       </IconButton>
                     </TableCell>
@@ -299,6 +442,19 @@ export default function PromoCodesPage() {
           rowsPerPageOptions={[5, 10, 25, 50]}
         />
       </Paper>
+      <FadeTransition in={confirmDialog.open}>
+        <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({open:false,code:null,action:null})}>
+          <DialogTitle>Confirmer l'action</DialogTitle>
+          <DialogContent>Voulez-vous vraiment {confirmDialog.action === 'delete' ? 'supprimer' : 'désactiver'} ce code promo ?</DialogContent>
+          <DialogActions>
+            <Button onClick={() => setConfirmDialog({open:false,code:null,action:null})} tabIndex={0}>Annuler</Button>
+            <Button onClick={handleConfirmAction} color="error" tabIndex={0}>Confirmer</Button>
+          </DialogActions>
+        </Dialog>
+      </FadeTransition>
+      <Snackbar open={undoStack.length > 0} autoHideDuration={5000} onClose={handleUndoClose} message="Action annulable">
+        <Button onClick={handleUndo} color="secondary" tabIndex={0}>Annuler</Button>
+      </Snackbar>
     </Box>
   );
 } 

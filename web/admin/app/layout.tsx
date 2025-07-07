@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import AdminAuthGuard from './AdminAuthGuard';
+import ThemeRegistry from './ThemeRegistry';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,58 +36,60 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AdminAuthGuard>
-          <CssBaseline />
-          <Box sx={{ display: 'flex' }}>
-            <Drawer
-              variant="permanent"
-              sx={{
-                width: drawerWidth,
-                flexShrink: 0,
-                [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box', background: '#0A192F', color: '#fff' },
-              }}
-            >
-              <Toolbar sx={{ justifyContent: 'center', alignItems: 'center', minHeight: 90 }}>
-                <Image src="/logo.png" alt="Logo Smooth AI" width={60} height={60} style={{ borderRadius: 12, background: '#fff', padding: 4 }} />
-              </Toolbar>
-              <Box sx={{ overflow: 'auto' }}>
-                <List>
-                  <ListItem disablePadding>
-                    <ListItemButton component={Link} href="/">
-                      <ListItemText primary="Dashboard" />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem disablePadding>
-                    <ListItemButton component={Link} href="/payments">
-                      <ListItemText primary="Paiements" />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem disablePadding>
-                    <ListItemButton component={Link} href="/promo-codes">
-                      <ListItemText primary="Codes Promo" />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem disablePadding>
-                    <ListItemButton component={Link} href="/stats">
-                      <ListItemText primary="Statistiques" />
-                    </ListItemButton>
-                  </ListItem>
-                </List>
-              </Box>
-            </Drawer>
-            <Box component="main" sx={{ flexGrow: 1, bgcolor: '#F4F6FA', minHeight: '100vh', pl: `${drawerWidth}px` }}>
-              <AppBar position="fixed" sx={{ zIndex: 1201, bgcolor: '#0A192F', color: '#fff', boxShadow: 'none' }}>
-                <Toolbar>
-                  <Typography variant="h6" noWrap component="div">
-                    Admin Smooth AI
-                  </Typography>
+        <ThemeRegistry>
+          <AdminAuthGuard>
+            <CssBaseline />
+            <Box sx={{ display: 'flex' }}>
+              <Drawer
+                variant="permanent"
+                sx={{
+                  width: drawerWidth,
+                  flexShrink: 0,
+                  [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box', background: '#0A192F', color: '#fff' },
+                }}
+              >
+                <Toolbar sx={{ justifyContent: 'center', alignItems: 'center', minHeight: 90 }}>
+                  <Image src="/logo.png" alt="Logo Smooth AI" width={60} height={60} style={{ borderRadius: 12, background: '#fff', padding: 4 }} />
                 </Toolbar>
-              </AppBar>
-              <Toolbar />
-              <Box sx={{ p: 4 }}>{children}</Box>
+                <Box sx={{ overflow: 'auto' }}>
+                  <List>
+                    <ListItem disablePadding>
+                      <ListItemButton component={Link} href="/">
+                        <ListItemText primary="Dashboard" />
+                      </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                      <ListItemButton component={Link} href="/payments">
+                        <ListItemText primary="Paiements" />
+                      </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                      <ListItemButton component={Link} href="/promo-codes">
+                        <ListItemText primary="Codes Promo" />
+                      </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                      <ListItemButton component={Link} href="/stats">
+                        <ListItemText primary="Statistiques" />
+                      </ListItemButton>
+                    </ListItem>
+                  </List>
+                </Box>
+              </Drawer>
+              <Box component="main" sx={{ flexGrow: 1, bgcolor: '#F4F6FA', minHeight: '100vh', pl: `${drawerWidth}px` }}>
+                <AppBar position="fixed" sx={{ zIndex: 1201, bgcolor: '#0A192F', color: '#fff', boxShadow: 'none' }}>
+                  <Toolbar>
+                    <Typography variant="h6" noWrap component="div">
+                      Admin Smooth AI
+                    </Typography>
+                  </Toolbar>
+                </AppBar>
+                <Toolbar />
+                <Box sx={{ p: 4 }}>{children}</Box>
+              </Box>
             </Box>
-          </Box>
-        </AdminAuthGuard>
+          </AdminAuthGuard>
+        </ThemeRegistry>
       </body>
     </html>
   );
