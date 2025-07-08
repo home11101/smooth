@@ -170,8 +170,9 @@ class _ReferralSuccessDialogState extends State<ReferralSuccessDialog>
                                     child: Transform.rotate(
                                       angle: _confettiController.value * 6.28,
                                       child: Icon(
-                                        ['🎉', '🎊', '⭐', '🎁', '💎'][index % 5],
+                                        [Icons.celebration, Icons.star, Icons.card_giftcard, Icons.diamond, Icons.favorite][index % 5],
                                         size: 20,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   );

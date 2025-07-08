@@ -158,7 +158,7 @@ class InAppPurchaseService {
 
     String deviceId = 'unknown_device';
     try {
-      deviceId = await PromoCodeService()._getDeviceId();
+      deviceId = await PromoCodeService().getDeviceId();
     } catch (_) {}
 
     // Récupère le user_id Supabase si connecté

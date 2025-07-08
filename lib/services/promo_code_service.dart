@@ -29,7 +29,7 @@ class PromoCodeService {
   /// Valide un code promo
   Future<PromoCodeValidation> validatePromoCode(String code, {String? context}) async {
     try {
-      final deviceId = await _getDeviceId();
+      final deviceId = await getDeviceId();
       
       final response = await http.post(
         Uri.parse(_validateUrl),
@@ -73,7 +73,7 @@ class PromoCodeService {
   /// Applique un code promo et enregistre son utilisation
   Future<bool> applyPromoCode(String code, double discountApplied, {String? subscriptionType}) async {
     try {
-      final deviceId = await _getDeviceId();
+      final deviceId = await getDeviceId();
       
       final response = await http.post(
         Uri.parse(_useUrl),
@@ -111,7 +111,7 @@ class PromoCodeService {
   }
 
   /// Obtient l'ID unique de l'appareil
-  Future<String> _getDeviceId() async {
+  Future<String> getDeviceId() async {
     if (_cachedDeviceId != null) {
       return _cachedDeviceId!;
     }
