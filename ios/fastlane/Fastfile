@@ -3,29 +3,24 @@ default_platform(:ios)
 platform :ios do
   desc "Build and archive iOS app"
   lane :build do
-    # Setup code signing
-    setup_ci if is_ci
-    
-    # Configure automatic signing
-    update_code_signing_settings(
-      use_automatic_signing: true,
-      team_id: "7BHY8D9X9V",
-      targets: ["Runner"],
-      build_configurations: ["Release"],
-      path: "Runner.xcodeproj" # Ajout du path pour plus de clarté
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPSTORECONNECT_API_KEY_KEY_ID"],
+      issuer_id: ENV["APPSTORECONNECT_API_KEY_ISSUER_ID"],
+      key_content: ENV["APPSTORECONNECT_API_KEY_KEY"]
     )
-    
-    # Build the app with automatic signing
+    match(type: "appstore", api_key: api_key, readonly: true)
     gym(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       configuration: "Release",
-      export_method: "ad-hoc",
+      export_method: "app-store",
       export_options: {
-        method: "ad-hoc",
+        method: "app-store",
+        provisioningProfiles: {
+          "com.henrikanda.smoothai" => "match AppStore com.henrikanda.smoothai"
+        },
         teamID: "7BHY8D9X9V",
         signingStyle: "automatic",
-        # Ajout d'options recommandées pour App Store
         compileBitcode: true,
         uploadBitcode: true,
         uploadSymbols: true,
@@ -35,7 +30,6 @@ platform :ios do
       output_directory: "build/ios/ipa",
       output_name: "SmoothAI.ipa",
       xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Automatic",
-      # Ajout pour une meilleure gestion des erreurs
       silent: false,
       skip_package_ipa: false
     )
@@ -43,12 +37,16 @@ platform :ios do
 
   desc "Upload to App Store Connect"
   lane :upload do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APPSTORECONNECT_API_KEY_KEY_ID"],
+      issuer_id: ENV["APPSTORECONNECT_API_KEY_ISSUER_ID"],
+      key_content: ENV["APPSTORECONNECT_API_KEY_KEY"]
+    )
+    match(type: "appstore", api_key: api_key, readonly: true)
     pilot(
-      api_key_path: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      api_key: api_key,
       skip_waiting_for_build_processing: true,
-      # Ajout pour lier explicitement à l'IPA généré
       ipa: lane_context[SharedValues::IPA_OUTPUT_PATH],
-      # Options recommandées pour TestFlight
       distribute_external: false,
       notify_external_testers: false,
       skip_submission: true
