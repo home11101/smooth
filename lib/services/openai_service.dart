@@ -10,7 +10,8 @@ import '../utils/constants.dart';
 
 // Configuration OpenAI intégrée
 class OpenAIConfig {
-  static const String baseUrl = 'https://api.openai.com/v1/chat/completions';
+  // Utiliser notre Supabase Edge Function comme proxy
+  static const String baseUrl = 'https://oahmneimzzfahkuervii.supabase.co/functions/v1/openai-proxy';
   static const String defaultModel = 'gpt-3.5-turbo';
   static const String advancedModel = 'gpt-4';
   static const double defaultTemperature = 0.7;
@@ -123,7 +124,7 @@ class OpenAIService {
             Uri.parse(OpenAIConfig.baseUrl),
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer $_apiKey',
+              'Authorization': 'Bearer ${supabaseAnonKey}',
             },
             body: jsonEncode({
               'model': model,
@@ -238,7 +239,7 @@ Réponds toujours avec empathie, expertise et des conseils pratiques. Adapte ton
         Uri.parse(OpenAIConfig.baseUrl),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $openAIApiKey',
+          'Authorization': 'Bearer ${supabaseAnonKey}',
         },
         body: jsonEncode({
           'model': 'gpt-3.5-turbo',

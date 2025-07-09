@@ -120,19 +120,19 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
     final isValid = _validation?.isValid == true;
     final hasFeedback = isValid || (_validation != null && _validation!.isValid == false);
     if (!hasFeedback) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 8),
-              const Text('Code promo appliqué avec succès !'),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 8),
+            const Text('Code promo appliqué avec succès !'),
+          ],
         ),
-      );
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
     }
   }
 
@@ -175,10 +175,10 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
         ],
         border: Border.all(
           color: isValid
-              ? Colors.green.shade400
+              ? Colors.green.shade400 
               : isInvalid
                   ? Colors.red.shade300
-                  : Colors.grey.shade300,
+              : Colors.grey.shade300,
           width: 2,
         ),
       ),
@@ -191,21 +191,21 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
               children: [
                 Icon(Icons.card_giftcard, color: AppTheme.primaryBlue, size: 28),
                 const SizedBox(width: 8),
-                Text(
-                  'Code promo',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+            Text(
+              'Code promo',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
                         color: AppTheme.primaryBlue,
                       ),
-                ),
+              ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
               'Avez-vous un code promo ? Utilisez-le pour obtenir une réduction.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
+                color: Colors.grey.shade600,
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -214,9 +214,9 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
                   child: TextField(
                     controller: _controller,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 1.2,
-                        ),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.2,
+                    ),
                     textCapitalization: TextCapitalization.characters,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
@@ -226,7 +226,7 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
                       hintText: 'Entrez votre code promo',
                       hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey.shade400,
-                          ),
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -234,7 +234,7 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
                       filled: true,
                       fillColor: Colors.grey.shade100,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    ),
+                      ),
                     // La validation ne se fait plus à chaque frappe
                   ),
                 ),
@@ -246,10 +246,10 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
               Row(
                 children: [
                   SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
                   const SizedBox(width: 12),
                   Text('Vérification du code...', style: TextStyle(color: Colors.blueGrey)),
                 ],
@@ -289,24 +289,24 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
             const SizedBox(height: 4),
             Text('Exemple : SMOOTH10', style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic)),
             const SizedBox(height: 16),
-            if (widget.showApplyButton)
+                if (widget.showApplyButton)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _isValidating || _isApplied
-                      ? null
-                      : _validateCode,
+                    onPressed: _isValidating || _isApplied
+                        ? null
+                            : _validateCode,
                   icon: Icon(Icons.check, color: Colors.white),
                   label: Text('Valider le code'),
-                  style: ElevatedButton.styleFrom(
+                    style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+                      foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
                 ),
               ),
             if (isValid && widget.showApplyButton)

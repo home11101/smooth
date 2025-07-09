@@ -618,7 +618,7 @@ class _OptimizedRizzScannerState extends State<OptimizedRizzScanner>
                     Positioned.fill(
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                        child: Container(
+                      child: Container(
                           color: Colors.white.withAlpha(26),
                         ),
                       ),
@@ -630,8 +630,8 @@ class _OptimizedRizzScannerState extends State<OptimizedRizzScanner>
                       child: IgnorePointer(
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 600),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.cyanAccent.withAlpha(46),
@@ -657,7 +657,7 @@ class _OptimizedRizzScannerState extends State<OptimizedRizzScanner>
                         final scanLineY = _scanLineAnimation.value;
                         final particles = List.generate(6, (i) {
                           final offset = (i - 2.5) * 30.0;
-                          return Positioned(
+                        return Positioned(
                             left: 60.0 + i * 30.0 + (scanLineY % 20),
                             top: scanLineY + offset,
                             child: AnimatedOpacity(
@@ -690,25 +690,25 @@ class _OptimizedRizzScannerState extends State<OptimizedRizzScanner>
                           children: [
                             // Ligne de scan moderne
                             Positioned(
-                              left: 0,
-                              right: 0,
-                              top: scanLineY,
+                          left: 0,
+                          right: 0,
+                          top: scanLineY,
                               child: AnimatedOpacity(
                                 opacity: 1.0,
                                 duration: const Duration(milliseconds: 300),
-                                child: Container(
+                          child: Container(
                                   height: 8,
-                                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                                  decoration: BoxDecoration(
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
-                                    gradient: const LinearGradient(
-                                      colors: [
+                              gradient: const LinearGradient(
+                                colors: [
                                         Color(0x8000E5FF),
                                         Color(0x337C4DFF),
-                                      ],
-                                      begin: Alignment.centerLeft,
-                                      end: Alignment.centerRight,
-                                    ),
+                                ],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Color(0x8000E5FF),
@@ -723,8 +723,8 @@ class _OptimizedRizzScannerState extends State<OptimizedRizzScanner>
                                     ],
                                   ),
                                 ),
-                              ),
                             ),
+                          ),
                             // Particules animées
                             ...particles,
                           ],

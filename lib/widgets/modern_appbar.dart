@@ -32,9 +32,9 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: SizedBox(
         width: 120, // Largeur réduite
         child: Image.asset(
-          'assets/images/logo.png',
-          height: 40,
-          fit: BoxFit.contain,
+        'assets/images/logo.png',
+        height: 40,
+        fit: BoxFit.contain,
         ),
       ),
       actions: actions,
