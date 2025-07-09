@@ -38,6 +38,21 @@ jobs:
         cd ios
         gem install fastlane
         
+    - name: Install certificate and provisioning profile
+      run: |
+        echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
+        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > profile.mobileprovision
+        security create-keychain -p "" build.keychain
+        security import certificate.p12 -k build.keychain -P ${{ secrets.CERTIFICATE_PASSWORD }} -T /usr/bin/codesign
+        security list-keychains -s build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "" build.keychain
+        mkdir -p ~/Library/MobileDevice/Provisioning\\ Profiles
+        cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\\ Profiles/
+        
+    - name: Clean provisioning profiles
+      run: rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/*
+        
     - name: Build with Fastlane
       env:
         APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -45,6 +60,9 @@ jobs:
         FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
         FASTLANE_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
         FASTLANE_USER: ${{ secrets.APPLE_ID }}
+        APPSTORECONNECT_API_KEY_KEY_ID: ${{ secrets.APPSTORECONNECT_API_KEY_KEY_ID }}
+        APPSTORECONNECT_API_KEY_ISSUER_ID: ${{ secrets.APPSTORECONNECT_API_KEY_ISSUER_ID }}
+        APPSTORECONNECT_API_KEY_KEY: ${{ secrets.APPSTORECONNECT_API_KEY_KEY }}
       run: |
         cd ios
         fastlane build
