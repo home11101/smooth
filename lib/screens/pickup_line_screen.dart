@@ -289,20 +289,10 @@ class _PickupLineScreenState extends State<PickupLineScreen>
                         ),
                         SizedBox(
                           height: 60,
-                          child: Text(
-                            'SMOOTH IA',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              foreground: Paint()
-                                ..shader = const LinearGradient(
-                                  colors: [
-                                    Color(0xFF87CEFA),
-                                    Color(0xFF4096FF),
-                                    Color(0xFF0A63FF),
-                                  ],
-                                ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
-                            ),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            height: 40,
+                            fit: BoxFit.contain,
                           ),
                         ),
                         const SizedBox(width: 44),

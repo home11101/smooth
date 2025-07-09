@@ -99,6 +99,8 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHeader(),
+                      const SizedBox(height: 16),
+                      _buildPromoCodeBar(), // Ajout du widget ici
                       const SizedBox(height: 24),
                       _buildStatsCards(),
                       const SizedBox(height: 24),
@@ -192,30 +194,95 @@ class _ReferralScreenState extends State<ReferralScreen> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.card_giftcard,
-            size: 48,
-            color: Colors.white,
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Programme de parrainage',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.card_giftcard,
+              size: 48,
               color: Colors.white,
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Gagnez des points en parrainant vos amis !',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white70,
+            const SizedBox(height: 12),
+            const Text(
+              'Programme de parrainage',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
-            textAlign: TextAlign.center,
+            const SizedBox(height: 8),
+            const Text(
+              'Gagnez des points en parrainant vos amis !',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white70,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPromoCodeBar() {
+    final referralCode = _referralStats?['referral_code'];
+    if (referralCode == null) return SizedBox.shrink();
+    final referralLink = 'https://smoothai.com/invite/$referralCode';
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text('Mon code : ', style: TextStyle(color: Colors.white70)),
+                    SelectableText(referralCode, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    IconButton(
+                      icon: Icon(Icons.copy, color: Colors.white, size: 18),
+                      tooltip: 'Copier le code',
+                      onPressed: () => _copyToClipboard(referralCode),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _copyToClipboard(referralLink),
+                        child: Text(
+                          referralLink,
+                          style: TextStyle(color: Colors.blue[200], decoration: TextDecoration.underline, fontSize: 13),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.copy, color: Colors.white, size: 18),
+                      tooltip: 'Copier le lien',
+                      onPressed: () => _copyToClipboard(referralLink),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.share, color: Colors.white, size: 18),
+                      tooltip: 'Partager le lien',
+                      onPressed: () => _shareCode(referralLink),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

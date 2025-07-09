@@ -14,7 +14,7 @@ class CustomBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: ResponsiveHelper.getAdaptiveButtonHeight(context) + 16,
+      height: ResponsiveHelper.getAdaptiveButtonHeight(context) + 32,
       decoration: const BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.only(
@@ -32,11 +32,15 @@ class CustomBottomNav extends StatelessWidget {
           // Bouton S pour l'écran 1 (remplacé par une image)
           GestureDetector(
             onTap: () => onTap(0),
-            child: Image.asset(
-              'assets/images/leSmenu.png',
-              height: ResponsiveHelper.responsiveFontSize(context, 32),
-              color: currentIndex == 0 ? const Color(0xFF2196F3) : Colors.white,
-              colorBlendMode: BlendMode.srcIn,
+            child: SizedBox(
+              width: ResponsiveHelper.responsiveFontSize(context, 28), // Largeur réduite
+              child: Image.asset(
+                'assets/images/leSmenu.png',
+                height: ResponsiveHelper.responsiveFontSize(context, 32),
+                color: currentIndex == 0 ? const Color(0xFF2196F3) : Colors.white,
+                colorBlendMode: BlendMode.srcIn,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
 

@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/app_theme.dart';
+import '../main_navigation_screen.dart';
 import 'dart:math' as math;
 
 void main() {
@@ -85,7 +87,7 @@ class _SplashScreen1State extends State<SplashScreen1>
     // Navigation vers l'écran suivant après l'animation
     Future.delayed(Duration(seconds: 4), () {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/onboarding');
+        _checkOnboardingStatus();
       }
     });
     
@@ -133,6 +135,35 @@ class _SplashScreen1State extends State<SplashScreen1>
       });
       }
     });
+  }
+
+  Future<void> _checkOnboardingStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+      
+      print('🔍 DEBUG: has_seen_onboarding = $hasSeenOnboarding');
+      
+      if (mounted) {
+        if (hasSeenOnboarding) {
+          print('🚀 DEBUG: Aller directement à l\'écran principal');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MainNavigationScreen(),
+            ),
+          );
+        } else {
+          print('📱 DEBUG: Afficher l\'onboarding');
+          Navigator.pushReplacementNamed(context, '/onboarding');
+        }
+      }
+    } catch (e) {
+      print('❌ DEBUG: Erreur lors de la vérification: $e');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/onboarding');
+      }
+    }
   }
 
   @override

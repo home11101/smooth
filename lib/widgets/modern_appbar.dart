@@ -29,10 +29,13 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
         onPressed: onMenuPressed,
       ),
       centerTitle: true,
-      title: Image.asset(
-        'assets/images/logo.png',
-        height: 40,
-        fit: BoxFit.contain,
+      title: SizedBox(
+        width: 120, // Largeur réduite
+        child: Image.asset(
+          'assets/images/logo.png',
+          height: 40,
+          fit: BoxFit.contain,
+        ),
       ),
       actions: actions,
     );

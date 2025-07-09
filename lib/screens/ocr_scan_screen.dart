@@ -613,42 +613,121 @@ class _OptimizedRizzScannerState extends State<OptimizedRizzScanner>
                           ),
                   ),
                   
-                  // Effet de scan simplifié
+                  // Glassmorphism overlay
                   if (isScanning)
                     Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          color: Colors.cyanAccent.withAlpha(26),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                        child: Container(
+                          color: Colors.white.withAlpha(26),
+                        ),
+                      ),
+                    ),
+
+                  // Border glow
+                  if (isScanning)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 600),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.cyanAccent.withAlpha(46),
+                                blurRadius: 32,
+                                spreadRadius: 8,
+                              ),
+                              BoxShadow(
+                                color: Colors.blueAccent.withAlpha(26),
+                                blurRadius: 64,
+                                spreadRadius: 16,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   
-                  // Ligne de scan simplifiée
+                  // Ligne de scan moderne avec effets
                   if (isScanning)
                     AnimatedBuilder(
                       animation: _scanLineAnimation,
                       builder: (context, child) {
                         final scanLineY = _scanLineAnimation.value;
-                        return Positioned(
-                          left: 0,
-                          right: 0,
-                          top: scanLineY,
-                          child: Container(
-                            height: 4,
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFF00E5FF),
-                                  Color(0xFF2979FF),
-                                ],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
+                        final particles = List.generate(6, (i) {
+                          final offset = (i - 2.5) * 30.0;
+                          return Positioned(
+                            left: 60.0 + i * 30.0 + (scanLineY % 20),
+                            top: scanLineY + offset,
+                            child: AnimatedOpacity(
+                              opacity: isScanning ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 300),
+                              child: Container(
+                                width: 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      Colors.cyanAccent.withAlpha(179),
+                                      Colors.blueAccent.withAlpha(51),
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.cyanAccent.withAlpha(128),
+                                      blurRadius: 8,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
+                          );
+                        });
+                        return Stack(
+                          children: [
+                            // Ligne de scan moderne
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: scanLineY,
+                              child: AnimatedOpacity(
+                                opacity: 1.0,
+                                duration: const Duration(milliseconds: 300),
+                                child: Container(
+                                  height: 8,
+                                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0x8000E5FF),
+                                        Color(0x337C4DFF),
+                                      ],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color(0x8000E5FF),
+                                        blurRadius: 24,
+                                        spreadRadius: 2,
+                                      ),
+                                      BoxShadow(
+                                        color: Color(0x337C4DFF),
+                                        blurRadius: 32,
+                                        spreadRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Particules animées
+                            ...particles,
+                          ],
                         );
                       },
                     ),

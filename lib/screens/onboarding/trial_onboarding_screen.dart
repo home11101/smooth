@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/app_theme.dart';
 import '../../services/promo_code_service.dart';
 import '../../services/subscription_service.dart';
@@ -66,6 +67,11 @@ class _TrialOnboardingScreenState extends State<TrialOnboardingScreen> {
 
     try {
       await _subscriptionService.initialize();
+      
+      // Marquer que l'onboarding a été vu
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('has_seen_onboarding', true);
+      print('✅ DEBUG: Onboarding marqué comme vu');
       
       if (mounted) {
         Navigator.of(context).pushReplacement(

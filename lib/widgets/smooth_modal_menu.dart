@@ -5,7 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:io' show Platform;
 import 'package:url_launcher/url_launcher.dart'
     show canLaunchUrl, launchUrl, LaunchMode;
-import '../screens/help_faq_screen.dart';
+
 import '../screens/premium_screen.dart';
 import '../screens/referral_screen.dart';
 
@@ -162,21 +162,8 @@ class SmoothModalMenu extends StatelessWidget {
                           horizontal: 16.0, vertical: 8.0),
                       child: Column(
                         children: [
-                          // Section Aide
+                          // Section Contact
                           _buildMenuSection([
-                            _SmoothMenuItem(
-                              icon: Icons.help_outline,
-                              label: 'Aide & FAQ',
-                              onTap: () {
-                                Navigator.of(context).pop(); // Ferme d'abord le menu
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HelpFaqScreen(),
-                                  ),
-                                );
-                              },
-                            ),
                             _SmoothMenuItem(
                               icon: Icons.mail_outline,
                               label: 'Contactez-nous',

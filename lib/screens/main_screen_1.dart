@@ -406,16 +406,16 @@ class _MainScreen1State extends State<MainScreen1> {
           ResponsiveHelper.responsiveWidth(context, 6),
           0,
           ResponsiveHelper.responsiveWidth(context, 6),
-          ResponsiveHelper.responsiveHeight(context, 4),
+          ResponsiveHelper.responsiveHeight(context, 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ElevatedButton.icon(
+            ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
-                foregroundColor: AppTheme.secondaryBlue,
+                foregroundColor: Colors.lightBlue[100],
                 padding: EdgeInsets.symmetric(
                   vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3,
                 ),
@@ -425,17 +425,16 @@ class _MainScreen1State extends State<MainScreen1> {
                 elevation: 5,
                 shadowColor: Colors.black.withAlpha(102),
               ),
-              icon: Icon(Icons.add_photo_alternate_outlined, size: ResponsiveHelper.responsiveFontSize(context, 22)),
-              label: Text(
+              onPressed: () {
+                _navigateToOcrScan(context);
+              },
+              child: Text(
                 'Télécharger une capture',
                 style: TextStyle(
                   fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 13, medium: 15, large: 17),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              onPressed: () {
-                _navigateToOcrScan(context);
-              },
             ),
             SizedBox(height: ResponsiveHelper.responsiveSpacing(context)),
             Row(
@@ -448,18 +447,23 @@ class _MainScreen1State extends State<MainScreen1> {
                       );
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.primaryBlue,
+                      backgroundColor: Colors.white, // Fond blanc
+                      foregroundColor: Colors.black,
                       padding: EdgeInsets.symmetric(
                         vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3.5,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      side: BorderSide(color: AppTheme.lightBlueBorder, width: 1.5),
+                      side: BorderSide(color: Colors.white, width: 1.5),
                     ),
                     child: Text(
                       'Saisir le texte',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16)),
+                      style: TextStyle(
+                        color: Colors.black, // Texte noir
+                        fontWeight: FontWeight.w600, 
+                        fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16)
+                      ),
                     ),
                   ),
                 ),
@@ -472,18 +476,23 @@ class _MainScreen1State extends State<MainScreen1> {
                       );
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.primaryBlue,
+                      backgroundColor: Colors.white, // Fond blanc
+                      foregroundColor: Colors.black,
                       padding: EdgeInsets.symmetric(
                         vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3.5,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      side: BorderSide(color: AppTheme.lightBlueBorder, width: 1.5),
+                      side: BorderSide(color: Colors.white, width: 1.5),
                     ),
                     child: Text(
                       'Phrase d\'approche',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16)),
+                      style: TextStyle(
+                        color: Colors.black, // Texte noir
+                        fontWeight: FontWeight.w600, 
+                        fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16)
+                      ),
                     ),
                   ),
                 ),

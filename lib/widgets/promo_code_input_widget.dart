@@ -115,19 +115,25 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
   }
 
   void _showSuccessSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            const Text('Code promo appliqué avec succès !'),
-          ],
+    // N'affiche la snackbar que si aucun feedback instantané n'est visible
+    if (!mounted) return;
+    final isValid = _validation?.isValid == true;
+    final hasFeedback = isValid || (_validation != null && _validation!.isValid == false);
+    if (!hasFeedback) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 8),
+              const Text('Code promo appliqué avec succès !'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
         ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+      );
+    }
   }
 
   void _showErrorSnackBar(String message) {
@@ -148,34 +154,58 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isValid = _validation?.isValid == true;
+    final isInvalid = _validation != null && _validation!.isValid == false;
+    final hasError = _validation?.errorMessage != null && _validation!.errorMessage!.isNotEmpty;
+    final discountMsg = isValid && _validation?.discountValue != null
+        ? (_validation!.discountType == 'percentage'
+            ? '-${_validation!.discountValue!.toInt()}% sur votre abonnement'
+            : 'Réduction : ${_validation!.discountValue}')
+        : null;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 16,
+            offset: Offset(0, 4),
+          ),
+        ],
         border: Border.all(
-          color: _validation?.isValid == true 
-              ? Colors.green.shade400 
-              : Colors.grey.shade300,
+          color: isValid
+              ? Colors.green.shade400
+              : isInvalid
+                  ? Colors.red.shade300
+                  : Colors.grey.shade300,
           width: 2,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Code promo',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(Icons.card_giftcard, color: AppTheme.primaryBlue, size: 28),
+                const SizedBox(width: 8),
+                Text(
+                  'Code promo',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryBlue,
+                      ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
-              'Avez-vous un code promo ?',
+              'Avez-vous un code promo ? Utilisez-le pour obtenir une réduction.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+                    color: Colors.grey.shade600,
+                  ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -184,9 +214,9 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
                   child: TextField(
                     controller: _controller,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.2,
-                    ),
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1.2,
+                        ),
                     textCapitalization: TextCapitalization.characters,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
@@ -195,106 +225,108 @@ class _PromoCodeInputWidgetState extends State<PromoCodeInputWidget> {
                     decoration: InputDecoration(
                       hintText: 'Entrez votre code promo',
                       hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade500,
-                      ),
+                            color: Colors.grey.shade400,
+                          ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      suffixIcon: _isValidating
-                          ? const Padding(
-                              padding: EdgeInsets.all(16),
-                              child: SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
-                            )
-                          : _validation?.isValid == true
-                              ? Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green.shade600,
-                                  size: 24,
-                                )
-                              : _validation?.isValid == false
-                                  ? Icon(
-                                      Icons.error,
-                                      color: Colors.red.shade600,
-                                      size: 24,
-                                    )
-                                  : null,
+                      fillColor: Colors.grey.shade100,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
-                    onChanged: (value) {
-                      _controller.value = _controller.value.copyWith(
-                        text: value.toUpperCase(),
-                        selection: TextSelection.collapsed(offset: value.length),
-                      );
-                      if (_validation != null) {
-                        setState(() {
-                          _validation = null;
-                        });
-                      }
-                    },
-                    onSubmitted: (_) => _validateCode(),
+                    // La validation ne se fait plus à chaque frappe
                   ),
                 ),
-                const SizedBox(width: 12),
-                if (widget.showApplyButton)
-                  ElevatedButton(
-                    onPressed: _isValidating || _isApplied
-                        ? null
-                        : _validation?.isValid == true
-                            ? _applyCode
-                            : _validateCode,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _validation?.isValid == true
-                          ? Colors.green.shade600
-                          : AppTheme.primaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _isValidating
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : _isApplied
-                            ? const Icon(Icons.check, size: 20)
-                            : Text(
-                                _validation?.isValid == true ? 'Appliquer' : 'Valider',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                  ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              'Seules les lettres (A-Z) et chiffres sont acceptés. Les minuscules sont converties automatiquement.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade600,
-                fontStyle: FontStyle.italic,
+            // Feedback instantané uniquement après validation
+            if (_isValidating)
+              Row(
+                children: [
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 12),
+                  Text('Vérification du code...', style: TextStyle(color: Colors.blueGrey)),
+                ],
+              )
+            else if (isValid)
+              Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green, size: 20),
+                  const SizedBox(width: 8),
+                  Text('Code valide', style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600)),
+                  if (discountMsg != null) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(discountMsg, style: TextStyle(color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                  ],
+                ],
+              )
+            else if (isInvalid)
+              Row(
+                children: [
+                  Icon(Icons.error, color: Colors.red, size: 20),
+                  const SizedBox(width: 8),
+                  Text('Code invalide', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                  if (hasError) ...[
+                    const SizedBox(width: 8),
+                    Flexible(child: Text(_validation!.errorMessage!, style: TextStyle(color: Colors.red, fontSize: 12))),
+                  ],
+                ],
               ),
-            ),
-            if (_validation != null) ...[
-              const SizedBox(height: 12),
-              _buildValidationMessage(),
-            ],
+            // Exemple de code
+            const SizedBox(height: 4),
+            Text('Exemple : SMOOTH10', style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic)),
+            const SizedBox(height: 16),
+            if (widget.showApplyButton)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isValidating || _isApplied
+                      ? null
+                      : _validateCode,
+                  icon: Icon(Icons.check, color: Colors.white),
+                  label: Text('Valider le code'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            if (isValid && widget.showApplyButton)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: !_isApplied ? _applyCode : null,
+                  icon: Icon(Icons.check, color: Colors.white),
+                  label: Text('Appliquer le code'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

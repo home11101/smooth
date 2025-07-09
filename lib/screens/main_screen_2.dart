@@ -18,6 +18,7 @@ import 'package:path_provider/path_provider.dart';
 // import 'dart:html' as html;
 import 'package:flutter/rendering.dart';
 import 'dart:io';
+import '../utils/responsive_helper.dart';
 
 class MainScreen2 extends StatefulWidget {
   const MainScreen2({Key? key}) : super(key: key);
@@ -109,16 +110,21 @@ class _MainScreen2State extends State<MainScreen2> {
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        padding: EdgeInsets.fromLTRB(
+          ResponsiveHelper.responsiveWidth(context, 6),
+          ResponsiveHelper.responsiveHeight(context, 3),
+          ResponsiveHelper.responsiveWidth(context, 6),
+          0,
+        ),
         child: Container(
           color: Colors.transparent,
-          child: const Text(
-            'Téléverse un chat\nPour obtenir une analyse',
+          child: Text(
+            'Téléverse un chat et\nObtiens une analyse',
             style: TextStyle(
-              fontSize: 26,
+              fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 18, medium: 22, large: 26),
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2024),
-              height: 1.15,
+              color: const Color(0xFF1F2024),
+              height: 1.2,
             ),
             textAlign: TextAlign.center,
             maxLines: 2,
@@ -132,61 +138,65 @@ class _MainScreen2State extends State<MainScreen2> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-        child: Row(
+        padding: EdgeInsets.fromLTRB(
+          ResponsiveHelper.responsiveWidth(context, 6),
+          0,
+          ResponsiveHelper.responsiveWidth(context, 6),
+          ResponsiveHelper.responsiveHeight(context, 2), // Réduit de 4 à 2 pour descendre les boutons
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: OutlinedButton.icon(
+            // Bouton Télécharge une capture (en haut)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: AppTheme.primaryBlue,
-                  side: BorderSide(color: AppTheme.primaryBlue.withAlpha(51), width: 1.5),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.black, // Fond noir
+                  foregroundColor: Colors.white,
+                  side: BorderSide(color: Colors.black, width: 1.5),
+                  padding: EdgeInsets.symmetric(
+                    vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
                   elevation: 0,
-                  textStyle: const TextStyle(
+                  textStyle: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                icon: const Icon(Icons.file_upload, color: Color(0xFF87CEFA), size: 20),
-                label: Text(
-                  'Télécharge une capture',
-                  style: TextStyle(
-                    color: AppTheme.primaryBlue,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 13, medium: 15, large: 17),
                   ),
                 ),
                 onPressed: () => _navigateToUpload(context),
+                child: Text(
+                  'Télécharge une capture',
+                  style: TextStyle(
+                    color: Colors.lightBlue[100], // Bleu ciel léger
+                    fontWeight: FontWeight.bold,
+                    fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 13, medium: 15, large: 17),
+                  ),
+                ),
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: OutlinedButton.icon(
+            SizedBox(height: ResponsiveHelper.responsiveSpacing(context)),
+            // Bouton Smooth Coach (en bas)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: AppTheme.primaryBlue,
-                  side: BorderSide(color: AppTheme.primaryBlue.withAlpha(51), width: 1.5),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.white, // Fond blanc
+                  foregroundColor: Colors.black,
+                  side: BorderSide(color: Colors.white, width: 1.5),
+                  padding: EdgeInsets.symmetric(
+                    vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3.5,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
                   elevation: 0,
-                  textStyle: const TextStyle(
+                  textStyle: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                icon: const Icon(Icons.auto_awesome, color: Color(0xFF87CEFA), size: 20),
-                label: Text(
-                  'Smooth Coach',
-                  style: TextStyle(
-                    color: AppTheme.primaryBlue,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16),
                   ),
                 ),
                 onPressed: () {
@@ -194,6 +204,14 @@ class _MainScreen2State extends State<MainScreen2> {
                     MaterialPageRoute(builder: (_) => const SmoothCoachingScreen()),
                   );
                 },
+                child: Text(
+                  'Smooth Coach',
+                  style: TextStyle(
+                    color: Colors.black, // Texte noir
+                    fontWeight: FontWeight.bold,
+                    fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16),
+                  ),
+                ),
               ),
             ),
           ],
