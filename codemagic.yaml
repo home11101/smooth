@@ -50,10 +50,12 @@ workflows:
       - name: Build iOS app
         script: |
           flutter build ios --release --no-codesign
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' clean build
       - name: Build iOS app bundle
         script: |
           cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos
           xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios -allowProvisioningUpdates
     artifacts:
       - build/ios/*.ipa
