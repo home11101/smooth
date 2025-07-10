@@ -17,9 +17,7 @@ workflows:
         APPSTORE_CONNECT_API_KEY_ID: ${{ secrets.APPSTORE_CONNECT_API_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
-      code_signing:
-        - ios/certs/distribution_certificate.p12
-        - ios/certs/distribution_certificate.p12
+
     scripts:
       - name: Setup iOS code signing
         script: |
