@@ -38,9 +38,6 @@ workflows:
             security import ios/certs/distribution_certificate.p12 -k login.keychain -P "" -T /usr/bin/codesign
           fi
           
-          # Setup API key for App Store Connect
-          mkdir -p ~/.appstoreconnect/private_keys
-          
           # Copy the .p8 file to the current directory for Fastlane
           cp ios/AuthKey_4V6GWRQFC9.p8 ./AuthKey_4V6GWRQFC9.p8
           chmod 600 ./AuthKey_4V6GWRQFC9.p8
@@ -53,13 +50,14 @@ workflows:
         script: |
           cd ios
           pod install
-      - name: Build iOS app
+      - name: Build iOS app with code signing
         script: |
-          flutter build ios --release --no-codesign
-      - name: Build and archive iOS app
+          flutter build ios --release --codesign
+      - name: Create IPA file
         script: |
           cd ios
-          fastlane build
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive archive
+          xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/ipa
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
