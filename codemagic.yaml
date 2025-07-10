@@ -1,34 +1,62 @@
 workflows:
   ios-workflow:
-    name: iOS Workflow (Auto Code Signing)
-    max_build_duration: 60
+    name: iOS Workflow
     environment:
-      xcode: latest # ou '16.0' si tu veux forcer la version
+      xcode: latest
       cocoapods: default
-      flutter: stable
       groups:
-        - Variables # ou le nom de ton groupe de variables App Store Connect
+        - ios-certificates
+      vars:
+        XCODE_PROJECT: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        BUNDLE_ID: "com.henrikanda.smoothai"
     scripts:
-      - name: Install Flutter dependencies
+      - name: Set up code signing settings
         script: |
-          flutter pub get
-      - name: Install iOS dependencies
+          keychain_name="codemagic.keychain"
+          keychain_password="temp"
+          
+          # Create keychain
+          security create-keychain -p "$keychain_password" "$keychain_name"
+          security list-keychains -s "$keychain_name"
+          security default-keychain -s "$keychain_name"
+          security unlock-keychain -p "$keychain_password" "$keychain_name"
+          security set-keychain-settings -t 3600 -l ~/Library/Keychains/"$keychain_name"
+          
+          # Import certificates
+          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
+          security import /tmp/build_certificate.p12 -k "$keychain_name" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_name"
+          
+          # Import private key
+          echo "$CERTIFICATE_PRIVATE_KEY" | base64 --decode > /tmp/certificate_private_key.p8
+          security import /tmp/certificate_private_key.p8 -k "$keychain_name" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          
+          # Set up provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          
+          # Set up App Store Connect API key
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build iOS app
+        script: |
+          flutter build ios --release --no-codesign
+      - name: Build iOS app bundle
         script: |
           cd ios
-          pod install
-      - name: Build iOS app (auto code signing)
-        script: |
-          flutter build ios --release
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive
+          xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios
     artifacts:
-      - build/ios/ipa/*.ipa
-      - build/ios/iphoneos/*.app
-      - ios/build/archive/*.xcarchive
+      - build/ios/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
       app_store_connect:
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        api_key: $APP_STORE_CONNECT_API_KEY_BASE64
+        key_id: $APP_STORE_CONNECT_API_KEY_ID
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        submit_to_app_store: true
         submit_to_testflight: true 
