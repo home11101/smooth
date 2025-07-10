@@ -66,16 +66,17 @@ workflows:
           
           echo "✅ Archive created for App Store"
           ls -la build/archive/
-      - name: Create IPA for App Store
+      - name: Create IPA from archive
         script: |
           cd ios
           mkdir -p build/ios/ipa
           
-          # Export to IPA for App Store (will be signed by App Store Connect)
-          xcodebuild -exportArchive -archivePath build/archive/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/ipa CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          # Create a simple IPA from the archive without export
+          cd build/archive/Runner.xcarchive/Products/Applications/
+          zip -r ../../ios/ipa/SmoothAI.ipa Runner.app
           
-          echo "✅ IPA created for App Store"
-          ls -la build/ios/ipa/
+          echo "✅ IPA created from archive"
+          ls -la ../../ios/ipa/
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/iphoneos/*.app
