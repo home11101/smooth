@@ -6,8 +6,8 @@ type("development") # The default type, can be: appstore, adhoc, enterprise or d
 
 app_identifier(["com.henrikanda.smoothai"])
 
-# API Key configuration
-api_key_path("./api_key.json")
+# API Key configuration - using environment variables instead of file
+# api_key_path("./api_key.json")
 
 # username("user@fastlane.tools") # Your Apple Developer Portal username
 
