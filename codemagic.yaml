@@ -86,6 +86,17 @@ workflows:
             zip -r ../../../build/ios/ipa/SmoothAI.ipa "$(basename "$APP_PATH")"
             echo "✅ IPA created from archive"
             ls -la ../../../build/ios/ipa/
+            
+            # Debug: Check if IPA exists and show its location
+            echo "=== IPA Location Debug ==="
+            pwd
+            ls -la ../../../build/ios/ipa/SmoothAI.ipa
+            echo "=== From project root ==="
+            cd ../../../../
+            pwd
+            ls -la ios/build/ios/ipa/SmoothAI.ipa
+            echo "=== Artifacts check ==="
+            find . -name "*.ipa" -type f
           else
             echo "❌ No app found in archive"
             ls -la build/archive/Runner.xcarchive/
