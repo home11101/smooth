@@ -20,7 +20,7 @@ platform :ios do
           "com.henrikanda.smoothai" => "match AppStore com.henrikanda.smoothai"
         },
         teamID: "7BHY8D9X9V",
-        signingStyle: "automatic",
+        signingStyle: "manual",
         compileBitcode: true,
         uploadBitcode: true,
         uploadSymbols: true,
@@ -29,7 +29,7 @@ platform :ios do
       clean: true,
       output_directory: "build/ios/ipa",
       output_name: "SmoothAI.ipa",
-      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Automatic",
+      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='match AppStore com.henrikanda.smoothai' CODE_SIGN_IDENTITY='Apple Distribution'",
       silent: false,
       skip_package_ipa: false,
       build_path: "/tmp/build",
