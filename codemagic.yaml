@@ -10,6 +10,8 @@ workflows:
         XCODE_PROJECT: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "com.henrikanda.smoothai"
+        BUILD_CERTIFICATE_PASSWORD: "RABE2024"
+        KEYCHAIN_PASSWORD: "temp"
     scripts:
       - name: Set up code signing settings
         script: |
@@ -25,16 +27,16 @@ workflows:
           
           # Import certificates
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
-          security import /tmp/build_certificate.p12 -k "$keychain_name" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security import /tmp/build_certificate.p12 -k "$keychain_name" -P "RABE2024" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_name"
           
           # Import private key
           echo "$CERTIFICATE_PRIVATE_KEY" | base64 --decode > /tmp/certificate_private_key.p8
-          security import /tmp/certificate_private_key.p8 -k "$keychain_name" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security import /tmp/certificate_private_key.p8 -k "$keychain_name" -P "RABE2024" -T /usr/bin/codesign
           
           # Set up provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/7BHY8D9X9V.com.henrikanda.smoothai.mobileprovision
           
           # Set up App Store Connect API key
           mkdir -p ~/.appstoreconnect/private_keys
