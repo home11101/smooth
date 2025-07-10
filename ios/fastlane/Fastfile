@@ -3,10 +3,11 @@ default_platform(:ios)
 platform :ios do
   desc "Build and archive iOS app"
   lane :build do
+    # Use the .p8 file directly instead of environment variables
     api_key = app_store_connect_api_key(
-      key_id: ENV["APPSTORE_CONNECT_API_KEY_ID"],
-      issuer_id: ENV["APPSTORE_CONNECT_ISSUER_ID"],
-      key_content: ENV["APPSTORE_CONNECT_API_KEY"]
+      key_id: "4V6GWRQFC9",
+      issuer_id: "bbd1db28-6a57-409f-860f-cfc657430d67",
+      key_filepath: "AuthKey_4V6GWRQFC9.p8"
     )
     
     # Install certificates and profiles
@@ -38,10 +39,11 @@ platform :ios do
 
   desc "Upload to App Store Connect"
   lane :upload do
+    # Use the .p8 file directly instead of environment variables
     api_key = app_store_connect_api_key(
-      key_id: ENV["APPSTORE_CONNECT_API_KEY_ID"],
-      issuer_id: ENV["APPSTORE_CONNECT_ISSUER_ID"],
-      key_content: ENV["APPSTORE_CONNECT_API_KEY"]
+      key_id: "4V6GWRQFC9",
+      issuer_id: "bbd1db28-6a57-409f-860f-cfc657430d67",
+      key_filepath: "AuthKey_4V6GWRQFC9.p8"
     )
     
     pilot(
