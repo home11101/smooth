@@ -71,12 +71,23 @@ workflows:
           cd ios
           mkdir -p build/ios/ipa
           
-          # Create a simple IPA from the archive without export
-          cd build/archive/Runner.xcarchive/Products/Applications/
-          zip -r ../../ios/ipa/SmoothAI.ipa Runner.app
+          # Find the app in the archive
+          echo "Looking for app in archive..."
+          find build/archive/Runner.xcarchive -name "*.app" -type d
           
-          echo "✅ IPA created from archive"
-          ls -la ../../ios/ipa/
+          # Create IPA from the found app
+          APP_PATH=$(find build/archive/Runner.xcarchive -name "*.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            echo "Found app at: $APP_PATH"
+            cd $(dirname "$APP_PATH")
+            zip -r ../../../build/ios/ipa/SmoothAI.ipa $(basename "$APP_PATH")
+            echo "✅ IPA created from archive"
+            ls -la ../../../build/ios/ipa/
+          else
+            echo "❌ No app found in archive"
+            ls -la build/archive/Runner.xcarchive/
+            exit 1
+          fi
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/iphoneos/*.app
