@@ -38,21 +38,6 @@ jobs:
         cd ios
         gem install fastlane
         
-    - name: Setup keychain for code signing
-      run: |
-        # Remove existing keychain if it exists
-        security delete-keychain login.keychain || true
-        
-        # Create a temporary keychain for code signing
-        security create-keychain -p "password" login.keychain
-        security list-keychains -s login.keychain
-        security default-keychain -s login.keychain
-        security unlock-keychain -p "password" login.keychain
-        security set-keychain-settings -t 3600 -l ~/Library/Keychains/login.keychain-db
-        
-    - name: Clean provisioning profiles
-      run: rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/*
-        
     - name: Build with Fastlane
       env:
         APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -64,7 +49,6 @@ jobs:
         APPSTORECONNECT_API_KEY_ISSUER_ID: ${{ secrets.APPSTORECONNECT_API_KEY_ISSUER_ID }}
         APPSTORECONNECT_API_KEY_KEY: ${{ secrets.APPSTORECONNECT_API_KEY_KEY }}
         MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-        KEYCHAIN_PASSWORD: "password"
       run: |
         cd ios
         fastlane build_and_upload

@@ -3,17 +3,15 @@ default_platform(:ios)
 platform :ios do
   desc "Build and archive iOS app"
   lane :build do
-    # Setup keychain for CI
-    setup_ci(
-      keychain_name: "login"
-    )
-    
     api_key = app_store_connect_api_key(
       key_id: ENV["APPSTORECONNECT_API_KEY_KEY_ID"],
       issuer_id: ENV["APPSTORECONNECT_API_KEY_ISSUER_ID"],
       key_content: ENV["APPSTORECONNECT_API_KEY_KEY"]
     )
+    
+    # Install certificates and profiles
     match(type: "appstore", api_key: api_key, readonly: true)
+    
     gym(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -29,13 +27,12 @@ platform :ios do
         compileBitcode: true,
         uploadBitcode: true,
         uploadSymbols: true,
-        stripSwiftSymbols: true,
-        signingCertificate: "Apple Distribution"
+        stripSwiftSymbols: true
       },
       clean: true,
       output_directory: "build/ios/ipa",
       output_name: "SmoothAI.ipa",
-      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='match AppStore com.henrikanda.smoothai' CODE_SIGN_IDENTITY='Apple Distribution' OTHER_CODE_SIGN_FLAGS='--keychain /Users/runner/Library/Keychains/login.keychain-db'",
+      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration",
       silent: false,
       skip_package_ipa: false,
       build_path: "/tmp/build",
@@ -45,17 +42,12 @@ platform :ios do
 
   desc "Upload to App Store Connect"
   lane :upload do
-    # Setup keychain for CI
-    setup_ci(
-      keychain_name: "login"
-    )
-    
     api_key = app_store_connect_api_key(
       key_id: ENV["APPSTORECONNECT_API_KEY_KEY_ID"],
       issuer_id: ENV["APPSTORECONNECT_API_KEY_ISSUER_ID"],
       key_content: ENV["APPSTORECONNECT_API_KEY_KEY"]
     )
-    match(type: "appstore", api_key: api_key, readonly: true)
+    
     pilot(
       api_key: api_key,
       skip_waiting_for_build_processing: true,
@@ -68,23 +60,18 @@ platform :ios do
 
   desc "Build and upload to App Store Connect"
   lane :build_and_upload do
-    prepare_ci_environment
+    setup_ci_environment
     build
     upload
   end
   
-  # Lane bonus pour debug
-  desc "Debug code signing setup"
-  lane :debug_signing do
-    puts "Team ID: 7BHY8D9X9V"
-    puts "Bundle ID: com.henrikanda.smoothai"
-    puts "Xcode version: #{sh('xcodebuild -version')}"
-    puts "Available provisioning profiles:"
-    sh('security find-identity -v -p codesigning')
-  end
-  
-  desc "Setup project for CI build"
-  lane :prepare_ci_environment do
+  desc "Setup CI environment"
+  lane :setup_ci_environment do
+    # Setup keychain for CI
+    setup_ci(
+      keychain_name: "login"
+    )
+    
     # Clean derived data
     clean_build_artifacts
     
@@ -93,10 +80,14 @@ platform :ios do
       podfile: "Podfile",
       repo_update: true
     )
-    
-    # Setup keychain
-    setup_ci(
-      keychain_name: "login"
-    )
+  end
+  
+  desc "Debug code signing setup"
+  lane :debug_signing do
+    puts "Team ID: 7BHY8D9X9V"
+    puts "Bundle ID: com.henrikanda.smoothai"
+    puts "Xcode version: #{sh('xcodebuild -version')}"
+    puts "Available provisioning profiles:"
+    sh('security find-identity -v -p codesigning')
   end
 end
