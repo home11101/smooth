@@ -41,6 +41,9 @@ workflows:
           # List available profiles for debugging
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
           
+          # List available certificates
+          security find-identity -v -p codesigning
+          
           # Set up App Store Connect API key
           mkdir -p ~/.appstoreconnect/private_keys
           echo "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
@@ -50,12 +53,10 @@ workflows:
       - name: Build iOS app
         script: |
           flutter build ios --release --no-codesign
-          cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' clean build
       - name: Build iOS app bundle
         script: |
           cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos -destination 'generic/platform=iOS'
           xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios -allowProvisioningUpdates
     artifacts:
       - build/ios/*.ipa
