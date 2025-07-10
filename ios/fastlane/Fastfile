@@ -34,7 +34,7 @@ platform :ios do
       clean: true,
       output_directory: "build/ios/ipa",
       output_name: "SmoothAI.ipa",
-      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='match AppStore com.henrikanda.smoothai' CODE_SIGN_IDENTITY='Apple Distribution' OTHER_CODE_SIGN_FLAGS='--keychain /Users/runner/Library/Keychains/login.keychain-db'",
+      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Apple Distribution' OTHER_CODE_SIGN_FLAGS='--keychain /Users/runner/Library/Keychains/login.keychain-db'",
       silent: false,
       skip_package_ipa: false,
       build_path: "/tmp/build",
