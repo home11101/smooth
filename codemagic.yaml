@@ -13,14 +13,14 @@ workflows:
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "com.henrikanda.smoothai"
         TEAM_ID: "7BHY8D9X9V"
-        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-        APPSTORE_CONNECT_API_KEY_ID: ${{ secrets.APPSTORE_CONNECT_API_KEY_ID }}
-        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-        APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+        MATCH_PASSWORD: $MATCH_PASSWORD
+        APPLE_ID: $APPLE_ID
+        APP_SPECIFIC_PASSWORD: $APP_SPECIFIC_PASSWORD
+        APPSTORE_CONNECT_API_KEY_ID: $APPSTORE_CONNECT_API_KEY_ID
+        APPSTORE_CONNECT_ISSUER_ID: $APPSTORE_CONNECT_ISSUER_ID
+        APPSTORE_CONNECT_API_KEY: $APPSTORE_CONNECT_API_KEY
         # CodeMagic expects this environment variable for App Store Connect publishing
-        APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+        APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY: $APPSTORE_CONNECT_API_KEY
     scripts:
       - name: Setup iOS code signing
         script: |
