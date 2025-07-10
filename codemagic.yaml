@@ -1,9 +1,11 @@
 workflows:
   ios-workflow:
     name: iOS Workflow
+    max_build_duration: 60
     environment:
       xcode: latest
       cocoapods: default
+      flutter: stable
       vars:
         XCODE_PROJECT: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
@@ -15,64 +17,50 @@ workflows:
         APPSTORE_CONNECT_API_KEY_ID: ${{ secrets.APPSTORE_CONNECT_API_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
-      flutter: stable
-      xcode_project: $XCODE_PROJECT
-      xcode_scheme: $XCODE_SCHEME
-      bundle_id: $BUNDLE_ID
-      team_id: $TEAM_ID
-      app_specific_password: $APP_SPECIFIC_PASSWORD
-      apple_id: $APPLE_ID
-      api_key: $APPSTORE_CONNECT_API_KEY
-      key_id: $APPSTORE_CONNECT_API_KEY_ID
-      issuer_id: $APPSTORE_CONNECT_ISSUER_ID
-      match_password: $MATCH_PASSWORD
-      code_signing:
-        - ios/certs/distribution_certificate.p12
-        - ios/certs/distribution_certificate.p12
-      scripts:
-        - name: Setup iOS code signing
-          script: |
-            # Create certificates directory
-            mkdir -p ios/certs
-            
-            # Setup keychain
-            security create-keychain -p "password" login.keychain
-            security list-keychains -s login.keychain
-            security default-keychain -s login.keychain
-            security unlock-keychain -p "password" login.keychain
-            security set-keychain-settings -t 3600 -l ~/Library/Keychains/login.keychain-db
-            
-            # Import certificates if they exist
-            if [ -f "ios/certs/distribution_certificate.p12" ]; then
-              security import ios/certs/distribution_certificate.p12 -k login.keychain -P "" -T /usr/bin/codesign
-            fi
-            
-            # Setup API key for App Store Connect
-            mkdir -p ~/.appstoreconnect/private_keys
-            echo "$APPSTORE_CONNECT_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_$APPSTORE_CONNECT_API_KEY_ID.p8
-            chmod 600 ~/.appstoreconnect/private_keys/AuthKey_$APPSTORE_CONNECT_API_KEY_ID.p8
-        - name: Install Flutter dependencies
-          script: |
-            flutter pub get
-        - name: Install iOS dependencies
-          script: |
-            cd ios
-            pod install
-        - name: Build iOS app
-          script: |
-            flutter build ios --release --no-codesign
-        - name: Build and archive iOS app
-          script: |
-            cd ios
-            fastlane build
-      artifacts:
-        - build/ios/ipa/*.ipa
-        - /tmp/xcodebuild_logs/*.log
-        - flutter_drive.log
-      publishing:
-        app_store_connect:
-          api_key: $APPSTORE_CONNECT_API_KEY
-          key_id: $APPSTORE_CONNECT_API_KEY_ID
-          issuer_id: $APPSTORE_CONNECT_ISSUER_ID
-          submit_to_app_store: true
-          submit_to_testflight: true 
+    scripts:
+      - name: Setup iOS code signing
+        script: |
+          # Create certificates directory
+          mkdir -p ios/certs
+          
+          # Setup keychain
+          security create-keychain -p "password" login.keychain
+          security list-keychains -s login.keychain
+          security default-keychain -s login.keychain
+          security unlock-keychain -p "password" login.keychain
+          security set-keychain-settings -t 3600 -l ~/Library/Keychains/login.keychain-db
+          
+          # Import certificates if they exist
+          if [ -f "ios/certs/distribution_certificate.p12" ]; then
+            security import ios/certs/distribution_certificate.p12 -k login.keychain -P "" -T /usr/bin/codesign
+          fi
+          
+          # Setup API key for App Store Connect
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APPSTORE_CONNECT_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_$APPSTORE_CONNECT_API_KEY_ID.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_$APPSTORE_CONNECT_API_KEY_ID.p8
+      - name: Install Flutter dependencies
+        script: |
+          flutter pub get
+      - name: Install iOS dependencies
+        script: |
+          cd ios
+          pod install
+      - name: Build iOS app
+        script: |
+          flutter build ios --release --no-codesign
+      - name: Build and archive iOS app
+        script: |
+          cd ios
+          fastlane build
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      app_store_connect:
+        api_key: $APPSTORE_CONNECT_API_KEY
+        key_id: $APPSTORE_CONNECT_API_KEY_ID
+        issuer_id: $APPSTORE_CONNECT_ISSUER_ID
+        submit_to_app_store: true
+        submit_to_testflight: true 
