@@ -11,7 +11,7 @@ platform :ios do
     )
     
     # Install certificates and profiles
-    match(type: "appstore", api_key: api_key, readonly: true)
+    # match(type: "appstore", api_key: api_key, readonly: true)
     
     gym(
       workspace: "Runner.xcworkspace",
