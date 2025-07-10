@@ -19,11 +19,7 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         method: "app-store",
-        provisioningProfiles: {
-          "com.henrikanda.smoothai" => "match AppStore com.henrikanda.smoothai"
-        },
         teamID: "7BHY8D9X9V",
-        signingStyle: "manual",
         compileBitcode: true,
         uploadBitcode: true,
         uploadSymbols: true,
