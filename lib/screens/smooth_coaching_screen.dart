@@ -151,13 +151,10 @@ class _SmoothCoachingScreenState extends State<SmoothCoachingScreen>
 
     try {
       // Convertir l'historique des messages au format attendu par le CoachingService
-      final history = _messages
-          .where((msg) => !msg.isUser) // Seulement les messages du coach
-          .map((msg) => {
-                'role': 'assistant',
-                'content': msg.text,
-              })
-          .toList();
+      final history = _messages.map((msg) => {
+        'role': msg.isUser ? 'user' : 'assistant',
+        'content': msg.text,
+      }).toList();
 
       // Utilisation du CoachingService pour générer une réponse du DOCTEUR LOVE
       final botResponse = await _coachingService.getCoachResponse(message, history);
@@ -202,7 +199,6 @@ class _SmoothCoachingScreenState extends State<SmoothCoachingScreen>
       body: AppTheme.buildPickupScreenBackground(
         child: Column(
           children: [
-            _buildHeader(),
             Expanded(child: _buildChatArea()),
             _buildInputArea(),
           ],
@@ -246,12 +242,19 @@ class _SmoothCoachingScreenState extends State<SmoothCoachingScreen>
       padding: const EdgeInsets.all(20),
       child: ListView.builder(
         controller: _scrollController,
-        itemCount: _messages.length + (_isTyping ? 1 : 0),
+        itemCount: 1 + _messages.length + (_isTyping ? 1 : 0),
         itemBuilder: (context, index) {
-          if (index == _messages.length && _isTyping) {
+          if (index == 0) {
+            return _buildHeader();
+          }
+          final msgIndex = index - 1;
+          if (msgIndex == _messages.length && _isTyping) {
             return _buildTypingIndicator();
           }
-          return _buildMessageBubble(_messages[index]);
+          if (msgIndex < _messages.length) {
+            return _buildMessageBubble(_messages[msgIndex]);
+          }
+          return const SizedBox.shrink();
         },
       ),
     );

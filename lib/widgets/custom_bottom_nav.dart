@@ -13,63 +13,79 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: ResponsiveHelper.getAdaptiveButtonHeight(context) + 32,
-      decoration: const BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 1.2,
+            color: const Color(0x22222222),
+          ),
         ),
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: ResponsiveHelper.responsiveWidth(context, 20),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Bouton S pour l'écran 1 (remplacé par une image)
-          GestureDetector(
-            onTap: () => onTap(0),
-            child: SizedBox(
-              width: ResponsiveHelper.responsiveFontSize(context, 28), // Largeur réduite
-              child: Image.asset(
-                'assets/images/leSmenu.png',
-                height: ResponsiveHelper.responsiveFontSize(context, 32),
-                color: currentIndex == 0 ? const Color(0xFF2196F3) : Colors.white,
-                colorBlendMode: BlendMode.srcIn,
-                fit: BoxFit.contain,
+        Container(
+          height: ResponsiveHelper.getAdaptiveButtonHeight(context) + 32,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 12,
+                offset: const Offset(0, -2),
               ),
-            ),
+            ],
           ),
+          padding: EdgeInsets.symmetric(
+            horizontal: ResponsiveHelper.responsiveWidth(context, 20),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Bouton S pour l'écran 1 (remplacé par une image)
+              GestureDetector(
+                onTap: () => onTap(0),
+                child: SizedBox(
+                  width: ResponsiveHelper.responsiveFontSize(context, 28), // Largeur réduite
+                  child: Image.asset(
+                    'assets/images/leSmenu.png',
+                    height: ResponsiveHelper.responsiveFontSize(context, 32),
+                    color: currentIndex == 0 ? const Color(0xFF2196F3) : Colors.white,
+                    colorBlendMode: BlendMode.srcIn,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
 
-          // Bouton Chat pour l'écran 2
-          GestureDetector(
-            onTap: () => onTap(1),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: currentIndex == 1
-                    ? [
-                        BoxShadow(
-                          color: Colors.blueAccent.withAlpha(26),
-                          blurRadius: 12,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 0),
-                        ),
-                      ]
-                    : null,
+              // Bouton Chat pour l'écran 2
+              GestureDetector(
+                onTap: () => onTap(1),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: currentIndex == 1
+                        ? [
+                            BoxShadow(
+                              color: Colors.blueAccent.withAlpha(26),
+                              blurRadius: 12,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 0),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Icon(
+                    Icons.chat_bubble_outline,
+                    color: currentIndex == 1 ? Color(0xFF2196F3) : Colors.grey[400],
+                    size: ResponsiveHelper.responsiveFontSize(context, 28),
+                  ),
+                ),
               ),
-              child: Icon(
-                Icons.chat_bubble_outline,
-                color: currentIndex == 1 ? Color(0xFF2196F3) : Colors.grey[400],
-                size: ResponsiveHelper.responsiveFontSize(context, 28),
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

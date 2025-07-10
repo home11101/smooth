@@ -677,12 +677,13 @@ class _SmoothAIScreenState extends State<SmoothAIScreen>
   Widget _buildBottomActionArea() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withAlpha(204),
-        border: Border(
-          top: BorderSide(color: Colors.white.withAlpha(77)),
-        ),
-      ),
+      // Suppression de la couleur de fond et de la bordure
+      // decoration: BoxDecoration(
+      //   color: Colors.white.withAlpha(204),
+      //   border: Border(
+      //     top: BorderSide(color: Colors.white.withAlpha(77)),
+      //   ),
+      // ),
       child: Row(
         children: [
           // Bouton de sélection de type

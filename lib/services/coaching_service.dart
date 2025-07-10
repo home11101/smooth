@@ -70,10 +70,11 @@ GÉNÈRE : Une réponse qui suit ton style de DOCTEUR LOVE, avec conseils pratiq
       ];
 
       final response = await _client.post(
-        Uri.parse('https://oahmneimzzfahkuervii.supabase.co/functions/v1/openai-proxy'),
+        Uri.parse('https://qlomkoexurbxqsezavdi.supabase.co/functions/v1/openai-proxy'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${supabaseAnonKey}',
+          'apikey': supabaseAnonKey,
         },
         body: jsonEncode({
           'model': 'gpt-4',
@@ -119,10 +120,11 @@ FORMAT : Réponse directe, maximum 2-3 phrases, dans ton style DOCTEUR LOVE.
       ];
 
       final response = await _client.post(
-        Uri.parse('https://oahmneimzzfahkuervii.supabase.co/functions/v1/openai-proxy'),
+        Uri.parse('https://qlomkoexurbxqsezavdi.supabase.co/functions/v1/openai-proxy'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${supabaseAnonKey}',
+          'apikey': supabaseAnonKey,
         },
         body: jsonEncode({
           'model': 'gpt-4',
@@ -168,10 +170,11 @@ Utilise ton style unique de "médecin des cœurs" avec métaphores médicales et
       ];
 
       final response = await _client.post(
-        Uri.parse('https://oahmneimzzfahkuervii.supabase.co/functions/v1/openai-proxy'),
+        Uri.parse('https://qlomkoexurbxqsezavdi.supabase.co/functions/v1/openai-proxy'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${supabaseAnonKey}',
+          'apikey': supabaseAnonKey,
         },
         body: jsonEncode({
           'model': 'gpt-4',

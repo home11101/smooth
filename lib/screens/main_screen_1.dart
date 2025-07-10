@@ -136,9 +136,28 @@ class _MainScreen1State extends State<MainScreen1> {
         child: SafeArea(
           child: Stack(
             children: [
-              Center(child: _buildMainImage(context)),
-              _buildTitle(context),
-              _buildActionButtons(context),
+              // Titre en haut avec padding minimal
+              Positioned(
+                top: ResponsiveHelper.responsiveHeight(context, 0.7),
+                left: 0,
+                right: 0,
+                child: _buildTitle(context),
+              ),
+              // Image principale centrée, descendue encore un peu
+              Positioned(
+                top: ResponsiveHelper.responsiveHeight(context, 17),
+                left: 0,
+                right: 0,
+                child: Center(child: _buildMainImage(context)),
+              ),
+              // Boutons fixes en bas
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _buildActionButtons(context),
+              ),
+              // Carrousel positionné au-dessus des boutons
               if (_analysisHistory.isNotEmpty)
                 Positioned(
                   left: 0,
