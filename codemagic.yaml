@@ -17,6 +17,9 @@ workflows:
         APPSTORE_CONNECT_API_KEY_ID: ${{ secrets.APPSTORE_CONNECT_API_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+      code_signing:
+        - ios/certs/distribution_certificate.p12
+        - ios/certs/distribution_certificate.p12
     scripts:
       - name: Setup iOS code signing
         script: |
@@ -50,21 +53,32 @@ workflows:
         script: |
           cd ios
           pod install
-      - name: Build iOS app without code signing
+      - name: Build iOS app with code signing
         script: |
-          flutter build ios --release --no-codesign
-      - name: Create archive only
+          flutter build ios --release --codesign
+      - name: Create signed IPA
         script: |
           cd ios
-          mkdir -p build/archive
+          mkdir -p build/ios/ipa
           
-          # Archive the app without code signing
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/archive/Runner.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          # Archive the app with code signing
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/archive/Runner.xcarchive archive
           
-          echo "Archive created successfully"
-          ls -la build/archive/
+          # Export to IPA with code signing
+          xcodebuild -exportArchive -archivePath build/archive/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/ipa
+          
+          echo "Signed IPA created successfully"
+          ls -la build/ios/ipa/
     artifacts:
+      - build/ios/ipa/*.ipa
       - build/ios/iphoneos/*.app
       - ios/build/archive/*.xcarchive
       - /tmp/xcodebuild_logs/*.log
-      - flutter_drive.log 
+      - flutter_drive.log
+    publishing:
+      app_store_connect:
+        api_key: $APPSTORE_CONNECT_API_KEY
+        key_id: $APPSTORE_CONNECT_API_KEY_ID
+        issuer_id: $APPSTORE_CONNECT_ISSUER_ID
+        submit_to_app_store: true
+        submit_to_testflight: true 
