@@ -1,55 +1,14 @@
 workflows:
   ios-workflow:
-    name: iOS Workflow
+    name: iOS Workflow (Auto Code Signing)
     max_build_duration: 60
     environment:
-      groups:
-        - Variables
-      xcode: latest
+      xcode: latest # ou '16.0' si tu veux forcer la version
       cocoapods: default
       flutter: stable
-      vars:
-        XCODE_PROJECT: "ios/Runner.xcworkspace"
-        XCODE_SCHEME: "Runner"
-        BUNDLE_ID: "com.henrikanda.smoothai"
-        TEAM_ID: "7BHY8D9X9V"
-        MATCH_PASSWORD: $MATCH_PASSWORD
-        APPLE_ID: $APPLE_ID
-        APP_SPECIFIC_PASSWORD: $APP_SPECIFIC_PASSWORD
-        APPSTORE_CONNECT_API_KEY_ID: $APPSTORE_CONNECT_API_KEY_ID
-        APPSTORE_CONNECT_ISSUER_ID: $APPSTORE_CONNECT_ISSUER_ID
-        APPSTORE_CONNECT_API_KEY: $APPSTORE_CONNECT_API_KEY
-        # CodeMagic expects this environment variable for App Store Connect publishing
-        APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY: $APPSTORE_CONNECT_API_KEY
+      groups:
+        - Variables # ou le nom de ton groupe de variables App Store Connect
     scripts:
-      - name: Setup iOS code signing
-        script: |
-          # Create certificates directory
-          mkdir -p ios/certs
-          
-          # Remove existing keychain if it exists
-          security delete-keychain login.keychain 2>/dev/null || true
-          
-          # Setup keychain
-          security create-keychain -p "password" login.keychain
-          security list-keychains -s login.keychain
-          security default-keychain -s login.keychain
-          security unlock-keychain -p "password" login.keychain
-          security set-keychain-settings -t 3600 -l ~/Library/Keychains/login.keychain-db
-          
-          # Import certificates if they exist
-          if [ -f "ios/certs/distribution_certificate.p12" ]; then
-            security import ios/certs/distribution_certificate.p12 -k login.keychain -P "" -T /usr/bin/codesign
-            echo "✅ Certificat de distribution importé"
-          else
-            echo "⚠️  Certificat de distribution non trouvé. Utilisation du code signing automatique."
-          fi
-          
-          # Copy the .p8 file to the current directory for Fastlane
-          cp ios/AuthKey_4V6GWRQFC9.p8 ./AuthKey_4V6GWRQFC9.p8
-          chmod 600 ./AuthKey_4V6GWRQFC9.p8
-          
-          echo "API key file copied for Fastlane"
       - name: Install Flutter dependencies
         script: |
           flutter pub get
@@ -57,73 +16,19 @@ workflows:
         script: |
           cd ios
           pod install
-      - name: Build iOS app without code signing
+      - name: Build iOS app (auto code signing)
         script: |
-          flutter build ios --release --no-codesign
-      - name: Create archive for App Store
-        script: |
-          cd ios
-          mkdir -p build/archive
-          
-          # Archive the app without code signing to avoid conflicts
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/archive/Runner.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-          
-          echo "✅ Archive created for App Store"
-          ls -la build/archive/
-      - name: Create IPA from archive
-        script: |
-          cd ios
-          mkdir -p build/ios/ipa
-          
-          # Find the app in the archive
-          echo "Looking for app in archive..."
-          find build/archive/Runner.xcarchive -name "*.app" -type d
-          
-          # Create IPA from the found app
-          APP_PATH=$(find build/archive/Runner.xcarchive -name "*.app" -type d | head -1)
-          if [ -n "$APP_PATH" ]; then
-            echo "Found app at: $APP_PATH"
-            cd $(dirname "$APP_PATH")
-            # Use absolute path to ensure correct location
-            zip -r /Users/builder/clone/ios/build/ios/ipa/SmoothAI.ipa "$(basename "$APP_PATH")"
-            echo "✅ IPA created from archive"
-            ls -la /Users/builder/clone/ios/build/ios/ipa/
-            
-            # Debug: Check if IPA exists and show its location
-            echo "=== IPA Location Debug ==="
-            pwd
-            ls -la /Users/builder/clone/ios/build/ios/ipa/SmoothAI.ipa
-            echo "=== From project root ==="
-            cd /Users/builder/clone
-            pwd
-            ls -la ios/build/ios/ipa/SmoothAI.ipa
-            echo "=== Artifacts check ==="
-            find . -name "*.ipa" -type f
-          else
-            echo "❌ No app found in archive"
-            ls -la build/archive/Runner.xcarchive/
-            exit 1
-          fi
-      - name: Debug App Store Connect variables
-        script: |
-          echo "==== DEBUG APP STORE CONNECT VARIABLES ===="
-          echo "APPSTORE_CONNECT_API_KEY_ID: $APPSTORE_CONNECT_API_KEY_ID"
-          echo "APPSTORE_CONNECT_ISSUER_ID: $APPSTORE_CONNECT_ISSUER_ID"
-          echo "APPSTORE_CONNECT_API_KEY (first 5 lines):"
-          echo "$APPSTORE_CONNECT_API_KEY" | head -5
-          echo "APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY (first 5 lines):"
-          echo "$APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY" | head -5
-          echo "==== END DEBUG ===="
+          flutter build ios --release
     artifacts:
-      - ios/build/ios/ipa/*.ipa
+      - build/ios/ipa/*.ipa
       - build/ios/iphoneos/*.app
       - ios/build/archive/*.xcarchive
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
       app_store_connect:
-        api_key: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
-        key_id: ${{ secrets.APPSTORE_CONNECT_API_KEY_ID }}
-        issuer_id: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
         submit_to_app_store: true
         submit_to_testflight: true 
