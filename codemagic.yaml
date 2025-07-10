@@ -80,19 +80,17 @@ workflows:
           if [ -n "$APP_PATH" ]; then
             echo "Found app at: $APP_PATH"
             cd $(dirname "$APP_PATH")
-            # Ensure the output directory exists
-            mkdir -p ../../../build/ios/ipa
-            # Use quotes to handle spaces in app name
-            zip -r ../../../build/ios/ipa/SmoothAI.ipa "$(basename "$APP_PATH")"
+            # Use absolute path to ensure correct location
+            zip -r /Users/builder/clone/ios/build/ios/ipa/SmoothAI.ipa "$(basename "$APP_PATH")"
             echo "✅ IPA created from archive"
-            ls -la ../../../build/ios/ipa/
+            ls -la /Users/builder/clone/ios/build/ios/ipa/
             
             # Debug: Check if IPA exists and show its location
             echo "=== IPA Location Debug ==="
             pwd
-            ls -la ../../../build/ios/ipa/SmoothAI.ipa
+            ls -la /Users/builder/clone/ios/build/ios/ipa/SmoothAI.ipa
             echo "=== From project root ==="
-            cd ../../../../
+            cd /Users/builder/clone
             pwd
             ls -la ios/build/ios/ipa/SmoothAI.ipa
             echo "=== Artifacts check ==="
