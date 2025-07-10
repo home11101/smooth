@@ -23,6 +23,9 @@ workflows:
           # Create certificates directory
           mkdir -p ios/certs
           
+          # Remove existing keychain if it exists
+          security delete-keychain login.keychain 2>/dev/null || true
+          
           # Setup keychain
           security create-keychain -p "password" login.keychain
           security list-keychains -s login.keychain
@@ -37,8 +40,8 @@ workflows:
           
           # Setup API key for App Store Connect
           mkdir -p ~/.appstoreconnect/private_keys
-          echo "$APPSTORE_CONNECT_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_$APPSTORE_CONNECT_API_KEY_ID.p8
-          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_$APPSTORE_CONNECT_API_KEY_ID.p8
+          echo "$APPSTORE_CONNECT_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_CONNECT_API_KEY_ID}.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_CONNECT_API_KEY_ID}.p8
       - name: Install Flutter dependencies
         script: |
           flutter pub get
