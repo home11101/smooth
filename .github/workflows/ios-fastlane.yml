@@ -38,17 +38,14 @@ jobs:
         cd ios
         gem install fastlane
         
-    - name: Install certificate and provisioning profile
+    - name: Setup keychain for code signing
       run: |
-        echo "${{ secrets.DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
-        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > profile.mobileprovision
-        security create-keychain -p "" build.keychain
-        security import certificate.p12 -k build.keychain -P ${{ secrets.CERTIFICATE_PASSWORD }} -T /usr/bin/codesign
-        security list-keychains -s build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "" build.keychain
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+        # Create a temporary keychain for code signing
+        security create-keychain -p "password" login.keychain
+        security list-keychains -s login.keychain
+        security default-keychain -s login.keychain
+        security unlock-keychain -p "password" login.keychain
+        security set-keychain-settings -t 3600 -l ~/Library/Keychains/login.keychain-db
         
     - name: Clean provisioning profiles
       run: rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/*
@@ -64,25 +61,13 @@ jobs:
         APPSTORECONNECT_API_KEY_ISSUER_ID: ${{ secrets.APPSTORECONNECT_API_KEY_ISSUER_ID }}
         APPSTORECONNECT_API_KEY_KEY: ${{ secrets.APPSTORECONNECT_API_KEY_KEY }}
         MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        KEYCHAIN_PASSWORD: "password"
       run: |
         cd ios
-        fastlane build
+        fastlane build_and_upload
         
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v4
       with:
         name: smooth-ai-ipa
-        path: ios/build/ios/ipa/SmoothAI.ipa
-        
-    - name: Upload to App Store Connect
-      if: github.ref == 'refs/heads/main'
-      env:
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-        FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-        FASTLANE_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-        FASTLANE_USER: ${{ secrets.APPLE_ID }}
-        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-      run: |
-        cd ios
-        fastlane upload 
+        path: ios/build/ios/ipa/SmoothAI.ipa 
