@@ -3,18 +3,18 @@
 <plist version="1.0">
 <dict>
 	<key>method</key>
-	<string>development</string>
+	<string>app-store</string>
 	<key>teamID</key>
 	<string>7BHY8D9X9V</string>
 	<key>compileBitcode</key>
-	<false/>
+	<true/>
 	<key>uploadBitcode</key>
-	<false/>
+	<true/>
 	<key>uploadSymbols</key>
-	<false/>
+	<true/>
 	<key>stripSwiftSymbols</key>
 	<true/>
 	<key>signingStyle</key>
-	<string>manual</string>
+	<string>automatic</string>
 </dict>
 </plist> 

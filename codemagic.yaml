@@ -36,6 +36,9 @@ workflows:
           # Import certificates if they exist
           if [ -f "ios/certs/distribution_certificate.p12" ]; then
             security import ios/certs/distribution_certificate.p12 -k login.keychain -P "" -T /usr/bin/codesign
+            echo "✅ Certificat de distribution importé"
+          else
+            echo "⚠️  Certificat de distribution non trouvé. Utilisation du code signing automatique."
           fi
           
           # Copy the .p8 file to the current directory for Fastlane
@@ -50,28 +53,21 @@ workflows:
         script: |
           cd ios
           pod install
-      - name: Build iOS app without code signing
+      - name: Build iOS app with automatic code signing
         script: |
-          flutter build ios --release --no-codesign
-      - name: Create archive without code signing
-        script: |
-          cd ios
-          mkdir -p build/archive
-          
-          # Archive the app without code signing
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/archive/Runner.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-          
-          echo "Archive created successfully"
-          ls -la build/archive/
-      - name: Create unsigned IPA
+          flutter build ios --release --codesign
+      - name: Create signed IPA for App Store
         script: |
           cd ios
           mkdir -p build/ios/ipa
           
-          # Export to IPA without code signing
-          xcodebuild -exportArchive -archivePath build/archive/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/ipa CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          # Archive the app with automatic code signing
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/archive/Runner.xcarchive archive
           
-          echo "Unsigned IPA created successfully"
+          # Export to IPA for App Store
+          xcodebuild -exportArchive -archivePath build/archive/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/ipa
+          
+          echo "✅ Signed IPA created for App Store"
           ls -la build/ios/ipa/
     artifacts:
       - build/ios/ipa/*.ipa
