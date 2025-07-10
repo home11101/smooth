@@ -92,7 +92,7 @@ workflows:
             exit 1
           fi
     artifacts:
-      - build/ios/ipa/*.ipa
+      - ios/build/ios/ipa/*.ipa
       - build/ios/iphoneos/*.app
       - ios/build/archive/*.xcarchive
       - /tmp/xcodebuild_logs/*.log
