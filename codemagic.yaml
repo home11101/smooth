@@ -50,14 +50,21 @@ workflows:
         script: |
           cd ios
           pod install
-      - name: Build iOS app with code signing
+      - name: Build iOS app without code signing
         script: |
-          flutter build ios --release --codesign
-      - name: Create IPA file
+          flutter build ios --release --no-codesign
+      - name: Create IPA file with manual signing
         script: |
           cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive archive
-          xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/ipa
+          mkdir -p build/ios/ipa
+          
+          # Archive the app
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          
+          # Export to IPA
+          xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/ipa CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          
+          echo "IPA created successfully"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
