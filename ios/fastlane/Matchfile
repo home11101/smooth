@@ -1,4 +1,4 @@
-git_url("git@github.com:home11101/smoothai-ios-certificates.git")
+git_url("https://github.com/home11101/smoothai-ios-certificates.git")
 
 storage_mode("git")
 
