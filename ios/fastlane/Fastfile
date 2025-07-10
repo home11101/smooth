@@ -4,7 +4,7 @@ platform :ios do
   desc "Build and archive iOS app"
   lane :build do
     # Setup keychain for CI
-    setup_ci_keychain(
+    setup_ci(
       keychain_name: "login",
       keychain_password: ENV["KEYCHAIN_PASSWORD"] || "password"
     )
@@ -46,7 +46,7 @@ platform :ios do
   desc "Upload to App Store Connect"
   lane :upload do
     # Setup keychain for CI
-    setup_ci_keychain(
+    setup_ci(
       keychain_name: "login",
       keychain_password: ENV["KEYCHAIN_PASSWORD"] || "password"
     )
@@ -69,7 +69,7 @@ platform :ios do
 
   desc "Build and upload to App Store Connect"
   lane :build_and_upload do
-    setup_ci
+    prepare_ci_environment
     build
     upload
   end
@@ -85,7 +85,7 @@ platform :ios do
   end
   
   desc "Setup project for CI build"
-  lane :setup_ci do
+  lane :prepare_ci_environment do
     # Clean derived data
     clean_build_artifacts
     
@@ -96,7 +96,7 @@ platform :ios do
     )
     
     # Setup keychain
-    setup_ci_keychain(
+    setup_ci(
       keychain_name: "login",
       keychain_password: ENV["KEYCHAIN_PASSWORD"] || "password"
     )
