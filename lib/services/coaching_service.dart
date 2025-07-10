@@ -9,11 +9,9 @@ class CoachingService {
   CoachingService({
     String? apiKey,
     http.Client? client,
-  })  : _apiKey = apiKey ?? openAIApiKey,
+  })  : _apiKey = '', // Ne plus utiliser openAIApiKey
         _client = client ?? http.Client() {
-    if (_apiKey.isEmpty) {
-      throw ArgumentError('OpenAI API key is required');
-    }
+    // Suppression de la vérification de l'API key côté client
   }
 
   Future<String> getCoachResponse(String message, List<Map<String, String>> history) async {
