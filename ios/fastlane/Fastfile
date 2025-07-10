@@ -5,8 +5,7 @@ platform :ios do
   lane :build do
     # Setup keychain for CI
     setup_ci(
-      keychain_name: "login",
-      keychain_password: ENV["KEYCHAIN_PASSWORD"] || "password"
+      keychain_name: "login"
     )
     
     api_key = app_store_connect_api_key(
@@ -14,7 +13,7 @@ platform :ios do
       issuer_id: ENV["APPSTORECONNECT_API_KEY_ISSUER_ID"],
       key_content: ENV["APPSTORECONNECT_API_KEY_KEY"]
     )
-    match(type: "appstore", api_key: api_key, readonly: true, keychain_password: ENV["KEYCHAIN_PASSWORD"] || "password")
+    match(type: "appstore", api_key: api_key, readonly: true)
     gym(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -47,8 +46,7 @@ platform :ios do
   lane :upload do
     # Setup keychain for CI
     setup_ci(
-      keychain_name: "login",
-      keychain_password: ENV["KEYCHAIN_PASSWORD"] || "password"
+      keychain_name: "login"
     )
     
     api_key = app_store_connect_api_key(
@@ -56,7 +54,7 @@ platform :ios do
       issuer_id: ENV["APPSTORECONNECT_API_KEY_ISSUER_ID"],
       key_content: ENV["APPSTORECONNECT_API_KEY_KEY"]
     )
-    match(type: "appstore", api_key: api_key, readonly: true, keychain_password: ENV["KEYCHAIN_PASSWORD"] || "password")
+    match(type: "appstore", api_key: api_key, readonly: true)
     pilot(
       api_key: api_key,
       skip_waiting_for_build_processing: true,
@@ -97,8 +95,7 @@ platform :ios do
     
     # Setup keychain
     setup_ci(
-      keychain_name: "login",
-      keychain_password: ENV["KEYCHAIN_PASSWORD"] || "password"
+      keychain_name: "login"
     )
   end
 end
