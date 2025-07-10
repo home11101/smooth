@@ -17,6 +17,8 @@ workflows:
         APPSTORE_CONNECT_API_KEY_ID: ${{ secrets.APPSTORE_CONNECT_API_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+        # CodeMagic expects this environment variable for App Store Connect publishing
+        APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
     scripts:
       - name: Setup iOS code signing
         script: |
