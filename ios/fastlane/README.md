@@ -39,6 +39,14 @@ Upload to App Store Connect
 
 Build and upload to App Store Connect
 
+### ios setup_ci_environment
+
+```sh
+[bundle exec] fastlane ios setup_ci_environment
+```
+
+Setup CI environment
+
 ### ios debug_signing
 
 ```sh
