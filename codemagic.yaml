@@ -27,12 +27,13 @@ workflows:
           
           # Import certificates
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
-          security import /tmp/build_certificate.p12 -k "$keychain_name" -P "RABE2024" -T /usr/bin/codesign
+          security import /tmp/build_certificate.p12 -k "$keychain_name" -P "RABE2024" -T /usr/bin/codesign || echo "Certificate import failed, trying without password"
+          security import /tmp/build_certificate.p12 -k "$keychain_name" -T /usr/bin/codesign || echo "Certificate import failed completely"
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_name"
           
           # Import private key
           echo "$CERTIFICATE_PRIVATE_KEY" | base64 --decode > /tmp/certificate_private_key.p8
-          security import /tmp/certificate_private_key.p8 -k "$keychain_name" -P "RABE2024" -T /usr/bin/codesign
+          security import /tmp/certificate_private_key.p8 -k "$keychain_name" -P "RABE2024" -T /usr/bin/codesign || echo "Private key import failed"
           
           # Set up provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
@@ -56,7 +57,7 @@ workflows:
       - name: Build iOS app bundle
         script: |
           cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos -destination 'generic/platform=iOS'
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos -destination 'generic/platform=iOS' CODE_SIGN_IDENTITY="Apple Distribution: Henri-Vincent Kanda (7BHY8D9X9V)" PROVISIONING_PROFILE="7BHY8D9X9V.com.henrikanda.smoothai"
           xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios -allowProvisioningUpdates
     artifacts:
       - build/ios/*.ipa
