@@ -40,6 +40,9 @@ jobs:
         
     - name: Setup keychain for code signing
       run: |
+        # Remove existing keychain if it exists
+        security delete-keychain login.keychain || true
+        
         # Create a temporary keychain for code signing
         security create-keychain -p "password" login.keychain
         security list-keychains -s login.keychain
