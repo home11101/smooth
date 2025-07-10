@@ -40,8 +40,13 @@ workflows:
           
           # Setup API key for App Store Connect
           mkdir -p ~/.appstoreconnect/private_keys
-          echo "$APPSTORE_CONNECT_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_CONNECT_API_KEY_ID}.p8
-          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_CONNECT_API_KEY_ID}.p8
+          
+          # Use the API key ID directly (4V6GWRQFC9)
+          API_KEY_ID="4V6GWRQFC9"
+          echo "$APPSTORE_CONNECT_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${API_KEY_ID}.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${API_KEY_ID}.p8
+          
+          echo "API key setup completed for key ID: ${API_KEY_ID}"
       - name: Install Flutter dependencies
         script: |
           flutter pub get
