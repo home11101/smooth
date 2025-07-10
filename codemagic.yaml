@@ -104,6 +104,16 @@ workflows:
             ls -la build/archive/Runner.xcarchive/
             exit 1
           fi
+      - name: Debug App Store Connect variables
+        script: |
+          echo "==== DEBUG APP STORE CONNECT VARIABLES ===="
+          echo "APPSTORE_CONNECT_API_KEY_ID: $APPSTORE_CONNECT_API_KEY_ID"
+          echo "APPSTORE_CONNECT_ISSUER_ID: $APPSTORE_CONNECT_ISSUER_ID"
+          echo "APPSTORE_CONNECT_API_KEY (first 5 lines):"
+          echo "$APPSTORE_CONNECT_API_KEY" | head -5
+          echo "APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY (first 5 lines):"
+          echo "$APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY" | head -5
+          echo "==== END DEBUG ===="
     artifacts:
       - ios/build/ios/ipa/*.ipa
       - build/ios/iphoneos/*.app
