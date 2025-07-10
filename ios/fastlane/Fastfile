@@ -29,8 +29,7 @@ platform :ios do
       clean: true,
       output_directory: "build/ios/ipa",
       output_name: "SmoothAI.ipa",
-      # Fixed: Properly quoted the provisioning profile specifier
-      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Automatic 'PROVISIONING_PROFILE_SPECIFIER=match AppStore com.henrikanda.smoothai'",
+      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=7BHY8D9X9V CODE_SIGN_STYLE=Automatic",
       silent: false,
       skip_package_ipa: false,
       build_path: "/tmp/build",
