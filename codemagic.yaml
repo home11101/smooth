@@ -108,8 +108,8 @@ workflows:
       - flutter_drive.log
     publishing:
       app_store_connect:
-        api_key: $APPSTORE_CONNECT_API_KEY
-        key_id: $APPSTORE_CONNECT_API_KEY_ID
-        issuer_id: $APPSTORE_CONNECT_ISSUER_ID
+        api_key: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
+        key_id: ${{ secrets.APPSTORE_CONNECT_API_KEY_ID }}
+        issuer_id: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         submit_to_app_store: true
         submit_to_testflight: true 
