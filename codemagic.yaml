@@ -13,6 +13,11 @@ workflows:
         BUILD_CERTIFICATE_PASSWORD: "${BUILD_CERTIFICATE_PASSWORD}"
         KEYCHAIN_PASSWORD: "temp"
     scripts:
+      - name: Debug: Vérifier le certificat base64
+        script: |
+          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
+          ls -lh /tmp/build_certificate.p12
+          file /tmp/build_certificate.p12
       - name: Set up code signing settings
         script: |
           keychain_name="codemagic.keychain"
