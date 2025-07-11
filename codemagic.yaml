@@ -6,7 +6,7 @@ workflows:
         certificates:
           - pem_cert
         provisioning_profiles:
-          - Smooth_last # Remplace par la référence exacte de ton profil si besoin
+          - Smooth_last.mobileprovision
       xcode: latest
       cocoapods: default
       groups:
