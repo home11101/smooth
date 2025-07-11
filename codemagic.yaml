@@ -4,58 +4,20 @@ workflows:
     environment:
       ios_signing:
         certificates:
-          - pem_cert
+          - pem_cert # ou le nom de ton certificat PEM
         provisioning_profiles:
           - Smooth_last.mobileprovision
       xcode: latest
       cocoapods: default
-      groups:
-        - ios-certificates
       vars:
         XCODE_PROJECT: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "com.henrikanda.smoothai"
-        BUILD_CERTIFICATE_PASSWORD: "${BUILD_CERTIFICATE_PASSWORD}"
-        KEYCHAIN_PASSWORD: "temp"
     scripts:
-      - name: Debug verify certificate base64
-        script: |
-          echo "[INFO] CodeMagic utilise la gestion native des certificats et profils (ios_signing)."
-          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
-          ls -lh /tmp/build_certificate.p12
-          file /tmp/build_certificate.p12
-      - name: Set up code signing settings
-        script: |
-          keychain_name="codemagic.keychain"
-          keychain_path="$HOME/Library/Keychains/$keychain_name-db"
-          keychain_password="temp"
-          security create-keychain -p "$keychain_password" "$keychain_name"
-          security unlock-keychain -p "$keychain_password" "$keychain_path"
-          security set-keychain-settings -t 3600 -l "$keychain_path"
-          security list-keychains -s "$keychain_path"
-          # Import certificate (with password)
-          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
-          security import /tmp/build_certificate.p12 -k "$keychain_path" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_path"
-          # Import private key (if needed)
-          if [ ! -z "$CERTIFICATE_PRIVATE_KEY" ]; then
-            echo "$CERTIFICATE_PRIVATE_KEY" | base64 --decode > /tmp/certificate_private_key.p8
-            security import /tmp/certificate_private_key.p8 -k "$keychain_path" -T /usr/bin/codesign || echo "Private key import failed"
-          fi
-          # Set up provisioning profile
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/7BHY8D9X9V.com.henrikanda.smoothai.mobileprovision
-          # Debug: List available certificates
-          echo "Available certificates:"
-          security find-identity -v -p codesigning || echo "No certificates found"
-          # Debug: List provisioning profiles
-          echo "Available provisioning profiles:"
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found"
       - name: Get Flutter packages
         script: flutter pub get
       - name: Build iOS app
-        script: |
-          flutter build ios --release --no-codesign
+        script: flutter build ios --release --no-codesign
       - name: Build iOS app bundle
         script: |
           cd ios
