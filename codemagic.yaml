@@ -6,16 +6,12 @@ workflows:
       cocoapods: default
       groups:
         - ios-certificates
-        - app_store_credentials
       vars:
         XCODE_PROJECT: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "com.henrikanda.smoothai"
-        BUILD_CERTIFICATE_PASSWORD: "RABE2024"
+        BUILD_CERTIFICATE_PASSWORD: "${BUILD_CERTIFICATE_PASSWORD}"
         KEYCHAIN_PASSWORD: "temp"
-        APP_STORE_CONNECT_KEY_IDENTIFIER: "4V6GWRQFC9"
-        APP_STORE_CONNECT_ISSUER_ID: "bbd1db28-6a57-409f-860f-cfc657430d67"
-
     scripts:
       - name: Set up code signing settings
         script: |
@@ -29,37 +25,20 @@ workflows:
           security unlock-keychain -p "$keychain_password" "$keychain_name"
           security set-keychain-settings -t 3600 -l ~/Library/Keychains/"$keychain_name"
           
-          # Import certificate to keychain
-          echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > /tmp/certificate.p12
-          security import /tmp/certificate.p12 -k "$keychain_name" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          # Import certificate
+          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
+          security import /tmp/build_certificate.p12 -k "$keychain_name" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_name"
           
-          # Setup provisioning profile
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-          
-          # Create private key from private key content
+          # Import private key (if needed)
           if [ ! -z "$CERTIFICATE_PRIVATE_KEY" ]; then
-            echo "$CERTIFICATE_PRIVATE_KEY" > /tmp/private_key.pem
-            security import /tmp/private_key.pem -k "$keychain_name" -T /usr/bin/codesign
+            echo "$CERTIFICATE_PRIVATE_KEY" | base64 --decode > /tmp/certificate_private_key.p8
+            security import /tmp/certificate_private_key.p8 -k "$keychain_name" -T /usr/bin/codesign || echo "Private key import failed"
           fi
           
-          # Configure App Store Connect API access
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_4V6GWRQFC9.p8
-          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_4V6GWRQFC9.p8
-      - name: Get Flutter packages
-        script: flutter pub get
-      - name: Build iOS app
-        script: |
-          flutter build ios --release --no-codesign
-      - name: Build iOS app bundle
-        script: |
-          cd ios
-          
-          # Debug: List files in ios directory
-          echo "Files in ios directory:"
-          ls -la
+          # Set up provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/7BHY8D9X9V.com.henrikanda.smoothai.mobileprovision
           
           # Debug: List available certificates
           echo "Available certificates:"
@@ -68,13 +47,15 @@ workflows:
           # Debug: List provisioning profiles
           echo "Available provisioning profiles:"
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found"
-          
-          # Build directly with xcodebuild
-          echo "Building with xcodebuild..."
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos -destination 'generic/platform=iOS' -allowProvisioningDeviceRegistration
-          
-          # Export the archive
-          echo "Exporting archive..."
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build iOS app
+        script: |
+          flutter build ios --release --no-codesign
+      - name: Build iOS app bundle
+        script: |
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos -destination 'generic/platform=iOS'
           xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios -allowProvisioningUpdates
     artifacts:
       - build/ios/*.ipa
@@ -82,5 +63,8 @@ workflows:
       - flutter_drive.log
     publishing:
       app_store_connect:
-        auth: integration
-        submit_to_testflight: true 
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_API_KEY_ID
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+        submit_to_app_store: true 
