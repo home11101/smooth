@@ -1,17 +1,9 @@
-git_url("https://github.com/home11101/smoothai-ios-certificates.git")
-
+git_url("https://github.com/home11101/smooth.git")
 storage_mode("git")
 
-type("appstore") # The default type, can be: appstore, adhoc, enterprise or development
+type("appstore") # The default type, can be: appstore, adhoc, development, enterprise
 
 app_identifier(["com.henrikanda.smoothai"])
-
-# API Key configuration - using environment variables instead of file
-# api_key_path("./api_key.json")
-
-# username("user@fastlane.tools") # Your Apple Developer Portal username
+team_id("7BHY8D9X9V")
 
 # For all available options run `fastlane match --help`
-# Remove the # in the beginning of the line to enable the other options
-
-# The docs are available on https://docs.fastlane.tools/actions/match

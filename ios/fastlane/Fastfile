@@ -6,6 +6,21 @@ platform :ios do
     # Setup code signing
     setup_ci if is_ci
     
+    # Setup App Store Connect API key
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_filepath: "~/.appstoreconnect/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8"
+    )
+    
+    # Sync certificates and profiles
+    match(
+      type: "appstore",
+      api_key: api_key,
+      readonly: true,
+      force_for_new_devices: true
+    )
+    
     # Build the app
     build_ios_app(
       workspace: "Runner.xcworkspace",
@@ -14,7 +29,7 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          "com.henrikanda.smoothai" => "7BHY8D9X9V.com.henrikanda.smoothai"
+          "com.henrikanda.smoothai" => "match AppStore com.henrikanda.smoothai"
         }
       },
       output_directory: "build/ios",
@@ -22,57 +37,5 @@ platform :ios do
       clean: true,
       archive_path: "build/Runner.xcarchive"
     )
-  end
-
-  desc "Upload to App Store Connect"
-  lane :upload do
-    # Use the .p8 file directly instead of environment variables
-    api_key = app_store_connect_api_key(
-      key_id: "4V6GWRQFC9",
-      issuer_id: "bbd1db28-6a57-409f-860f-cfc657430d67",
-      key_filepath: "AuthKey_4V6GWRQFC9.p8"
-    )
-    
-    pilot(
-      api_key: api_key,
-      skip_waiting_for_build_processing: true,
-      ipa: lane_context[SharedValues::IPA_OUTPUT_PATH],
-      distribute_external: false,
-      notify_external_testers: false,
-      skip_submission: true
-    )
-  end
-
-  desc "Build and upload to App Store Connect"
-  lane :build_and_upload do
-    setup_ci_environment
-    build
-    upload
-  end
-  
-  desc "Setup CI environment"
-  lane :setup_ci_environment do
-    # Setup keychain for CI
-    setup_ci(
-      keychain_name: "login"
-    )
-    
-    # Clean derived data
-    clean_build_artifacts
-    
-    # Install pods
-    cocoapods(
-      podfile: "Podfile",
-      repo_update: true
-    )
-  end
-  
-  desc "Debug code signing setup"
-  lane :debug_signing do
-    puts "Team ID: 7BHY8D9X9V"
-    puts "Bundle ID: com.henrikanda.smoothai"
-    puts "Xcode version: #{sh('xcodebuild -version')}"
-    puts "Available provisioning profiles:"
-    sh('security find-identity -v -p codesigning')
   end
 end
