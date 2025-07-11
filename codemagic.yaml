@@ -6,12 +6,15 @@ workflows:
       cocoapods: default
       groups:
         - ios-certificates
+        - app_store_credentials
       vars:
         XCODE_PROJECT: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "com.henrikanda.smoothai"
         BUILD_CERTIFICATE_PASSWORD: "RABE2024"
         KEYCHAIN_PASSWORD: "temp"
+        APP_STORE_CONNECT_KEY_IDENTIFIER: "4V6GWRQFC9"
+        APP_STORE_CONNECT_ISSUER_ID: "bbd1db28-6a57-409f-860f-cfc657430d67"
 
     scripts:
       - name: Set up code signing settings
@@ -80,7 +83,4 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        api_key_path: ~/.appstoreconnect/private_keys/AuthKey_4V6GWRQFC9.p8
-        key_identifier: 4V6GWRQFC9
-        issuer_identifier: bbd1db28-6a57-409f-860f-cfc657430d67
         submit_to_testflight: true 
