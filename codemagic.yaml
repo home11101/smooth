@@ -86,13 +86,13 @@ workflows:
       - flutter_drive.log
     publishing:
       app_store_connect:
-        key: |
+        api_key: |
           -----BEGIN PRIVATE KEY-----
           MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgkMgjuZYt4R2t4CwX
           PsxArZs2EBzkuWLLW67g3rZDxOugCgYIKoZIzj0DAQehRANCAATXyLEQeX6CCDmI
           0UO8xFiFbWaJWz1okKrDRGsy2VMDJLHrUaxWxJD49PVB+IyOtV5Aot5/9DBEBy0d
           eNUULbC8
           -----END PRIVATE KEY-----
-        key_id: 4V6GWRQFC9
-        issuer_id: bbd1db28-6a57-409f-860f-cfc657430d67
+        key_identifier: "4V6GWRQFC9"
+        issuer_identifier: "bbd1db28-6a57-409f-860f-cfc657430d67"
         submit_to_testflight: true 
