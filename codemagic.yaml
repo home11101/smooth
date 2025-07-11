@@ -59,6 +59,10 @@ workflows:
           echo "Available provisioning profiles:"
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found"
           
+          # Debug: List files in ios directory
+          echo "Files in ios directory:"
+          ls -la
+          
           # Build with fastlane
           fastlane build
     artifacts:
