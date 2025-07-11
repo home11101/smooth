@@ -50,7 +50,7 @@ workflows:
           # Debug: List provisioning profiles
           echo "Available provisioning profiles:"
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found"
-      - name: Debug: List provisioning profiles
+      - name: "Debug: List provisioning profiles"
         script: |
           echo "Provisioning profiles in ~/Library/MobileDevice/Provisioning Profiles:"
           ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
