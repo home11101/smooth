@@ -13,7 +13,7 @@ workflows:
         BUILD_CERTIFICATE_PASSWORD: "${BUILD_CERTIFICATE_PASSWORD}"
         KEYCHAIN_PASSWORD: "temp"
     scripts:
-      - name: Debug: Verify certificate base64
+      - name: Debug verify certificate base64
         script: |
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
           ls -lh /tmp/build_certificate.p12
@@ -22,33 +22,27 @@ workflows:
         script: |
           keychain_name="codemagic.keychain"
           keychain_password="temp"
-          
           # Create keychain
           security create-keychain -p "$keychain_password" "$keychain_name"
           security list-keychains -s "$keychain_name"
           security default-keychain -s "$keychain_name"
           security unlock-keychain -p "$keychain_password" "$keychain_name"
           security set-keychain-settings -t 3600 -l ~/Library/Keychains/"$keychain_name"
-          
           # Import certificate
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
           security import /tmp/build_certificate.p12 -k "$keychain_name" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_name"
-          
           # Import private key (if needed)
           if [ ! -z "$CERTIFICATE_PRIVATE_KEY" ]; then
             echo "$CERTIFICATE_PRIVATE_KEY" | base64 --decode > /tmp/certificate_private_key.p8
             security import /tmp/certificate_private_key.p8 -k "$keychain_name" -T /usr/bin/codesign || echo "Private key import failed"
           fi
-          
           # Set up provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/7BHY8D9X9V.com.henrikanda.smoothai.mobileprovision
-          
           # Debug: List available certificates
           echo "Available certificates:"
           security find-identity -v -p codesigning || echo "No certificates found"
-          
           # Debug: List provisioning profiles
           echo "Available provisioning profiles:"
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found"
