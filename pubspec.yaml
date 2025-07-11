@@ -69,6 +69,7 @@ dependencies:
   json_annotation: ^4.9.0
 
   infinite_carousel: ^1.1.1
+  app_links: ^3.4.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
