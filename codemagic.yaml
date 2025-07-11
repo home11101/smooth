@@ -2,6 +2,11 @@ workflows:
   ios-workflow:
     name: iOS Workflow
     environment:
+      ios_signing:
+        certificates:
+          - pem_cert
+        provisioning_profiles:
+          - Smooth_last # Remplace par la référence exacte de ton profil si besoin
       xcode: latest
       cocoapods: default
       groups:
@@ -15,6 +20,7 @@ workflows:
     scripts:
       - name: Debug verify certificate base64
         script: |
+          echo "[INFO] CodeMagic utilise la gestion native des certificats et profils (ios_signing)."
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
           ls -lh /tmp/build_certificate.p12
           file /tmp/build_certificate.p12
