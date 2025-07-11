@@ -26,20 +26,32 @@ workflows:
           security unlock-keychain -p "$keychain_password" "$keychain_name"
           security set-keychain-settings -t 3600 -l ~/Library/Keychains/"$keychain_name"
           
-          # Setup for iOS build
-          echo "Setting up for iOS build..."
+          # Import certificate to keychain
+          echo $BUILD_CERTIFICATE_BASE64 | base64 --decode > /tmp/certificate.p12
+          security import /tmp/certificate.p12 -k "$keychain_name" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_name"
           
-          # Set up provisioning profile
+          # Setup provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/7BHY8D9X9V.com.henrikanda.smoothai.mobileprovision || echo "Provisioning profile setup failed"
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
           
-          # Set up App Store Connect API key
+          # Create private key from private key content
+          if [ ! -z "$CERTIFICATE_PRIVATE_KEY" ]; then
+            echo "$CERTIFICATE_PRIVATE_KEY" > /tmp/private_key.pem
+            security import /tmp/private_key.pem -k "$keychain_name" -T /usr/bin/codesign
+          fi
+          
+          # Configure App Store Connect API access
           mkdir -p ~/.appstoreconnect/private_keys
-          echo "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
-          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
-          
-          # Skip Apple account configuration for now
-          echo "Skipping Apple account configuration..."
+          cat > ~/.appstoreconnect/private_keys/AuthKey_4V6GWRQFC9.p8 << EOL
+          -----BEGIN PRIVATE KEY-----
+          MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgkMgjuZYt4R2t4CwX
+          PsxArZs2EBzkuWLLW67g3rZDxOugCgYIKoZIzj0DAQehRANCAATXyLEQeX6CCDmI
+          0UO8xFiFbWaJWz1okKrDRGsy2VMDJLHrUaxWxJD49PVB+IyOtV5Aot5/9DBEBy0d
+          eNUULbC8
+          -----END PRIVATE KEY-----
+          EOL
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_4V6GWRQFC9.p8
       - name: Get Flutter packages
         script: flutter pub get
       - name: Build iOS app
@@ -74,7 +86,13 @@ workflows:
       - flutter_drive.log
     publishing:
       app_store_connect:
-        api_key: $APP_STORE_CONNECT_API_KEY_BASE64
-        key_id: $APP_STORE_CONNECT_API_KEY_ID
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        key: |
+          -----BEGIN PRIVATE KEY-----
+          MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgkMgjuZYt4R2t4CwX
+          PsxArZs2EBzkuWLLW67g3rZDxOugCgYIKoZIzj0DAQehRANCAATXyLEQeX6CCDmI
+          0UO8xFiFbWaJWz1okKrDRGsy2VMDJLHrUaxWxJD49PVB+IyOtV5Aot5/9DBEBy0d
+          eNUULbC8
+          -----END PRIVATE KEY-----
+        key_id: 4V6GWRQFC9
+        issuer_id: bbd1db28-6a57-409f-860f-cfc657430d67
         submit_to_testflight: true 
