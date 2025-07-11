@@ -627,7 +627,9 @@ ${_analysisReport!.recommendations.take(3).map((r) => '• $r').join('\n')}
 Analyse complète disponible dans l'app Smooth AI.
 ''';
 
-      SharePlus.instance.share(shareText);
+      SharePlus.instance.share(
+        ShareParams(text: shareText),
+      );
     }
   }
 
