@@ -26,8 +26,8 @@ workflows:
           security unlock-keychain -p "$keychain_password" "$keychain_name"
           security set-keychain-settings -t 3600 -l ~/Library/Keychains/"$keychain_name"
           
-          # Setup for fastlane
-          echo "Setting up for fastlane build..."
+          # Setup for iOS build
+          echo "Setting up for iOS build..."
           
           # Set up provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
@@ -48,8 +48,10 @@ workflows:
       - name: Build iOS app bundle
         script: |
           cd ios
-          # Install fastlane
-          gem install fastlane
+          
+          # Debug: List files in ios directory
+          echo "Files in ios directory:"
+          ls -la
           
           # Debug: List available certificates
           echo "Available certificates:"
@@ -59,12 +61,13 @@ workflows:
           echo "Available provisioning profiles:"
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found"
           
-          # Debug: List files in ios directory
-          echo "Files in ios directory:"
-          ls -la
+          # Build directly with xcodebuild
+          echo "Building with xcodebuild..."
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos -destination 'generic/platform=iOS' -allowProvisioningDeviceRegistration
           
-          # Build with fastlane
-          fastlane build
+          # Export the archive
+          echo "Exporting archive..."
+          xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios -allowProvisioningUpdates
     artifacts:
       - build/ios/*.ipa
       - /tmp/xcodebuild_logs/*.log
