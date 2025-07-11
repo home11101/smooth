@@ -79,8 +79,8 @@ workflows:
       - flutter_drive.log
     publishing:
       app_store_connect:
-        auth: api_key
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY # Will use the .p8 file content
+        auth: integration
+        api_key_path: ~/.appstoreconnect/private_keys/AuthKey_4V6GWRQFC9.p8
         key_identifier: 4V6GWRQFC9
         issuer_identifier: bbd1db28-6a57-409f-860f-cfc657430d67
         submit_to_testflight: true 
