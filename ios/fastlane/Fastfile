@@ -6,25 +6,10 @@ platform :ios do
     # Setup code signing
     setup_ci if is_ci
     
-    # Build the app with automatic signing
-    build_ios_app(
-      workspace: "Runner.xcworkspace",
-      scheme: "Runner",
-      configuration: "Release",
-      export_method: "app-store",
-      export_options: {
-        method: "app-store",
-        teamID: "7BHY8D9X9V",
-        compileBitcode: false,
-        uploadBitcode: false,
-        uploadSymbols: false,
-        stripSwiftSymbols: true
-      },
-      output_directory: "build/ios",
-      output_name: "Smooth AI.ipa",
-      clean: true,
-      archive_path: "build/Runner.xcarchive",
-      xcargs: "-allowProvisioningUpdates -allowProvisioningDeviceRegistration"
-    )
+    # Build the app with manual xcodebuild commands
+    sh("xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive clean archive -allowProvisioningUpdates -sdk iphoneos -destination 'generic/platform=iOS' -allowProvisioningDeviceRegistration")
+    
+    # Export the archive
+    sh("xcodebuild -exportArchive -archivePath build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios -allowProvisioningUpdates")
   end
 end
