@@ -7,7 +7,7 @@ workflows:
         certificates:
           - ios_distribution_cert_2
         provisioning_profiles:
-          - "Smooth_last (1).mobileprovision"
+          - "Smooth_last_2024.mobileprovision"
       xcode: latest
       cocoapods: default
       groups:
