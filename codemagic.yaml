@@ -27,9 +27,9 @@ workflows:
           security unlock-keychain -p "$keychain_password" "$keychain_path"
           security set-keychain-settings -t 3600 -l "$keychain_path"
           security list-keychains -s "$keychain_path"
-          # Import certificate (no password)
+          # Import certificate (with password)
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/build_certificate.p12
-          security import /tmp/build_certificate.p12 -k "$keychain_path" -T /usr/bin/codesign
+          security import /tmp/build_certificate.p12 -k "$keychain_path" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$keychain_password" "$keychain_path"
           # Import private key (if needed)
           if [ ! -z "$CERTIFICATE_PRIVATE_KEY" ]; then
