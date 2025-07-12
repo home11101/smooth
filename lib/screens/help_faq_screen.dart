@@ -32,7 +32,7 @@ class HelpFaqScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Center(
               child: GestureDetector(
-                onTap: () => launchUrlString('https://smooth-pages.vercel.app/faq.html'),
+                onTap: () => launchUrlString('https://smoothia.app/faq.html'),
                 child: const Text(
                   'Voir la FAQ complète en ligne',
                   style: TextStyle(

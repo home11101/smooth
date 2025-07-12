@@ -83,25 +83,22 @@ class _MainScreen2State extends State<MainScreen2> {
         decoration: const BoxDecoration(
           gradient: AppTheme.mainBackgroundGradient,
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Titre en haut
-              _buildTitle(),
-              
-              // Contenu principal (image ou carrousel)
-              Expanded(
-                child: Center(
-                  child: _analysisHistory.isNotEmpty
-                      ? _buildCarousel()
-                      : _buildMainImage(context),
-                ),
+        child: Column(
+          children: [
+            // Titre en haut
+            _buildTitle(),
+            SizedBox(height: 8), // petit espace entre le titre et l'image
+            // Contenu principal (image ou carrousel)
+            Expanded(
+              child: Center(
+                child: _analysisHistory.isNotEmpty
+                    ? _buildCarousel()
+                    : _buildMainImage(context),
               ),
-              
-              // Boutons d'action en bas (au-dessus du bottom nav)
-              _buildActionButtons(context),
-            ],
-          ),
+            ),
+            // Boutons d'action en bas (au-dessus du bottom nav)
+            _buildActionButtons(context),
+          ],
         ),
       ),
     );
@@ -111,9 +108,9 @@ class _MainScreen2State extends State<MainScreen2> {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         ResponsiveHelper.responsiveWidth(context, 6),
-        ResponsiveHelper.responsiveHeight(context, 2),
+        ResponsiveHelper.responsiveHeight(context, 0.5), // réduit le padding haut
         ResponsiveHelper.responsiveWidth(context, 6),
-        ResponsiveHelper.responsiveHeight(context, 2),
+        ResponsiveHelper.responsiveHeight(context, 0.5), // réduit le padding bas
       ),
       child: Text(
         'Téléverse un chat et\nObtiens une analyse',

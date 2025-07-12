@@ -13,8 +13,9 @@ import 'promo_code_service.dart';
 
 class InAppPurchaseService {
   // IDs des produits
-  static const String premiumMonthly = 'premium_monthly';
-  static const String premiumYearly = 'premium_yearly';
+  static const String premiumWeekly = 'smooth_ai_premium_weekly';
+  static const String premiumMonthly = 'smooth_ai_premium_monthly';
+  static const String premiumYearly = 'smooth_ai_premium_yearly';
 
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
@@ -68,7 +69,7 @@ class InAppPurchaseService {
 
   /// Charge les produits depuis la boutique (App Store / Play Store)
   Future<void> loadProducts() async {
-    const Set<String> kIds = <String>{premiumMonthly, premiumYearly};
+    const Set<String> kIds = <String>{premiumWeekly, premiumMonthly, premiumYearly};
     final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails(kIds);
 
     if (response.error != null) {
@@ -247,22 +248,19 @@ class InAppPurchaseService {
   Future<void> _setupRenewalNotifications(PurchaseDetails purchase) async {
     try {
       DateTime expiryDate;
-      
       // Calculer la date d'expiration selon le type d'abonnement
-      if (purchase.productID.contains('yearly')) {
+      if (purchase.productID == premiumYearly) {
         expiryDate = DateTime.now().add(const Duration(days: 365));
-      } else if (purchase.productID.contains('monthly')) {
+      } else if (purchase.productID == premiumMonthly) {
         expiryDate = DateTime.now().add(const Duration(days: 30));
-      } else if (purchase.productID.contains('weekly')) {
+      } else if (purchase.productID == premiumWeekly) {
         expiryDate = DateTime.now().add(const Duration(days: 7));
       } else {
         // Achat unique - pas de notifications de renouvellement
         return;
       }
-      
       // Configurer les notifications de renouvellement
       await _notificationService.setupRenewalNotifications(expiryDate);
-      
       debugPrint('Notifications de renouvellement configurées pour le ${expiryDate.toString()}');
     } catch (e) {
       debugPrint('Erreur lors de la configuration des notifications: $e');

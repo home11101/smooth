@@ -273,14 +273,14 @@ class SmoothModalMenu extends StatelessWidget {
                           _SmoothFooterLink(
                             label: 'Termes',
                             onTap: () => _launchExternalUrl(
-                                'https://smooth-pages.vercel.app/terms.html',
+                                'https://smoothia.app/terms.html',
                                 context),
                           ),
                           const SizedBox(width: 12),
                           _SmoothFooterLink(
                             label: 'Confidentialité',
                             onTap: () => _launchExternalUrl(
-                                'https://smooth-pages.vercel.app/privacy.html',
+                                'https://smoothia.app/privacy.html',
                                 context),
                           ),
                           const SizedBox(width: 12),
