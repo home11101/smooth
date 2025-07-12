@@ -1,6 +1,6 @@
 {
   "redirects": [
-    { "source": "/", "destination": "/web/home.html", "permanent": true },
-    { "source": "/app", "destination": "/web/index.html", "permanent": true }
+    { "source": "/", "destination": "/home.html", "permanent": true },
+    { "source": "/app", "destination": "/index.html", "permanent": true }
   ]
 }
