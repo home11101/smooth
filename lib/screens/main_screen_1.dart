@@ -133,25 +133,22 @@ class _MainScreen1State extends State<MainScreen1> {
         decoration: const BoxDecoration(
           gradient: AppTheme.mainBackgroundGradient,
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Titre en haut
-              _buildTitle(context),
-              
-              // Contenu principal (image ou carrousel)
-              Expanded(
-                child: Center(
-                  child: _analysisHistory.isNotEmpty
-                      ? _buildCarousel()
-                      : _buildMainImage(context),
-                ),
+        child: Column(
+          children: [
+            // Titre en haut
+            _buildTitle(context),
+            SizedBox(height: 8), // petit espace entre le titre et l'image
+            // Contenu principal (image ou carrousel)
+            Expanded(
+              child: Center(
+                child: _analysisHistory.isNotEmpty
+                    ? _buildCarousel()
+                    : _buildMainImage(context),
               ),
-              
-              // Boutons d'action en bas (au-dessus du bottom nav)
-              _buildActionButtons(context),
-            ],
-          ),
+            ),
+            // Boutons d'action en bas (au-dessus du bottom nav)
+            _buildActionButtons(context),
+          ],
         ),
       ),
     );
@@ -382,19 +379,20 @@ class _MainScreen1State extends State<MainScreen1> {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         ResponsiveHelper.responsiveWidth(context, 6),
-        ResponsiveHelper.responsiveHeight(context, 2),
+        ResponsiveHelper.responsiveHeight(context, 0.5), // réduit le padding haut
         ResponsiveHelper.responsiveWidth(context, 6),
-        ResponsiveHelper.responsiveHeight(context, 2),
+        ResponsiveHelper.responsiveHeight(context, 0.5), // réduit le padding bas
       ),
       child: Text(
-        'Télécharge une capture\nd\'un chat ou d\'une bio',
+        'Analyse ton chat et\nObtiens des conseils',
         style: TextStyle(
           fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 18, medium: 22, large: 26),
-          fontWeight: FontWeight.w600,
-          color: AppTheme.textPrimary,
-          height: 1.4,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF1F2024),
+          height: 1.2,
         ),
         textAlign: TextAlign.center,
+        maxLines: 2,
       ),
     );
   }

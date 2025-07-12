@@ -809,7 +809,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: () => launchUrlString('https://smooth-pages.vercel.app/privacy.html'),
+                onTap: () => launchUrlString('https://smoothia.app/privacy.html'),
                 child: const Text(
                   'Politique de confidentialité',
                   style: TextStyle(
@@ -821,7 +821,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
               ),
               const SizedBox(width: 16),
               GestureDetector(
-                onTap: () => launchUrlString('https://smooth-pages.vercel.app/terms.html'),
+                onTap: () => launchUrlString('https://smoothia.app/terms.html'),
                 child: const Text(
                   'CGU',
                   style: TextStyle(

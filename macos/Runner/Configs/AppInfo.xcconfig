@@ -5,7 +5,7 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = smooth_ai_dating_assistant
+PRODUCT_NAME = Smooth IA
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = com.example.smoothAiDatingAssistant
