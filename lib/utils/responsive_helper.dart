@@ -62,6 +62,16 @@ class ResponsiveHelper {
     return MediaQuery.of(context).size.width >= 480;
   }
   
+  // Vérifier si c'est une tablette
+  static bool isTablet(BuildContext context) {
+    return MediaQuery.of(context).size.width >= 600;
+  }
+  
+  // Vérifier si c'est un desktop
+  static bool isDesktop(BuildContext context) {
+    return MediaQuery.of(context).size.width >= 1024;
+  }
+  
   // Obtenir la taille de police adaptée
   static double getAdaptiveFontSize(BuildContext context, {
     double small = 12,

@@ -84,33 +84,22 @@ class _MainScreen2State extends State<MainScreen2> {
           gradient: AppTheme.mainBackgroundGradient,
         ),
         child: SafeArea(
-          child: Stack(
+          child: Column(
             children: [
-              // Image principale centrée
-              Center(child: _buildMainImage(context)),
-              // Carrousel centré sur l'image principale
-              if (_analysisHistory.isNotEmpty)
-                Center(
-                  child: SizedBox(
-                    height: 320,
-                    child: _buildCarousel(),
-                  ),
-                ),
               // Titre en haut
-              Positioned(
-                top: ResponsiveHelper.responsiveHeight(context, 3),
-                left: 0,
-                right: 0,
-                child: _buildTitle(),
-              ),
-              // Boutons toujours fixes en bas
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: ResponsiveHelper.responsiveHeight(context, 0.5)),
-                  child: _buildActionButtons(context),
+              _buildTitle(),
+              
+              // Contenu principal (image ou carrousel)
+              Expanded(
+                child: Center(
+                  child: _analysisHistory.isNotEmpty
+                      ? _buildCarousel()
+                      : _buildMainImage(context),
                 ),
               ),
+              
+              // Boutons d'action en bas (au-dessus du bottom nav)
+              _buildActionButtons(context),
             ],
           ),
         ),
@@ -119,239 +108,231 @@ class _MainScreen2State extends State<MainScreen2> {
   }
 
   Widget _buildTitle() {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          ResponsiveHelper.responsiveWidth(context, 6),
-          ResponsiveHelper.responsiveHeight(context, 3),
-          ResponsiveHelper.responsiveWidth(context, 6),
-          0,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        ResponsiveHelper.responsiveWidth(context, 6),
+        ResponsiveHelper.responsiveHeight(context, 2),
+        ResponsiveHelper.responsiveWidth(context, 6),
+        ResponsiveHelper.responsiveHeight(context, 2),
+      ),
+      child: Text(
+        'Téléverse un chat et\nObtiens une analyse',
+        style: TextStyle(
+          fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 18, medium: 22, large: 26),
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF1F2024),
+          height: 1.2,
         ),
-        child: Container(
-          color: Colors.transparent,
-          child: Text(
-            'Téléverse un chat et\nObtiens une analyse',
-            style: TextStyle(
-              fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 18, medium: 22, large: 26),
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1F2024),
-              height: 1.2,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-          ),
-        ),
+        textAlign: TextAlign.center,
+        maxLines: 2,
       ),
     );
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          ResponsiveHelper.responsiveWidth(context, 6),
-          0,
-          ResponsiveHelper.responsiveWidth(context, 6),
-          ResponsiveHelper.responsiveHeight(context, 2), // Réduit de 4 à 2 pour descendre les boutons
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Bouton Télécharge une capture (en haut)
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.black, // Fond noir
-                  foregroundColor: Colors.white,
-                  side: BorderSide(color: Colors.black, width: 1.5),
-                  padding: EdgeInsets.symmetric(
-                    vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  elevation: 0,
-                  textStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 13, medium: 15, large: 17),
-                  ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        ResponsiveHelper.responsiveWidth(context, 6),
+        ResponsiveHelper.responsiveHeight(context, 1), // Espace au-dessus
+        ResponsiveHelper.responsiveWidth(context, 6),
+        ResponsiveHelper.responsiveHeight(context, 1), // Espace en-dessous (au-dessus du bottom nav)
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Bouton Télécharge une capture (en haut)
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.black, // Fond noir
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.black, width: 1.5),
+                padding: EdgeInsets.symmetric(
+                  vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3,
                 ),
-                onPressed: () => _navigateToUpload(context),
-                child: Text(
-                  'Télécharge une capture',
-                  style: TextStyle(
-                    color: Colors.lightBlue[100], // Bleu ciel léger
-                    fontWeight: FontWeight.bold,
-                    fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 13, medium: 15, large: 17),
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                elevation: 0,
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 13, medium: 15, large: 17),
+                ),
+              ),
+              onPressed: () => _navigateToUpload(context),
+              child: Text(
+                'Télécharge une capture',
+                style: TextStyle(
+                  color: Colors.lightBlue[100], // Bleu ciel léger
+                  fontWeight: FontWeight.bold,
+                  fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 13, medium: 15, large: 17),
                 ),
               ),
             ),
-            SizedBox(height: ResponsiveHelper.responsiveSpacing(context)),
-            // Bouton Smooth Coach (en bas)
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white, // Fond blanc
-                  foregroundColor: Colors.black,
-                  side: BorderSide(color: Colors.white, width: 1.5),
-                  padding: EdgeInsets.symmetric(
-                    vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3.5,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  elevation: 0,
-                  textStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16),
-                  ),
+          ),
+          SizedBox(height: ResponsiveHelper.responsiveSpacing(context)),
+          // Bouton Smooth Coach (en bas)
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white, // Fond blanc
+                foregroundColor: Colors.black,
+                side: BorderSide(color: Colors.white, width: 1.5),
+                padding: EdgeInsets.symmetric(
+                  vertical: ResponsiveHelper.getAdaptiveButtonHeight(context) / 3.5,
                 ),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const SmoothCoachingScreen()),
-                  );
-                },
-                child: Text(
-                  'Smooth Coach',
-                  style: TextStyle(
-                    color: Colors.black, // Texte noir
-                    fontWeight: FontWeight.bold,
-                    fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16),
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                elevation: 0,
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SmoothCoachingScreen()),
+                );
+              },
+              child: Text(
+                'Smooth Coach',
+                style: TextStyle(
+                  color: Colors.black, // Texte noir
+                  fontWeight: FontWeight.bold,
+                  fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 12, medium: 14, large: 16),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildMainImage(BuildContext context) {
-    double width = MediaQuery.of(context).size.width * 0.86;  // Augmenté de 0.85 à 0.86
-    double height = MediaQuery.of(context).size.height * 0.45; // Augmenté de 0.40 à 0.45
+    double width = ResponsiveHelper.responsiveWidth(context, 85);
+    double height = ResponsiveHelper.responsiveHeight(context, 45);
     return SizedBox(
       width: width,
       height: height,
       child: Image.asset(
         'assets/images/capturemilieurscreen2.png',
         fit: BoxFit.contain,
-        width: width,
-        height: height,
       ),
     );
   }
 
   Widget _buildCarousel() {
-    return InfiniteCarousel.builder(
-      itemCount: _analysisHistory.length,
-      itemExtent: 320,
-      center: true,
-      loop: false,
-      velocityFactor: 0.2,
-      onIndexChanged: (index) {},
-      itemBuilder: (context, index, realIndex) {
-        final item = _analysisHistory[index];
-        final heroTag = 'analysis_${item['report'].id}';
-        return GestureDetector(
-          onTap: () async {
-            // Simple tap: comportement actuel (rien ou custom)
-          },
-          onDoubleTap: () async {
-            final cardKey = GlobalKey();
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => Scaffold(
-                  backgroundColor: Colors.black.withAlpha(179),
-                  body: Center(
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Hero(
-                            tag: heroTag,
-                            child: SizedBox(
-                              width: 440,
-                              height: 600,
-                              child: FlipableChatAnalysisCard(
-                                report: item['report'],
-                                uploadedImageBytes: item['uploadedImageBytes'],
-                                repaintBoundaryKey: cardKey,
+    return SizedBox(
+      height: ResponsiveHelper.responsiveHeight(context, 45), // Hauteur responsive
+      child: InfiniteCarousel.builder(
+        itemCount: _analysisHistory.length,
+        itemExtent: ResponsiveHelper.responsiveWidth(context, 85), // Largeur responsive
+        center: true,
+        loop: false,
+        velocityFactor: 0.2,
+        onIndexChanged: (index) {},
+        itemBuilder: (context, index, realIndex) {
+          final item = _analysisHistory[index];
+          final heroTag = 'analysis_${item['report'].id}';
+          return GestureDetector(
+            onTap: () async {
+              // Simple tap: comportement actuel (rien ou custom)
+            },
+            onDoubleTap: () async {
+              final cardKey = GlobalKey();
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    backgroundColor: Colors.black.withAlpha(179),
+                    body: Center(
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Hero(
+                              tag: heroTag,
+                              child: SizedBox(
+                                width: 440,
+                                height: 600,
+                                child: FlipableChatAnalysisCard(
+                                  report: item['report'],
+                                  uploadedImageBytes: item['uploadedImageBytes'],
+                                  repaintBoundaryKey: cardKey,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Positioned(
-                          top: 24,
-                          left: 24,
-                          child: GestureDetector(
-                            onTap: () => Navigator.of(context).pop(),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(38),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white.withAlpha(77)),
+                          Positioned(
+                            top: 24,
+                            left: 24,
+                            child: GestureDetector(
+                              onTap: () => Navigator.of(context).pop(),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(38),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white.withAlpha(77)),
+                                ),
+                                padding: const EdgeInsets.all(10),
+                                child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
                               ),
-                              padding: const EdgeInsets.all(10),
-                              child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
                             ),
                           ),
-                        ),
-                        Positioned(
-                          top: 24,
-                          right: 24,
-                          child: GestureDetector(
-                            onTap: () => _exportCardAsImage(context, cardKey),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(38),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white.withAlpha(77)),
+                          Positioned(
+                            top: 24,
+                            right: 24,
+                            child: GestureDetector(
+                              onTap: () => _exportCardAsImage(context, cardKey),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(38),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white.withAlpha(77)),
+                                ),
+                                padding: const EdgeInsets.all(10),
+                                child: const Icon(Icons.download, color: Colors.white, size: 24),
                               ),
-                              padding: const EdgeInsets.all(10),
-                              child: const Icon(Icons.download, color: Colors.white, size: 24),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
-          child: Stack(
-            children: [
-              Hero(
-                tag: heroTag,
-                child: FlipableChatAnalysisCard(
-                  report: item['report'],
-                  uploadedImageBytes: item['uploadedImageBytes'],
-                ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: GestureDetector(
-                  onTap: () => _removeCard(index),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(179),
-                      shape: BoxShape.circle,
-                    ),
-                    padding: const EdgeInsets.all(6),
-                    child: const Icon(Icons.close, size: 18, color: Colors.black87),
+              );
+            },
+            child: Stack(
+              children: [
+                Hero(
+                  tag: heroTag,
+                  child: FlipableChatAnalysisCard(
+                    report: item['report'],
+                    uploadedImageBytes: item['uploadedImageBytes'],
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => _removeCard(index),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(179),
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(6),
+                      child: const Icon(Icons.close, size: 18, color: Colors.black87),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
