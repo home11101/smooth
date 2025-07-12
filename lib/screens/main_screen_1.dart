@@ -428,7 +428,7 @@ class _MainScreen1State extends State<MainScreen1> {
               _navigateToOcrScan(context);
             },
             child: Text(
-              'Télécharger une capture',
+              'Télécharge une capture',
               style: TextStyle(
                 fontSize: ResponsiveHelper.getAdaptiveFontSize(context, small: 13, medium: 15, large: 17),
                 fontWeight: FontWeight.bold,
