@@ -319,7 +319,7 @@ export default function ReferralsPage() {
   const paginatedLottery = groupedLottery.slice(lotteryTab.page * lotteryTab.rowsPerPage, lotteryTab.page * lotteryTab.rowsPerPage + lotteryTab.rowsPerPage);
 
   if (loading) return <Loader />;
-  if (error) return <Box p={4} color="error.main" aria-live="assertive">{error}</Box>;
+  if (error) return <div style={{ padding: 16, color: 'red' }} aria-live="assertive">{error}</div>;
 
   return (
     <Box>

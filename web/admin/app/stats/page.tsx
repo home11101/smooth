@@ -91,7 +91,7 @@ export default function StatsPage() {
 
   // Responsive et accessibilité : grilles, aria, labels
   if (loading) return <Loader />;
-  if (error) return <Box p={4} color="error.main" aria-live="assertive">{error}</Box>;
+  if (error) return <div style={{ padding: 16, color: 'red' }} aria-live="assertive">{error}</div>;
 
   // Filtres dynamiques
   const uniquePlatforms = Array.from(new Set(payments.map(p => p.platform))).filter(Boolean);
