@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import * as React from 'react';
 import { AppBar, Toolbar, Typography, CssBaseline, Drawer, List, ListItem, ListItemText, Box, ListItemButton } from '@mui/material';
@@ -11,13 +11,8 @@ import { createClient } from '@supabase/supabase-js';
 import AdminAuthGuard from './AdminAuthGuard';
 import ThemeRegistry from './ThemeRegistry';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -35,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={inter.variable}>
         <ThemeRegistry>
           <AdminAuthGuard>
             <CssBaseline />
@@ -64,8 +59,8 @@ export default function RootLayout({
                       </ListItemButton>
                     </ListItem>
                     <ListItem disablePadding>
-                      <ListItemButton component={Link} href="/promo-codes">
-                        <ListItemText primary="Codes Promo" />
+                      <ListItemButton component={Link} href="/referrals">
+                        <ListItemText primary="Parrainage" />
                       </ListItemButton>
                     </ListItem>
                     <ListItem disablePadding>

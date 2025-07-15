@@ -452,18 +452,27 @@ class _OptimizedRizzScannerState extends State<OptimizedRizzScanner>
       );
     }
     if (_isPremium == false) {
-      return Scaffold(
-        body: Center(
-          child: PremiumLockWidget(
-            feature: 'ocr_scan',
-            title: 'Fonctionnalité Premium',
-            description: 'Le scan OCR est réservé aux membres Premium.',
-            icon: Icons.document_scanner,
-            onUnlock: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const PremiumScreen()),
-              );
-            },
+      return PremiumLockOverlay(
+        feature: 'ocr_scan',
+        title: 'Scan OCR de Documents',
+        description: 'Analysez vos documents et captures d\'écran pour extraire du texte et recevoir des conseils.',
+        icon: Icons.document_scanner,
+        child: Scaffold(
+          body: AppTheme.buildPickupScreenBackground(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: ResponsiveHelper.responsivePadding(context),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildHeader(),
+                    SizedBox(height: ResponsiveHelper.responsiveSpacing(context) * 2),
+                    _buildScanArea(),
+                    SizedBox(height: ResponsiveHelper.responsiveSpacing(context) * 1.5),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       );

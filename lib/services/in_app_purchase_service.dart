@@ -9,7 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'premium_provider.dart';
 import 'notification_service.dart';
-import 'promo_code_service.dart';
 
 class InAppPurchaseService {
   // IDs des produits
@@ -79,9 +78,14 @@ class InAppPurchaseService {
       return;
     }
 
-    if (response.productDetails.isEmpty) {
+    if (response.notFoundIDs.isNotEmpty) {
+      debugPrint('IDs d\'achats intégrés non trouvés: ${response.notFoundIDs}');
+      premiumProvider.setErrorMessage(
+        'Aucun abonnement n\'a été trouvé. Vérifiez la configuration de vos achats intégrés sur App Store Connect.\nIDs manquants: ${response.notFoundIDs.join(", ")}'
+      );
+    } else if (response.productDetails.isEmpty) {
       debugPrint('Aucun produit trouvé.');
-      premiumProvider.setErrorMessage('Aucun abonnement n\'a été trouvé.');
+      premiumProvider.setErrorMessage('Aucun abonnement n\'a été trouvé. Vérifiez la configuration de vos achats intégrés sur App Store Connect.');
     }
     
     _products = response.productDetails;
@@ -159,7 +163,7 @@ class InAppPurchaseService {
 
     String deviceId = 'unknown_device';
     try {
-      deviceId = await PromoCodeService().getDeviceId();
+      
     } catch (_) {}
 
     // Récupère le user_id Supabase si connecté
@@ -189,7 +193,7 @@ class InAppPurchaseService {
     if (response.statusCode == 201) {
       debugPrint('✅ Paiement enregistré dans Supabase');
     } else {
-      debugPrint('❌ Erreur lors de l\'enregistrement du paiement : \\${response.body}');
+      debugPrint('❌ Erreur lors de l\'enregistrement du paiement : ${response.body}');
     }
   }
 
@@ -198,9 +202,13 @@ class InAppPurchaseService {
     const String validationUrl = 'https://qlomkoexurbxqsezavdi.supabase.co/functions/v1/validate-receipt';
     
     try {
+      final user = Supabase.instance.client.auth.currentUser;
+      final userId = user?.id;
+
       final Map<String, dynamic> requestBody = {
         'productId': purchase.productID,
         'platform': Platform.isIOS ? 'ios' : 'android',
+        'userId': userId, // Ajouté pour le backend
       };
 
       // Ajouter les paramètres spécifiques à la plateforme

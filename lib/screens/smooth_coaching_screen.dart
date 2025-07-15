@@ -178,18 +178,20 @@ class _SmoothCoachingScreenState extends State<SmoothCoachingScreen>
       );
     }
     if (_isPremium == false) {
-      return Scaffold(
-        body: Center(
-          child: PremiumLockWidget(
-            feature: 'smooth_coaching',
-            title: 'Fonctionnalité Premium',
-            description: 'Le coach IA Smooth est réservé aux membres Premium.',
-            icon: Icons.chat_bubble,
-            onUnlock: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const PremiumScreen()),
-              );
-            },
+      return PremiumLockOverlay(
+        feature: 'smooth_coaching',
+        title: 'Coaching Personnalisé',
+        description: 'Recevez des conseils personnalisés et des stratégies adaptées à votre style de séduction.',
+        icon: Icons.chat_bubble,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: AppTheme.buildPickupScreenBackground(
+            child: Column(
+              children: [
+                Expanded(child: _buildChatArea()),
+                _buildInputArea(),
+              ],
+            ),
           ),
         ),
       );

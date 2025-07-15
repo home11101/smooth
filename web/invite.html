@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invitation Smooth AI</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+      color: #fff;
+      font-family: 'SF Pro Display', Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: rgba(0,0,0,0.5);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(30,58,138,0.2);
+      padding: 32px 24px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .code-box {
+      background: #fff;
+      color: #1E3A8A;
+      font-weight: bold;
+      font-size: 1.5em;
+      border-radius: 10px;
+      padding: 12px 0;
+      margin: 18px 0 10px 0;
+      letter-spacing: 2px;
+      user-select: all;
+    }
+    .btn {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      padding: 14px 28px;
+      font-size: 1.1em;
+      font-weight: bold;
+      margin: 18px 0 0 0;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px rgba(34,197,94,0.15);
+    }
+    .btn:hover {
+      background: #16a34a;
+    }
+    .small {
+      font-size: 0.95em;
+      color: #dbeafe;
+      margin-top: 8px;
+    }
+    .store-links {
+      margin: 18px 0 0 0;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .store-links a img {
+      height: 48px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="main-container">
+    <h1>🎁 Invitation Smooth AI</h1>
+    <div id="welcome"></div>
+    <div id="code-section" style="display:none;">
+      <div class="code-box" id="referral-code"></div>
+      <button class="btn" id="copy-btn">Copier le code</button>
+      <div class="small">Le code sera automatiquement utilisé dans l'app.</div>
+      <div class="store-links">
+        <a href="https://apps.apple.com/app/id000000000" id="ios-link" target="_blank" rel="noopener">
+          <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="App Store">
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.smoothai.app" id="android-link" target="_blank" rel="noopener">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_FR.svg" alt="Google Play">
+        </a>
+      </div>
+      <div class="small" id="redirect-msg"></div>
+    </div>
+    <div id="fallback" style="display:none;">
+      <p>Code de parrainage introuvable dans le lien.<br>Vérifiez l'URL ou demandez à votre ami de vous renvoyer son lien d'invitation.</p>
+    </div>
+  </div>
+  <script>
+    function getReferralCode() {
+      // Supporte /invite.html?code=XXXX ou /invite/XXXX
+      const url = new URL(window.location.href);
+      let code = url.searchParams.get('code');
+      if (!code) {
+        // Essaye de récupérer dans le path
+        const match = window.location.pathname.match(/invite\/?([A-Za-z0-9]+)/);
+        if (match && match[1]) code = match[1];
+      }
+      return code;
+    }
+    function isIOS() {
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+    function isAndroid() {
+      return /Android/i.test(navigator.userAgent);
+    }
+    function redirectToStore() {
+      if (isIOS()) {
+        window.location.href = document.getElementById('ios-link').href;
+      } else if (isAndroid()) {
+        window.location.href = document.getElementById('android-link').href;
+      }
+    }
+    function copyToClipboard(text) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+      } else {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const code = getReferralCode();
+      if (code) {
+        document.getElementById('welcome').innerHTML = `<p>Vous avez été invité à découvrir <b>Smooth AI</b> !<br>En installant l'app, vous aiderez votre ami à gagner des points de parrainage 🎉</p>`;
+        document.getElementById('referral-code').textContent = code;
+        document.getElementById('code-section').style.display = '';
+        document.getElementById('copy-btn').onclick = function() {
+          copyToClipboard(code);
+          this.textContent = 'Copié !';
+          setTimeout(() => { this.textContent = 'Copier le code'; }, 2000);
+        };
+        // Copie auto pour l'app mobile
+        copyToClipboard(code);
+        // Redirection automatique après 4s
+        setTimeout(function() {
+          document.getElementById('redirect-msg').textContent = 'Redirection vers le store...';
+          redirectToStore();
+        }, 4000);
+      } else {
+        document.getElementById('fallback').style.display = '';
+      }
+    });
+  </script>
+</body>
+</html> 

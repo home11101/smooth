@@ -196,18 +196,203 @@ class _PickupLineScreenState extends State<PickupLineScreen>
       );
     }
     if (_isPremium == false) {
-      return Scaffold(
-        body: Center(
-          child: PremiumLockWidget(
-            feature: 'pickup_line',
-            title: 'Fonctionnalité Premium',
-            description: 'Les pickup lines sont réservées aux membres Premium.',
-            icon: Icons.bolt,
-            onUnlock: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const PremiumScreen()),
-              );
-            },
+      return PremiumLockOverlay(
+        feature: 'pickup_line',
+        title: 'Générateur de Phrases d\'Accroche',
+        description: 'Générez des phrases d\'accroche personnalisées et créatives pour maximiser vos chances de succès.',
+        icon: Icons.bolt,
+        child: Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFf5f7fa),
+                  Color(0xFFc3cfe2),
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment(-0.6, 0),
+                        radius: 1.0,
+                        colors: [
+                          Color(0x4D7877C6),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment(0.6, -0.6),
+                        radius: 1.0,
+                        colors: [
+                          Color(0x33FF77C6),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment(-0.2, 0.6),
+                        radius: 1.0,
+                        colors: [
+                          Color(0x3378DBFF),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Navigator.of(context).pop(),
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                child: const Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Color(0xFF007AFF),
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 60,
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                height: 40,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            const SizedBox(width: 44),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildContentArea(),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _buttonAnimation,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _buttonAnimation.value,
+                            child: GestureDetector(
+                              onTap: generateNewMessage,
+                              child: Container(
+                                width: 56,
+                                height: 56,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(0xFF007AFF),
+                                      Color(0xFF0051D5),
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Color(0x4D007AFF),
+                                      blurRadius: 25,
+                                      offset: Offset(0, 8),
+                                    ),
+                                    BoxShadow(
+                                      color: Color(0x26000000),
+                                      blurRadius: 12,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    coolEmojis[currentEmojiIndex],
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 15),
+                      GestureDetector(
+                        onTap: generateNewMessage,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28),
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF007AFF),
+                                Color(0xFF0051D5),
+                              ],
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x4D007AFF),
+                                blurRadius: 25,
+                                offset: Offset(0, 8),
+                              ),
+                              BoxShadow(
+                                color: Color(0x26000000),
+                                blurRadius: 12,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'File-moi un autre',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

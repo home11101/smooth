@@ -55,14 +55,12 @@ class _UploadChatAnalysisScreenState extends State<UploadChatAnalysisScreen> {
                   final isPremium = snapshot.data ?? false;
                   
                   if (!isPremium) {
-                    return PremiumLockWidget(
-                      title: 'Analyse de Chat',
-                      description: 'Analysez vos conversations textuelles pour obtenir des insights et des recommandations personnalisées.',
-                      icon: Icons.analytics_outlined,
+                    return PremiumLockOverlay(
                       feature: 'chat_analysis',
-                      onUnlock: () {
-                        Navigator.pushNamed(context, '/premium');
-                      },
+                      title: 'Analyse de Conversations',
+                      description: 'Analysez vos conversations pour identifier les points d\'amélioration et optimiser votre approche.',
+                      icon: Icons.analytics_outlined,
+                      child: _buildMainContent(),
                     );
                   }
                   

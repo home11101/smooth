@@ -1,59 +1,154 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Smooth AI - Votre Assistant de Rencontres Ultime">
-
-  <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Smooth AI">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>Smooth AI</title>
-  <link rel="manifest" href="manifest.json">
-
-  <script>
-    // The value below is injected by flutter build, do not touch.
-    const serviceWorkerVersion = null;
-  </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smooth AI - Assistant de Rencontres IA</title>
+    <meta name="description" content="Smooth AI, l'assistant de rencontres IA #1. Disponible sur App Store et Google Play.">
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: linear-gradient(-45deg, #2196f3 0%, #ffffff 95%, #ffe4ef 100%);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .centered {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 0.5em;
+        }
+        .slogan {
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 2.5em;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .store-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2em;
+            margin-bottom: 2.5em;
+        }
+        .store-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 0.8em 2em;
+            color: #2196f3;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+        }
+        .store-btn:hover {
+            background: #f5f5f5;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        .store-btn img {
+            height: 2.2em;
+            margin-right: 1em;
+        }
+        .store-btn.google img {
+            margin-right: 0.7em;
+        }
+        footer {
+            width: 100%;
+            padding: 2em 0 1em 0;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1rem;
+        }
+        .footer-links {
+            display: flex;
+            gap: 2em;
+            margin-bottom: 1em;
+        }
+        .footer-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover {
+            color: #e3f2fd;
+        }
+        .footer-socials {
+            display: flex;
+            gap: 1.2em;
+            margin-bottom: 0.5em;
+        }
+        .footer-socials a {
+            color: #ffffff;
+            font-size: 2em;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        .footer-socials a:hover {
+            opacity: 1;
+        }
+        @media (max-width: 600px) {
+            .logo { 
+                width: 80px; 
+            }
+            .slogan { font-size: 1.05rem; }
+            .store-btn { font-size: 1rem; padding: 0.7em 1.2em; }
+            .footer-links { gap: 1em; font-size: 0.95em; }
+        }
+    </style>
 </head>
 <body>
-  <script>
-    window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
-          });
-        }
-      });
-    });
-  </script>
+    <div class="centered">
+        <img src="app/assets/images/logo.png" alt="Smooth AI" class="logo"/>
+        <div class="slogan">Assistant de rencontres IA #1</div>
+        <div class="store-buttons">
+            <a class="store-btn" href="https://apps.apple.com/app/id6748257154" target="_blank" rel="noopener">
+                <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="App Store" style="height:2.2em;margin-right:0;">
+            </a>
+            <a class="store-btn google" href="https://play.google.com/store/apps/details?id=com.smoothai.datingassistant" target="_blank" rel="noopener">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style="height:2.2em;margin-right:0;">
+            </a>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-links">
+            <a href="contact.html">Support</a>
+            <a href="terms.html">Conditions</a>
+            <a href="privacy.html">Confidentialité</a>
+            <a href="faq.html">FAQ</a>
+        </div>
+        <div class="footer-socials">
+            <a href="https://www.instagram.com/smoothai_app?igsh=MWNjdmlmNDdhdWxtbw%3D%3D&utm_source=qr" aria-label="Instagram" target="_blank" rel="noopener">
+                <img src="app/assets/images/instagram.png" alt="Instagram" style="width:32px;height:32px;border-radius:8px;"/>
+            </a>
+            <a href="https://www.tiktok.com/@smooth.ia?_t=ZN-8xfS0OfT31a&_r=1" aria-label="TikTok" target="_blank" rel="noopener">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" rx="8" fill="#fff"/><path d="M22.667 13.333c-1.84 0-3.333-1.493-3.333-3.333h-2v10a2 2 0 1 1-2-2v-2a4 4 0 1 0 4 4v-8c.667 1.333 2 2.333 3.333 2.333v-2z" fill="#2196f3"/></svg>
+            </a>
+        </div>
+        <div style="color:#e3f2fd;font-size:0.95em;">&copy; 2025 Smooth AI. Tous droits réservés.</div>
+    </footer>
 </body>
 </html>

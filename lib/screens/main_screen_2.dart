@@ -3,6 +3,7 @@ import '../utils/app_theme.dart';
 import 'package:image_picker/image_picker.dart'; // supprimé car inutilisé
 import '../widgets/flipable_chat_analysis_card.dart';
 import 'package:infinite_carousel/infinite_carousel.dart';
+import '../services/cache_service.dart';
 
 import 'package:flutter/material.dart';
 import 'smooth_coaching_screen.dart';
@@ -19,6 +20,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:io';
 import '../utils/responsive_helper.dart';
+import '../models/chat_analysis_report.dart';
 
 class MainScreen2 extends StatefulWidget {
   const MainScreen2({Key? key}) : super(key: key);
@@ -31,6 +33,45 @@ class _MainScreen2State extends State<MainScreen2> {
   // Historique des analyses (rapport + image)
   final List<Map<String, dynamic>> _analysisHistory = [];
 
+  @override
+  void initState() {
+    super.initState();
+    // Charger l'historique depuis le cache au démarrage
+    _loadHistoryFromCache();
+  }
+
+  // Méthode pour charger l'historique depuis le cache
+  Future<void> _loadHistoryFromCache() async {
+    try {
+      final cachedHistory = await CacheService.getCachedAnalysisHistory('main_screen_2_carousel_history');
+      if (cachedHistory != null && cachedHistory.isNotEmpty) {
+        setState(() {
+          _analysisHistory.clear();
+          _analysisHistory.addAll(
+            cachedHistory.map((item) {
+              final newItem = Map<String, dynamic>.from(item);
+              if (newItem['report'] is Map<String, dynamic>) {
+                newItem['report'] = ChatAnalysisReport.fromJson(newItem['report']);
+              }
+              return newItem;
+            }),
+          );
+        });
+      }
+    } catch (e) {
+      print('Erreur lors du chargement de l\'historique carrousel MainScreen2: $e');
+    }
+  }
+
+  // Méthode pour sauvegarder l'historique dans le cache
+  Future<void> _saveHistoryToCache() async {
+    try {
+      await CacheService.cacheAnalysisHistory('main_screen_2_carousel_history', _analysisHistory);
+    } catch (e) {
+      print('Erreur lors de la sauvegarde de l\'historique carrousel MainScreen2: $e');
+    }
+  }
+
   Future<void> _navigateToUpload(BuildContext context) async {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const UploadScreenshotScreen()),
@@ -42,6 +83,8 @@ class _MainScreen2State extends State<MainScreen2> {
           'uploadedImageBytes': result['uploadedImageBytes'],
         });
       });
+      // Sauvegarder l'historique après ajout
+      await _saveHistoryToCache();
     }
   }
 
@@ -49,6 +92,8 @@ class _MainScreen2State extends State<MainScreen2> {
     setState(() {
       _analysisHistory.removeAt(index);
     });
+    // Sauvegarder l'historique après suppression
+    _saveHistoryToCache();
   }
 
   void _exportCardAsImage(BuildContext context, GlobalKey cardKey) async {

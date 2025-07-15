@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import '../services/in_app_purchase_service.dart';
 import '../services/premium_provider.dart';
-import '../services/promo_code_service.dart';
 import '../services/referral_service.dart';
-import '../widgets/promo_code_input_widget.dart';
 import '../widgets/referral_success_dialog.dart';
 import 'dart:ui';
 import 'dart:async';
@@ -30,11 +28,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
   final FixedExtentScrollController _carouselController = FixedExtentScrollController();
 
   final PremiumProvider _premiumProvider = PremiumProvider();
-  final PromoCodeService _promoCodeService = PromoCodeService();
   final ReferralService _referralService = ReferralService();
   
-  PromoCodeValidation? _appliedPromoCode;
-  bool _showPromoCodeInput = false;
   bool _showReferralDialog = false;
 
   @override
@@ -42,21 +37,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
     super.initState();
     _purchaseService = Provider.of<InAppPurchaseService>(context, listen: false);
     _purchaseService.initialize(_premiumProvider);
-    _loadAppliedPromoCode();
-  }
-
-  Future<void> _loadAppliedPromoCode() async {
-    final appliedCode = await _promoCodeService.getAppliedPromoCode();
-    if (appliedCode != null) {
-      setState(() {
-        _appliedPromoCode = PromoCodeValidation(
-          isValid: true,
-          discountType: appliedCode.discountType,
-          discountValue: appliedCode.discount,
-          description: 'Code promo appliqué: ${appliedCode.code}',
-        );
-      });
-    }
   }
 
   Future<void> _buyPremium(ProductDetails product) async {
@@ -105,24 +85,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
         );
       },
     );
-  }
-
-  void _onPromoCodeValidated(PromoCodeValidation validation) {
-    setState(() {
-      _appliedPromoCode = validation;
-    });
-  }
-
-  void _onPromoCodeApplied(String code) {
-    setState(() {
-      _showPromoCodeInput = false;
-    });
-  }
-
-  void _togglePromoCodeInput() {
-    setState(() {
-      _showPromoCodeInput = !_showPromoCodeInput;
-    });
   }
 
   Future<void> _restorePurchases() async {
@@ -205,7 +167,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Consumer2<InAppPurchaseService, PremiumProvider>(
       builder: (context, purchaseService, premiumProvider, _) {
         return Scaffold(
-          backgroundColor: const Color(0xFF121F2F),
+          extendBodyBehindAppBar: true,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -213,7 +176,19 @@ class _PremiumScreenState extends State<PremiumScreen> {
             title: Container(),
             iconTheme: const IconThemeData(color: Colors.white),
           ),
-          body: SafeArea(
+          body: Stack(
+            children: [
+              // Fond noir profond + blur léger
+              Container(
+                color: const Color(0xFF0A0A0A),
+              ),
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Container(
+                  color: Colors.black.withOpacity(0.3),
+                ),
+              ),
+              SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: SingleChildScrollView(
@@ -308,7 +283,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                     const SizedBox(height: 16),
                     // Section code promo
-                    _buildPromoCodeSection(),
+                    // SUPPRIMER : _buildPromoCodeSection(),
                     const SizedBox(height: 12),
                     // Offres de prix
                     _buildPricingOptions(),
@@ -347,6 +322,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 ),
               ),
             ),
+              ),
+            ],
           ),
         );
       },
@@ -536,105 +513,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPromoCodeSection() {
-    return Column(
-      children: [
-        if (_appliedPromoCode != null) ...[
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.shade200),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.green.shade600, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Code promo appliqué !',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green.shade700,
-                        ),
-                      ),
-                      if (_appliedPromoCode!.description != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          _appliedPromoCode!.description!,
-                          style: TextStyle(
-                            color: Colors.green.shade600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await _promoCodeService.clearAppliedPromoCode();
-                    setState(() {
-                      _appliedPromoCode = null;
-                    });
-                  },
-                  child: Text(
-                    'Supprimer',
-                    style: TextStyle(
-                      color: Colors.green.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        if (_showPromoCodeInput) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: PromoCodeInputWidget(
-              onCodeValidated: _onPromoCodeValidated,
-              onCodeApplied: _onPromoCodeApplied,
-              context: 'premium_purchase',
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _togglePromoCodeInput,
-                  icon: Icon(
-                    _showPromoCodeInput ? Icons.remove : Icons.add,
-                    size: 18,
-                  ),
-                  label: Text(
-                    _showPromoCodeInput ? 'Masquer le code promo' : 'J\'ai un code promo',
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.blue.shade600,
-                    side: BorderSide(color: Colors.blue.shade300),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 

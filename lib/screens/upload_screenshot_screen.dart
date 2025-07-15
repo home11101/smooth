@@ -420,18 +420,34 @@ class _UploadScreenshotScreenState extends State<UploadScreenshotScreen>
       );
     }
     if (_isPremium == false) {
-      return Scaffold(
-        body: Center(
-          child: PremiumLockWidget(
-            feature: 'upload_screenshot',
-            title: 'Fonctionnalité Premium',
-            description: 'L\'analyse de screenshots est réservée aux membres Premium.',
-            icon: Icons.image_search,
-            onUnlock: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const PremiumScreen()),
-              );
-            },
+      return PremiumLockOverlay(
+        feature: 'upload_screenshot',
+        title: 'Analyse de Screenshots',
+        description: 'Analysez vos captures d\'écran de conversations pour recevoir des conseils personnalisés.',
+        icon: Icons.image_search,
+        child: Scaffold(
+          body: AppTheme.buildPickupScreenBackground(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 32),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildScanArea(MediaQuery.of(context).size.width),
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       );

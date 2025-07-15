@@ -76,7 +76,7 @@ def generate_android_icons(source_path):
 
 def generate_ios_icons():
     # Source image
-    source_path = "assets/images/leSmenu.png"
+    source_path = "assets/images/icone1.jpg"
     output_dir = "ios/Runner/Assets.xcassets/AppIcon.appiconset"
     
     # iOS icon sizes (name, width, height)
@@ -202,17 +202,17 @@ def update_pubspec_assets():
             content = f.read()
         
         # Vérifier si l'icône est déjà dans les assets
-        if 'assets/images/leSmenu.png' not in content:
+        if 'assets/images/icone1.jpg' not in content:
             # Ajouter l'icône aux assets
-            assets_section = "  assets:\n    - assets/images/\n    - assets/sounds/\n    - assets/animations/\n    - assets/images/leSmenu.png\n    - assets/images/instagram.png"
+            assets_section = "  assets:\n    - assets/images/\n    - assets/sounds/\n    - assets/animations/\n    - assets/images/icone1.jpg\n    - assets/images/instagram.png"
             content = content.replace("  assets:\n    - assets/images/\n    - assets/sounds/\n    - assets/animations/\n    - assets/images/instagram.png", assets_section)
             
             with open(pubspec_path, 'w', encoding='utf-8') as f:
                 f.write(content)
             
-            print("✓ Ajouté leSmenu.png aux assets du pubspec.yaml")
+            print("✓ Ajouté icone1.jpg aux assets du pubspec.yaml")
         else:
-            print("✓ leSmenu.png est déjà dans les assets")
+            print("✓ icone1.jpg est déjà dans les assets")
             
     except Exception as e:
         print(f"✗ Erreur lors de la mise à jour du pubspec.yaml: {e}")
@@ -226,12 +226,12 @@ def main():
     ensure_pillow()
     
     # Chemin vers l'icône source
-    source_path = "assets/images/leSmenu.png"
+    source_path = "assets/images/icone1.jpg"
     
     # Vérifier que l'icône source existe
     if not os.path.exists(source_path):
         print(f"✗ Erreur: L'icône source {source_path} n'existe pas!")
-        print("Assurez-vous que leSmenu.png est dans le dossier assets/images/")
+        print("Assurez-vous que icone1.jpg est dans le dossier assets/images/")
         return
     
     print(f"✓ Icône source trouvée: {source_path}")

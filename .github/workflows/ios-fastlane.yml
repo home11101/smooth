@@ -1,11 +1,16 @@
 name: iOS Build with Fastlane
 
+# Temporarily disabled - uncomment to re-enable
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
+
+# Temporarily disabled workflow
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch: # Only manual trigger allowed
 
 jobs:
   build:

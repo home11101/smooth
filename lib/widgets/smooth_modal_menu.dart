@@ -7,7 +7,7 @@ import 'package:url_launcher/url_launcher.dart'
     show canLaunchUrl, launchUrl, LaunchMode;
 
 import '../screens/premium_screen.dart';
-import '../screens/referral_screen.dart';
+import '../widgets/smooth_coin_info_bottom_sheet.dart';
 
 // Classe principale du menu modal
 class SmoothModalMenu extends StatelessWidget {
@@ -192,15 +192,15 @@ class SmoothModalMenu extends StatelessWidget {
                               },
                             ),
                             _SmoothMenuItem(
-                              icon: Icons.card_giftcard,
-                              label: 'Parrainage',
-                              onTap: () {
+                              icon: Icons.monetization_on_outlined,
+                              label: 'Smooth Coin',
+                              onTap: () async {
                                 Navigator.of(context).pop();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const ReferralScreen(),
-                                  ),
+                                await showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (modalContext) => const SmoothCoinInfoBottomSheet(),
                                 );
                               },
                             ),

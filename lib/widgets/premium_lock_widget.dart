@@ -2,25 +2,164 @@ import 'package:flutter/material.dart';
 import '../services/subscription_service.dart';
 import '../screens/premium_screen.dart';
 import '../utils/app_theme.dart';
+import 'dart:ui';
 
-class PremiumLockWidget extends StatelessWidget {
+class PremiumLockOverlay extends StatefulWidget {
   final String feature;
   final String title;
   final String description;
   final IconData icon;
   final VoidCallback? onUnlock;
+  final Widget child;
 
-  const PremiumLockWidget({
+  const PremiumLockOverlay({
     super.key,
     required this.feature,
     required this.title,
     required this.description,
     required this.icon,
+    required this.child,
     this.onUnlock,
   });
 
   @override
+  State<PremiumLockOverlay> createState() => _PremiumLockOverlayState();
+}
+
+class _PremiumLockOverlayState extends State<PremiumLockOverlay>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late AnimationController _parallaxController;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _parallaxAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _parallaxController = AnimationController(
+      duration: const Duration(milliseconds: 3000),
+      vsync: this,
+    );
+    
+    // Animation de slide plus sophistiquée
+    _slideAnimation = Tween<double>(
+      begin: 150.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic),
+    ));
+    
+    // Animation de fade
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
+    ));
+    
+    // Animation de scale avec effet élastique
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.3, 1.0, curve: Curves.elasticOut),
+    ));
+    
+    // Animation de parallaxe
+    _parallaxAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _parallaxController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _animationController.forward();
+    _parallaxController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _parallaxController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: SubscriptionService().canAccessFeature(widget.feature),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        final hasAccess = snapshot.data ?? false;
+        
+        if (hasAccess) {
+          return widget.child;
+        }
+        
+        return Stack(
+          children: [
+            // Contenu original avec effet glassmorphism et parallaxe
+            AnimatedBuilder(
+              animation: _parallaxController,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, _parallaxAnimation.value * 10),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                    child: Container(
+                      color: Colors.black.withOpacity(0.4),
+              child: Opacity(
+                        opacity: 0.2,
+                        child: widget.child,
+              ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            
+            // Overlay de verrouillage en bas avec animation sophistiquée
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: Offset(0, _slideAnimation.value),
+                    child: Transform.scale(
+                      scale: _scaleAnimation.value,
+                      child: FadeTransition(
+                        opacity: _fadeAnimation,
+              child: _buildLockWidget(context),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildLockWidget(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -29,94 +168,84 @@ class PremiumLockWidget extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.grey.shade100,
-            Colors.grey.shade50,
+            Colors.white.withOpacity(0.1),
+            Colors.white.withOpacity(0.05),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(13),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withAlpha(80),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: AppTheme.primaryBlue.withOpacity(0.1),
+            blurRadius: 30,
+            spreadRadius: 5,
+          ),
+          // Effet de bordure lumineuse
+          BoxShadow(
+            color: Colors.white.withOpacity(0.1),
+            blurRadius: 1,
+            spreadRadius: 0,
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Icône verrouillée
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 30,
-                  color: Colors.grey.shade600,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.lock,
-                      size: 12,
-                      color: Colors.white,
-                    ),
-                  ),
+                child: Icon(
+                  widget.icon,
+                  color: AppTheme.primaryBlue,
+                  size: 24,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.description,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          
           const SizedBox(height: 16),
-          
-          // Titre
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: 8),
-          
-          // Description
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-              height: 1.4,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: 20),
-          
-          // Bouton débloquer
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                if (onUnlock != null) {
-                  onUnlock!();
+                if (widget.onUnlock != null) {
+                  widget.onUnlock!();
                 } else {
                   Navigator.push(
                     context,
@@ -129,7 +258,7 @@ class PremiumLockWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryBlue,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -151,128 +280,17 @@ class PremiumLockWidget extends StatelessWidget {
               ),
             ),
           ),
-          
-          const SizedBox(height: 12),
-          
-          // Texte d'information
-          Text(
+          const SizedBox(height: 8),
+          const Text(
             '3 jours d\'essai gratuit inclus',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade500,
+              color: Colors.white54,
             ),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
-  }
-}
-
-class FeatureLockOverlay extends StatelessWidget {
-  final String feature;
-  final Widget child;
-  final String? customMessage;
-
-  const FeatureLockOverlay({
-    super.key,
-    required this.feature,
-    required this.child,
-    this.customMessage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: SubscriptionService().canAccessFeature(feature),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        final hasAccess = snapshot.data ?? false;
-        
-        if (hasAccess) {
-          return child;
-        }
-        
-        return Stack(
-          children: [
-            // Contenu original avec filtre
-            Opacity(
-              opacity: 0.3,
-              child: child,
-            ),
-            
-            // Overlay de verrouillage
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withAlpha(26),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: PremiumLockWidget(
-                  feature: feature,
-                  title: _getFeatureTitle(feature),
-                  description: customMessage ?? _getFeatureDescription(feature),
-                  icon: _getFeatureIcon(feature),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  String _getFeatureTitle(String feature) {
-    switch (feature) {
-      case 'pickup_lines':
-        return 'Générateur de Phrases d\'Accroche';
-      case 'chat_analysis':
-        return 'Analyse de Conversations';
-      case 'screenshot_analysis':
-        return 'Analyse de Captures d\'Écran';
-      case 'coaching':
-        return 'Coaching Personnalisé';
-      case 'premium_features':
-        return 'Fonctionnalités Premium';
-      default:
-        return 'Fonctionnalité Premium';
-    }
-  }
-
-  String _getFeatureDescription(String feature) {
-    switch (feature) {
-      case 'pickup_lines':
-        return 'Générez des phrases d\'accroche personnalisées et créatives pour maximiser vos chances de succès.';
-      case 'chat_analysis':
-        return 'Analysez vos conversations pour identifier les points d\'amélioration et optimiser votre approche.';
-      case 'screenshot_analysis':
-        return 'Analysez vos captures d\'écran de conversations pour recevoir des conseils personnalisés.';
-      case 'coaching':
-        return 'Recevez des conseils personnalisés et des stratégies adaptées à votre style de séduction.';
-      case 'premium_features':
-        return 'Accédez à toutes les fonctionnalités avancées pour optimiser votre expérience de séduction.';
-      default:
-        return 'Cette fonctionnalité nécessite un abonnement premium.';
-    }
-  }
-
-  IconData _getFeatureIcon(String feature) {
-    switch (feature) {
-      case 'pickup_lines':
-        return Icons.chat_bubble_outline;
-      case 'chat_analysis':
-        return Icons.analytics_outlined;
-      case 'screenshot_analysis':
-        return Icons.screenshot_outlined;
-      case 'coaching':
-        return Icons.psychology_outlined;
-      case 'premium_features':
-        return Icons.star_outline;
-      default:
-        return Icons.lock_outline;
-    }
   }
 } 
