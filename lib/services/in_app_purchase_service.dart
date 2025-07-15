@@ -78,9 +78,14 @@ class InAppPurchaseService {
       return;
     }
 
-    if (response.productDetails.isEmpty) {
+    if (response.notFoundIDs.isNotEmpty) {
+      debugPrint('IDs d\'achats intégrés non trouvés: ${response.notFoundIDs}');
+      premiumProvider.setErrorMessage(
+        'Aucun abonnement n\'a été trouvé. Vérifiez la configuration de vos achats intégrés sur App Store Connect.\nIDs manquants: ${response.notFoundIDs.join(", ")}'
+      );
+    } else if (response.productDetails.isEmpty) {
       debugPrint('Aucun produit trouvé.');
-      premiumProvider.setErrorMessage('Aucun abonnement n\'a été trouvé.');
+      premiumProvider.setErrorMessage('Aucun abonnement n\'a été trouvé. Vérifiez la configuration de vos achats intégrés sur App Store Connect.');
     }
     
     _products = response.productDetails;
@@ -188,7 +193,7 @@ class InAppPurchaseService {
     if (response.statusCode == 201) {
       debugPrint('✅ Paiement enregistré dans Supabase');
     } else {
-      debugPrint('❌ Erreur lors de l\'enregistrement du paiement : \\${response.body}');
+      debugPrint('❌ Erreur lors de l\'enregistrement du paiement : ${response.body}');
     }
   }
 
