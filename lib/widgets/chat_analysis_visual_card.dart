@@ -153,24 +153,24 @@ class ChatAnalysisVisualCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
-            children: [
-                    Flexible(
-                child: _attachmentStyle(
+                  children: [
+                    Expanded(
+                      child: _attachmentStyle(
                         label: 'Tonalité (Vous)',
-                  style: report.styleAttachementVous,
-                  color: Colors.blueAccent,
-                ),
-              ),
-              const SizedBox(width: 12),
-                    Flexible(
-                child: _attachmentStyle(
+                        style: report.styleAttachementVous,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _attachmentStyle(
                         label: 'Tonalité (Eux)',
-                  style: report.styleAttachementEux,
-                  color: Colors.pinkAccent,
+                        style: report.styleAttachementEux,
+                        color: Colors.pinkAccent,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
               ),
             ),
             Card(

@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, CartesianGrid, Line } from 'recharts';
+import * as React from 'react';
 
 const supabaseUrl = 'https://qlomkoexurbxqsezavdi.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsb21rb2V4dXJieHFzZXphdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzODYxOTYsImV4cCI6MjA2Njk2MjE5Nn0.eVV4vRp1a_5FVMqqRcSHFC5cjaBEOKCODHZQ76fpED8';
@@ -108,7 +109,7 @@ export default function ReferralsPage() {
       setReferrals(enriched);
       setGlobalStats({ totalFilleuls, totalPremium });
     } catch (e: any) {
-      setError(e.message || 'Erreur lors du chargement des parrainages');
+      setError((e as any).message || 'Erreur lors du chargement des parrainages');
     } finally {
       setLoading(false);
     }
@@ -122,20 +123,20 @@ export default function ReferralsPage() {
       if (error) throw error;
       setCoins(data || []);
     } catch (e: any) {
-      setCoinError(e.message || 'Erreur lors du chargement des Smooth Coin');
+      setCoinError((e as any).message || 'Erreur lors du chargement des Smooth Coin');
     } finally {
       setCoinLoading(false);
     }
   }
 
   async function fetchLotteryEntries() {
-    setLotteryTab((prev) => ({ ...prev, loading: true, error: null }));
+    setLotteryTab((prev: typeof lotteryTab) => ({ ...prev, loading: true, error: null }));
     try {
       const { data, error } = await supabase.from('referral_lottery_entries').select('*');
       if (error) throw error;
-      setLotteryTab((prev) => ({ ...prev, entries: data || [], loading: false }));
+      setLotteryTab((prev: typeof lotteryTab) => ({ ...prev, entries: data || [], loading: false }));
     } catch (e) {
-      setLotteryTab((prev) => ({ ...prev, error: e.message || 'Erreur lors du chargement des participations', loading: false }));
+      setLotteryTab((prev: typeof lotteryTab) => ({ ...prev, error: (e as any).message || 'Erreur lors du chargement des participations', loading: false }));
     }
   }
 
@@ -163,7 +164,7 @@ export default function ReferralsPage() {
   }
 
   function filterReferrals() {
-    return referrals.filter((r) => {
+    return referrals.filter((r: any) => {
       const matchesSearch =
         search === '' ||
         r.user_id?.toLowerCase().includes(search.toLowerCase()) ||
@@ -174,7 +175,7 @@ export default function ReferralsPage() {
   }
 
   function filterCoins() {
-    return coins.filter((c) => {
+    return coins.filter((c: any) => {
       return (
         coinSearch === '' ||
         c.user_id?.toLowerCase().includes(coinSearch.toLowerCase()) ||
@@ -184,7 +185,7 @@ export default function ReferralsPage() {
   }
 
   function filterLotteryEntries() {
-    return lotteryTab.entries.filter((entry) =>
+    return lotteryTab.entries.filter((entry: any) =>
       lotteryTab.search === '' ||
       (entry.device_id && entry.device_id.toLowerCase().includes(lotteryTab.search.toLowerCase())) ||
       (entry.user_id && entry.user_id.toLowerCase().includes(lotteryTab.search.toLowerCase()))
@@ -322,7 +323,7 @@ export default function ReferralsPage() {
   if (error) return <div style={{ padding: 16, color: 'red' }} aria-live="assertive">{error}</div>;
 
   return (
-    <Box>
+    <div>
       <Typography variant="h4" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 2 }}>
         Parrainage
         <Button onClick={fetchReferralStats} startIcon={<RefreshIcon />} size="small" variant="outlined" sx={{ ml: 2 }}>
@@ -356,7 +357,7 @@ export default function ReferralsPage() {
           </Grid>
         </Grid>
         <Divider sx={{ mb: 2 }} />
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           <TextField
             label="Recherche utilisateur/code"
             value={search}
@@ -386,7 +387,7 @@ export default function ReferralsPage() {
           <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportCSV}>
             Export CSV
           </Button>
-        </Box>
+        </div>
         <Paper sx={{ width: '100%', overflow: 'auto' }}>
           <TableContainer>
             <Table size="small">
@@ -403,9 +404,9 @@ export default function ReferralsPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginated.map((r, idx) => (
-                  <>
-                    <TableRow key={r.id || idx}>
+                {paginated.map((r: any, idx: number) => (
+                  <React.Fragment key={r.id || idx}>
+                    <TableRow>
                       <TableCell>
                         <IconButton size="small" onClick={() => setExpanded(expanded === r.code ? null : r.code)}>
                           <ExpandMoreIcon sx={{ transform: expanded === r.code ? 'rotate(180deg)' : 'rotate(0deg)' }} />
@@ -422,7 +423,7 @@ export default function ReferralsPage() {
                     <TableRow>
                       <TableCell colSpan={8} sx={{ p: 0, border: 0 }}>
                         <Collapse in={expanded === r.code} timeout="auto" unmountOnExit>
-                          <Box sx={{ bgcolor: '#F4F6FA', p: 2 }}>
+                          <div style={{ background: '#F4F6FA', padding: 16 }}>
                             <Typography variant="subtitle2" gutterBottom>Filleuls</Typography>
                             <Table size="small">
                               <TableHead>
@@ -447,11 +448,11 @@ export default function ReferralsPage() {
                                 )}
                               </TableBody>
                             </Table>
-                          </Box>
+                          </div>
                         </Collapse>
                       </TableCell>
                     </TableRow>
-                  </>
+                  </React.Fragment>
                 ))}
                 {paginated.length === 0 && (
                   <TableRow>
@@ -473,9 +474,9 @@ export default function ReferralsPage() {
         </Paper>
       )}
       {tab === 1 && (
-        <Box>
+        <div>
           <Typography variant="h5" gutterBottom>Smooth Coin par utilisateur</Typography>
-          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
             <TextField
               label="Recherche user/device ID"
               value={coinSearch}
@@ -485,8 +486,8 @@ export default function ReferralsPage() {
             <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportCoinCSV}>
               Export CSV
             </Button>
-          </Box>
-          {coinLoading ? <Loader /> : coinError ? <Box color="error.main">{coinError}</Box> : (
+          </div>
+          {coinLoading ? <Loader /> : coinError ? <div style={{ color: 'red' }}>{coinError}</div> : (
             <Paper sx={{ width: '100%', overflow: 'auto' }}>
               <TableContainer>
                 <Table size="small">
@@ -499,7 +500,7 @@ export default function ReferralsPage() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {paginatedCoins.map((c) => (
+                    {paginatedCoins.map((c: any) => (
                       <TableRow key={c.user_id || c.device_id}>
                         <TableCell>{c.user_id}</TableCell>
                         <TableCell>{c.device_id}</TableCell>
@@ -521,18 +522,18 @@ export default function ReferralsPage() {
               />
             </Paper>
           )}
-        </Box>
+        </div>
       )}
       {tab === 2 && (
-        <Box>
+        <div>
           <Typography variant="h5" gutterBottom>Participations au tirage au sort</Typography>
           <Tabs value={lotteryStatsTab} onChange={(_, v) => setLotteryStatsTab(v)} sx={{ mb: 2 }}>
             <Tab label="Liste" />
             <Tab label="Statistiques" />
           </Tabs>
           {lotteryStatsTab === 0 && (
-            <Box>
-              <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
+            <div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center' }}>
                 <TextField
                   label="Recherche device/user ID"
                   value={lotteryTab.search}
@@ -548,20 +549,20 @@ export default function ReferralsPage() {
                 <Button variant="contained" color="primary" onClick={drawWinner} disabled={lotteryGrouped}>
                   Tirer au sort un gagnant
                 </Button>
-              </Box>
+              </div>
               {drawResult && (
-                <Box mb={2} p={2} bgcolor="#e3f2fd" borderRadius={2}>
+                <div style={{ marginBottom: 16, padding: 16, background: '#e3f2fd', borderRadius: 8 }}>
                   <Typography variant="subtitle1">Gagnant :</Typography>
                   {typeof drawResult === 'string' ? drawResult : (
-                    <Box>
+                    <div>
                       <Typography>User ID : {drawResult.user_id || '-'}</Typography>
                       <Typography>Device ID : {drawResult.device_id || '-'}</Typography>
                       <Typography>Date d'entrée : {drawResult.entry_date ? new Date(drawResult.entry_date).toLocaleDateString() : '-'}</Typography>
-                    </Box>
+                    </div>
                   )}
-                </Box>
+                </div>
               )}
-              {lotteryTab.loading ? <Loader /> : lotteryTab.error ? <Box color="error.main">{lotteryTab.error}</Box> : (
+              {lotteryTab.loading ? <Loader /> : lotteryTab.error ? <div style={{ color: 'red' }}>{lotteryTab.error}</div> : (
                 <Paper sx={{ width: '100%', overflow: 'auto' }}>
                   <TableContainer>
                     <Table size="small">
@@ -574,7 +575,7 @@ export default function ReferralsPage() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {paginatedLottery.map((e) => (
+                        {paginatedLottery.map((e: any) => (
                           <TableRow key={String(e.user_id || '') + String(e.device_id || '') + String(e.entry_date || e.last_entry || '')}>
                             <TableCell>{e.device_id}</TableCell>
                             <TableCell>{e.user_id}</TableCell>
@@ -596,7 +597,7 @@ export default function ReferralsPage() {
                   />
                 </Paper>
               )}
-            </Box>
+            </div>
           )}
           {lotteryStatsTab === 1 && (
             <Grid container spacing={4}>
@@ -629,8 +630,8 @@ export default function ReferralsPage() {
               </Grid>
             </Grid>
           )}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 } 

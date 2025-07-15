@@ -112,7 +112,7 @@ class _FlipableChatAnalysisCardState extends State<FlipableChatAnalysisCard> wit
           animation: _gradientController,
           builder: (context, child) {
             return Container(
-              width: 400,
+              width: 530,
               height: 520,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -151,7 +151,7 @@ class _FlipableChatAnalysisCardState extends State<FlipableChatAnalysisCard> wit
           ? Image.memory(
               widget.uploadedImageBytes!,
               fit: BoxFit.cover,
-              width: 360,
+              width: 530,
               height: 520,
             )
           : Center(

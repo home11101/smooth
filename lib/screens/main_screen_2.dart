@@ -20,6 +20,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:io';
 import '../utils/responsive_helper.dart';
+import '../models/chat_analysis_report.dart';
 
 class MainScreen2 extends StatefulWidget {
   const MainScreen2({Key? key}) : super(key: key);
@@ -46,7 +47,15 @@ class _MainScreen2State extends State<MainScreen2> {
       if (cachedHistory != null && cachedHistory.isNotEmpty) {
         setState(() {
           _analysisHistory.clear();
-          _analysisHistory.addAll(cachedHistory);
+          _analysisHistory.addAll(
+            cachedHistory.map((item) {
+              final newItem = Map<String, dynamic>.from(item);
+              if (newItem['report'] is Map<String, dynamic>) {
+                newItem['report'] = ChatAnalysisReport.fromJson(newItem['report']);
+              }
+              return newItem;
+            }),
+          );
         });
       }
     } catch (e) {
