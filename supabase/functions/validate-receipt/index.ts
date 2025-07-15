@@ -3,6 +3,7 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 // @ts-ignore: Deno types and djwt types may not be available in Edge Functions, but are fine at runtime
 import { makeJwt, setExpiration, Jose, Payload } from "https://deno.land/x/djwt@v2.8/mod.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
 
 console.log('Fonction de validation de reçu initialisée');
 
@@ -180,7 +181,8 @@ serve(async (req) => {
       platform, 
       packageName, 
       purchaseToken, 
-      isSubscription = true 
+      isSubscription = true,
+      userId // récupéré du body
     } = await req.json();
     
     console.log(`Validation pour le produit ${productId} sur ${platform}`);
@@ -199,8 +201,14 @@ serve(async (req) => {
           { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, status: 400 }
         );
       }
-      
       const result = await validateAppleReceipt(receipt, productId);
+      if (result.isValid && userId) {
+        // Récompense le parrain si l'achat est validé
+        const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        await supabase.rpc('reward_referrer_on_premium', { filleul_id: userId });
+      }
       if (!result.isValid) {
         console.warn('Validation iOS échouée:', result.reason);
       }
@@ -219,8 +227,14 @@ serve(async (req) => {
           { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, status: 400 }
         );
       }
-      
       const result = await validateAndroidReceipt(packageName, productId, purchaseToken, isSubscription);
+      if (result.isValid && userId) {
+        // Récompense le parrain si l'achat est validé
+        const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        await supabase.rpc('reward_referrer_on_premium', { filleul_id: userId });
+      }
       if (!result.isValid) {
         console.warn('Validation Android échouée:', result.reason);
       }

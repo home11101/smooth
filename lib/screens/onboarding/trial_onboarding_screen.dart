@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/app_theme.dart';
-import '../../services/promo_code_service.dart';
 import '../../services/subscription_service.dart';
-import '../../widgets/promo_code_input_widget.dart';
 import '../main_navigation_screen.dart';
 
 class TrialOnboardingScreen extends StatefulWidget {
@@ -14,50 +12,14 @@ class TrialOnboardingScreen extends StatefulWidget {
 }
 
 class _TrialOnboardingScreenState extends State<TrialOnboardingScreen> {
-  final PromoCodeService _promoCodeService = PromoCodeService();
   final SubscriptionService _subscriptionService = SubscriptionService();
   
-  PromoCodeValidation? _appliedPromoCode;
-  bool _showPromoCodeInput = false;
   bool _isLoading = false;
   int _currentStep = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadAppliedPromoCode();
-  }
-
-  Future<void> _loadAppliedPromoCode() async {
-    final appliedCode = await _promoCodeService.getAppliedPromoCode();
-    if (appliedCode != null) {
-      setState(() {
-        _appliedPromoCode = PromoCodeValidation(
-          isValid: true,
-          discountType: appliedCode.discountType,
-          discountValue: appliedCode.discount,
-          description: 'Code promo appliqué: ${appliedCode.code}',
-        );
-      });
-    }
-  }
-
-  void _onPromoCodeValidated(PromoCodeValidation validation) {
-    setState(() {
-      _appliedPromoCode = validation;
-    });
-  }
-
-  void _onPromoCodeApplied(String code) {
-    setState(() {
-      _showPromoCodeInput = false;
-    });
-  }
-
-  void _togglePromoCodeInput() {
-    setState(() {
-      _showPromoCodeInput = !_showPromoCodeInput;
-    });
   }
 
   Future<void> _startTrial() async {
@@ -99,12 +61,6 @@ class _TrialOnboardingScreenState extends State<TrialOnboardingScreen> {
     }
   }
 
-  void _skipPromoCode() {
-    setState(() {
-      _currentStep = 1;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,9 +77,7 @@ class _TrialOnboardingScreenState extends State<TrialOnboardingScreen> {
                   const SizedBox(height: 40),
                   _buildHeader(),
                   const SizedBox(height: 40),
-                  _currentStep == 0 
-                      ? _buildPromoCodeStep()
-                      : _buildWelcomeStep(),
+                  _buildWelcomeStep(),
                   const SizedBox(height: 40),
                   _buildBottomSection(),
                 ],
@@ -162,7 +116,7 @@ class _TrialOnboardingScreenState extends State<TrialOnboardingScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          _currentStep == 0 ? 'Code promo' : 'Bienvenue !',
+          'Bienvenue !',
           style: Theme.of(context).textTheme.headlineMedium!.copyWith(
             color: Colors.white.withAlpha(230),
             fontWeight: FontWeight.bold,
@@ -171,141 +125,11 @@ class _TrialOnboardingScreenState extends State<TrialOnboardingScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          _currentStep == 0 
-              ? 'Avez-vous un code promo pour votre essai gratuit ?'
-              : 'Votre essai gratuit de 3 jours commence maintenant !',
+          'Votre essai gratuit de 3 jours commence maintenant !',
           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
             color: Colors.white.withAlpha(204),
           ),
           textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPromoCodeStep() {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(26),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withAlpha(51),
-            ),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                Icons.card_giftcard,
-                size: 48,
-                color: Colors.white.withAlpha(204),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Réductions exclusives',
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Colors.white.withAlpha(230),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Entrez votre code promo pour obtenir des réductions spéciales sur votre abonnement premium.',
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: Colors.white.withAlpha(204),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        if (_appliedPromoCode != null) ...[
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.green.withAlpha(51),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.withAlpha(77)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.green.shade300, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Code promo appliqué !',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green.shade300,
-                        ),
-                      ),
-                      if (_appliedPromoCode!.description != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          _appliedPromoCode!.description!,
-                          style: TextStyle(
-                            color: Colors.green.shade200,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await _promoCodeService.clearAppliedPromoCode();
-                    setState(() {
-                      _appliedPromoCode = null;
-                    });
-                  },
-                  child: Text(
-                    'Supprimer',
-                    style: TextStyle(
-                      color: Colors.green.shade300,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        if (_showPromoCodeInput) ...[
-          PromoCodeInputWidget(
-            onCodeValidated: _onPromoCodeValidated,
-            onCodeApplied: _onPromoCodeApplied,
-            context: 'trial_onboarding',
-          ),
-          const SizedBox(height: 16),
-        ],
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _togglePromoCodeInput,
-                icon: Icon(
-                  _showPromoCodeInput ? Icons.remove : Icons.add,
-                  size: 18,
-                ),
-                label: Text(
-                  _showPromoCodeInput ? 'Masquer' : 'J\'ai un code promo',
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white.withAlpha(230),
-                  side: BorderSide(color: Colors.white.withAlpha(77)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
         ),
       ],
     );
@@ -410,29 +234,6 @@ class _TrialOnboardingScreenState extends State<TrialOnboardingScreen> {
   Widget _buildBottomSection() {
     return Column(
       children: [
-        if (_currentStep == 0) ...[
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _skipPromoCode,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white.withAlpha(51),
-                foregroundColor: Colors.white.withAlpha(230),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Passer cette étape',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-        ],
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
@@ -455,7 +256,7 @@ class _TrialOnboardingScreenState extends State<TrialOnboardingScreen> {
                     ),
                   )
                 : Text(
-                    _currentStep == 0 ? 'Continuer' : 'Commencer l\'essai',
+                    'Commencer l\'essai',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,

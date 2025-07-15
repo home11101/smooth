@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/app_theme.dart';
 import '../main_navigation_screen.dart';
 import 'dart:math' as math;
+import 'package:app_links/app_links.dart';
+import '../../services/referral_service.dart';
 
 void main() {
   runApp(const FigmaToCodeApp());
@@ -53,6 +55,9 @@ class _SplashScreen1State extends State<SplashScreen1>
     "Message parfait ! 🎯"
   ];
 
+  AppLinks? _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -96,6 +101,7 @@ class _SplashScreen1State extends State<SplashScreen1>
     
     // Créer de nouvelles cartes périodiquement
     _startCardCreation();
+    _initDeepLinkListener();
   }
 
   void _createInitialCards() {
@@ -166,10 +172,52 @@ class _SplashScreen1State extends State<SplashScreen1>
     }
   }
 
+  void _initDeepLinkListener() async {
+    _appLinks = AppLinks();
+    // Vérifie si l'app a été lancée via un lien
+    final initialUri = await _appLinks!.getInitialAppLink();
+    if (initialUri != null) {
+      _handleIncomingLink(initialUri);
+    }
+    // Écoute les liens reçus pendant que l'app est ouverte
+    _linkSubscription = _appLinks!.uriLinkStream.listen((uri) {
+      _handleIncomingLink(uri);
+    });
+  }
+
+  void _handleIncomingLink(Uri uri) async {
+    // Ex: https://smoothai.com/invite/ABC12345
+    final segments = uri.pathSegments;
+    if (segments.isNotEmpty && segments[0] == 'invite' && segments.length > 1) {
+      final code = segments[1];
+      final result = await ReferralService().useReferralCodeForCurrentUser(code, null);
+      if (result != null && result['success'] == true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Code de parrainage appliqué !'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else if (result != null && result['message'] != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message']),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
     _logoController.dispose();
     _cardsController.dispose();
+    _linkSubscription?.cancel();
     super.dispose();
   }
 

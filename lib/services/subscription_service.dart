@@ -370,6 +370,39 @@ class SubscriptionService {
     return await _notificationService.loadNotificationSettings();
   }
 
+  /// Prolonge la période d'essai gratuite de [days] jours supplémentaires
+  Future<void> extendTrial(int days) async {
+    if (!_isInitialized) await initialize();
+
+    final trialStartStr = _prefs.getString(_trialStartKey);
+    DateTime trialStart;
+    if (trialStartStr == null) {
+      // Si pas d'essai, on démarre maintenant
+      trialStart = DateTime.now();
+      await _prefs.setString(_trialStartKey, trialStart.toIso8601String());
+    } else {
+      trialStart = DateTime.parse(trialStartStr);
+    }
+
+    // Calculer la date de fin d'essai actuelle
+    final currentTrialEnd = trialStart.add(const Duration(days: trialDurationDays));
+    final now = DateTime.now();
+    DateTime newTrialEnd;
+    if (now.isAfter(currentTrialEnd)) {
+      // Si l'essai est déjà expiré, on repart de maintenant
+      newTrialEnd = now.add(Duration(days: days));
+      await _prefs.setString(_trialStartKey, now.toIso8601String());
+    } else {
+      // Sinon, on prolonge la date de fin d'essai actuelle
+      newTrialEnd = currentTrialEnd.add(Duration(days: days));
+    }
+    await _prefs.setString(_subscriptionExpiryKey, newTrialEnd.toIso8601String());
+    await _prefs.setBool(_isPremiumKey, true); // L'utilisateur reste premium pendant l'essai
+
+    // Configurer les notifications d'essai
+    await _notificationService.setupTrialNotifications(newTrialEnd);
+  }
+
   void dispose() {
     _subscription.cancel();
   }

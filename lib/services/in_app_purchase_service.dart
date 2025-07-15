@@ -9,7 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'premium_provider.dart';
 import 'notification_service.dart';
-import 'promo_code_service.dart';
 
 class InAppPurchaseService {
   // IDs des produits
@@ -159,7 +158,7 @@ class InAppPurchaseService {
 
     String deviceId = 'unknown_device';
     try {
-      deviceId = await PromoCodeService().getDeviceId();
+      
     } catch (_) {}
 
     // Récupère le user_id Supabase si connecté
@@ -198,9 +197,13 @@ class InAppPurchaseService {
     const String validationUrl = 'https://qlomkoexurbxqsezavdi.supabase.co/functions/v1/validate-receipt';
     
     try {
+      final user = Supabase.instance.client.auth.currentUser;
+      final userId = user?.id;
+
       final Map<String, dynamic> requestBody = {
         'productId': purchase.productID,
         'platform': Platform.isIOS ? 'ios' : 'android',
+        'userId': userId, // Ajouté pour le backend
       };
 
       // Ajouter les paramètres spécifiques à la plateforme

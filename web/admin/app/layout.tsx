@@ -64,8 +64,8 @@ export default function RootLayout({
                       </ListItemButton>
                     </ListItem>
                     <ListItem disablePadding>
-                      <ListItemButton component={Link} href="/promo-codes">
-                        <ListItemText primary="Codes Promo" />
+                      <ListItemButton component={Link} href="/referrals">
+                        <ListItemText primary="Parrainage" />
                       </ListItemButton>
                     </ListItem>
                     <ListItem disablePadding>

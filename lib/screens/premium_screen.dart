@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import '../services/in_app_purchase_service.dart';
 import '../services/premium_provider.dart';
-import '../services/promo_code_service.dart';
 import '../services/referral_service.dart';
-import '../widgets/promo_code_input_widget.dart';
 import '../widgets/referral_success_dialog.dart';
 import 'dart:ui';
 import 'dart:async';
@@ -30,11 +28,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
   final FixedExtentScrollController _carouselController = FixedExtentScrollController();
 
   final PremiumProvider _premiumProvider = PremiumProvider();
-  final PromoCodeService _promoCodeService = PromoCodeService();
   final ReferralService _referralService = ReferralService();
   
-  PromoCodeValidation? _appliedPromoCode;
-  bool _showPromoCodeInput = false;
   bool _showReferralDialog = false;
 
   @override
@@ -42,21 +37,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
     super.initState();
     _purchaseService = Provider.of<InAppPurchaseService>(context, listen: false);
     _purchaseService.initialize(_premiumProvider);
-    _loadAppliedPromoCode();
-  }
-
-  Future<void> _loadAppliedPromoCode() async {
-    final appliedCode = await _promoCodeService.getAppliedPromoCode();
-    if (appliedCode != null) {
-      setState(() {
-        _appliedPromoCode = PromoCodeValidation(
-          isValid: true,
-          discountType: appliedCode.discountType,
-          discountValue: appliedCode.discount,
-          description: 'Code promo appliqué: ${appliedCode.code}',
-        );
-      });
-    }
   }
 
   Future<void> _buyPremium(ProductDetails product) async {
@@ -105,24 +85,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
         );
       },
     );
-  }
-
-  void _onPromoCodeValidated(PromoCodeValidation validation) {
-    setState(() {
-      _appliedPromoCode = validation;
-    });
-  }
-
-  void _onPromoCodeApplied(String code) {
-    setState(() {
-      _showPromoCodeInput = false;
-    });
-  }
-
-  void _togglePromoCodeInput() {
-    setState(() {
-      _showPromoCodeInput = !_showPromoCodeInput;
-    });
   }
 
   Future<void> _restorePurchases() async {
@@ -205,7 +167,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Consumer2<InAppPurchaseService, PremiumProvider>(
       builder: (context, purchaseService, premiumProvider, _) {
         return Scaffold(
-          backgroundColor: const Color(0xFF121F2F),
+          extendBodyBehindAppBar: true,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -213,140 +176,154 @@ class _PremiumScreenState extends State<PremiumScreen> {
             title: Container(),
             iconTheme: const IconThemeData(color: Colors.white),
           ),
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 16),
-                    // Logo en haut
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(20),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(30),
-                            blurRadius: 32,
-                            spreadRadius: 8,
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Affichage du nombre de jours d'essai restant
-                    FutureBuilder<int>(
-                      future: SubscriptionService().getTrialDaysRemaining(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const SizedBox(height: 16);
-                        }
-                        final days = snapshot.data ?? 0;
-                        if (days > 0) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withAlpha(30),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'Essai gratuit : $days jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          );
-                        } else {
-                          return const SizedBox(height: 8);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    // Gestion des erreurs d'achat/validation
-                    if (premiumProvider.errorMessage != null && premiumProvider.errorMessage!.isNotEmpty)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withAlpha(180),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.error_outline, color: Colors.white, size: 20),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                premiumProvider.errorMessage!,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    // Avantages premium bien mis en avant
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 180,
-                      child: _buildBenefitCarousel(),
-                    ),
-                    const SizedBox(height: 16),
-                    // Section code promo
-                    _buildPromoCodeSection(),
-                    const SizedBox(height: 12),
-                    // Offres de prix
-                    _buildPricingOptions(),
-                    const SizedBox(height: 12),
-                    // Bouton restaurer visible
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: premiumProvider.isProcessing ? null : _restorePurchases,
-                        icon: const Icon(Icons.restore, color: Colors.white, size: 20),
-                        label: premiumProvider.isProcessing
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Text('Restaurer les achats', style: TextStyle(fontWeight: FontWeight.w600)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withAlpha(30),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Mentions légales
-                    _buildLegalInfo(),
-                    const SizedBox(height: 16, child: SizedBox.expand()),
-                  ],
+          body: Stack(
+            children: [
+              // Fond noir profond + blur léger
+              Container(
+                color: const Color(0xFF0A0A0A),
+              ),
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Container(
+                  color: Colors.black.withOpacity(0.3),
                 ),
               ),
-            ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 16),
+                        // Logo en haut
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(20),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(30),
+                                blurRadius: 32,
+                                spreadRadius: 8,
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Image.asset(
+                              'assets/images/logo.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Affichage du nombre de jours d'essai restant
+                        FutureBuilder<int>(
+                          future: SubscriptionService().getTrialDaysRemaining(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const SizedBox(height: 16);
+                            }
+                            final days = snapshot.data ?? 0;
+                            if (days > 0) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withAlpha(30),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'Essai gratuit : $days jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return const SizedBox(height: 8);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        // Gestion des erreurs d'achat/validation
+                        if (premiumProvider.errorMessage != null && premiumProvider.errorMessage!.isNotEmpty)
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withAlpha(180),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    premiumProvider.errorMessage!,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        // Avantages premium bien mis en avant
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 180,
+                          child: _buildBenefitCarousel(),
+                        ),
+                        const SizedBox(height: 16),
+                        // Section code promo
+                        // SUPPRIMER : _buildPromoCodeSection(),
+                        const SizedBox(height: 12),
+                        // Offres de prix
+                        _buildPricingOptions(),
+                        const SizedBox(height: 12),
+                        // Bouton restaurer visible
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: premiumProvider.isProcessing ? null : _restorePurchases,
+                            icon: const Icon(Icons.restore, color: Colors.white, size: 20),
+                            label: premiumProvider.isProcessing
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : const Text('Restaurer les achats', style: TextStyle(fontWeight: FontWeight.w600)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withAlpha(30),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Mentions légales
+                        _buildLegalInfo(),
+                        const SizedBox(height: 16, child: SizedBox.expand()),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -536,105 +513,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPromoCodeSection() {
-    return Column(
-      children: [
-        if (_appliedPromoCode != null) ...[
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.shade200),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.green.shade600, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Code promo appliqué !',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green.shade700,
-                        ),
-                      ),
-                      if (_appliedPromoCode!.description != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          _appliedPromoCode!.description!,
-                          style: TextStyle(
-                            color: Colors.green.shade600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await _promoCodeService.clearAppliedPromoCode();
-                    setState(() {
-                      _appliedPromoCode = null;
-                    });
-                  },
-                  child: Text(
-                    'Supprimer',
-                    style: TextStyle(
-                      color: Colors.green.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        if (_showPromoCodeInput) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: PromoCodeInputWidget(
-              onCodeValidated: _onPromoCodeValidated,
-              onCodeApplied: _onPromoCodeApplied,
-              context: 'premium_purchase',
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _togglePromoCodeInput,
-                  icon: Icon(
-                    _showPromoCodeInput ? Icons.remove : Icons.add,
-                    size: 18,
-                  ),
-                  label: Text(
-                    _showPromoCodeInput ? 'Masquer le code promo' : 'J\'ai un code promo',
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.blue.shade600,
-                    side: BorderSide(color: Colors.blue.shade300),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 

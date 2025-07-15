@@ -290,18 +290,22 @@ class _SmoothAIScreenState extends State<SmoothAIScreen>
       );
     }
     if (_isPremium == false) {
-      return Scaffold(
-        body: Center(
-          child: PremiumLockWidget(
-            feature: 'enter_text',
-            title: 'Fonctionnalité Premium',
-            description: 'La génération de réponses IA est réservée aux membres Premium.',
-            icon: Icons.text_fields,
-            onUnlock: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const PremiumScreen()),
-              );
-            },
+      return PremiumLockOverlay(
+        feature: 'enter_text',
+        title: 'Générateur de Réponses IA',
+        description: 'Générez des réponses intelligentes et personnalisées pour vos conversations.',
+        icon: Icons.text_fields,
+        child: Scaffold(
+          body: AppTheme.buildPickupScreenBackground(
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(child: _buildScrollableContent()),
+                  _buildBottomActionArea(),
+                ],
+              ),
+            ),
           ),
         ),
       );
