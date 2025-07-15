@@ -189,139 +189,139 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 ),
               ),
               SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 16),
-                        // Logo en haut
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(20),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(30),
-                                blurRadius: 32,
-                                spreadRadius: 8,
-                              ),
-                            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 16),
+                    // Logo en haut
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(20),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(30),
+                            blurRadius: 32,
+                            spreadRadius: 8,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Image.asset(
-                              'assets/images/logo.png',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 12),
-                        // Affichage du nombre de jours d'essai restant
-                        FutureBuilder<int>(
-                          future: SubscriptionService().getTrialDaysRemaining(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const SizedBox(height: 16);
-                            }
-                            final days = snapshot.data ?? 0;
-                            if (days > 0) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withAlpha(30),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  'Essai gratuit : $days jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return const SizedBox(height: 8);
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        // Gestion des erreurs d'achat/validation
-                        if (premiumProvider.errorMessage != null && premiumProvider.errorMessage!.isNotEmpty)
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withAlpha(180),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.error_outline, color: Colors.white, size: 20),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    premiumProvider.errorMessage!,
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        // Avantages premium bien mis en avant
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 180,
-                          child: _buildBenefitCarousel(),
-                        ),
-                        const SizedBox(height: 16),
-                        // Section code promo
-                        // SUPPRIMER : _buildPromoCodeSection(),
-                        const SizedBox(height: 12),
-                        // Offres de prix
-                        _buildPricingOptions(),
-                        const SizedBox(height: 12),
-                        // Bouton restaurer visible
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: premiumProvider.isProcessing ? null : _restorePurchases,
-                            icon: const Icon(Icons.restore, color: Colors.white, size: 20),
-                            label: premiumProvider.isProcessing
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                    ),
-                                  )
-                                : const Text('Restaurer les achats', style: TextStyle(fontWeight: FontWeight.w600)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white.withAlpha(30),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Mentions légales
-                        _buildLegalInfo(),
-                        const SizedBox(height: 16, child: SizedBox.expand()),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    // Affichage du nombre de jours d'essai restant
+                    FutureBuilder<int>(
+                      future: SubscriptionService().getTrialDaysRemaining(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const SizedBox(height: 16);
+                        }
+                        final days = snapshot.data ?? 0;
+                        if (days > 0) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(30),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              'Essai gratuit : $days jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          );
+                        } else {
+                          return const SizedBox(height: 8);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    // Gestion des erreurs d'achat/validation
+                    if (premiumProvider.errorMessage != null && premiumProvider.errorMessage!.isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withAlpha(180),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                premiumProvider.errorMessage!,
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    // Avantages premium bien mis en avant
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 180,
+                      child: _buildBenefitCarousel(),
+                    ),
+                    const SizedBox(height: 16),
+                    // Section code promo
+                    // SUPPRIMER : _buildPromoCodeSection(),
+                    const SizedBox(height: 12),
+                    // Offres de prix
+                    _buildPricingOptions(),
+                    const SizedBox(height: 12),
+                    // Bouton restaurer visible
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: premiumProvider.isProcessing ? null : _restorePurchases,
+                        icon: const Icon(Icons.restore, color: Colors.white, size: 20),
+                        label: premiumProvider.isProcessing
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text('Restaurer les achats', style: TextStyle(fontWeight: FontWeight.w600)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withAlpha(30),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Mentions légales
+                    _buildLegalInfo(),
+                    const SizedBox(height: 16, child: SizedBox.expand()),
+                  ],
                 ),
+              ),
+            ),
               ),
             ],
           ),

@@ -122,10 +122,10 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay>
                     filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                     child: Container(
                       color: Colors.black.withOpacity(0.4),
-                      child: Opacity(
+              child: Opacity(
                         opacity: 0.2,
                         child: widget.child,
-                      ),
+              ),
                     ),
                   ),
                 );
@@ -146,7 +146,7 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay>
                       scale: _scaleAnimation.value,
                       child: FadeTransition(
                         opacity: _fadeAnimation,
-                        child: _buildLockWidget(context),
+              child: _buildLockWidget(context),
                       ),
                     ),
                   );

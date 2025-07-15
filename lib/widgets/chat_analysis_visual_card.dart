@@ -280,10 +280,14 @@ class ChatAnalysisVisualCard extends StatelessWidget {
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
-          Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            children: keywords.map((k) => Chip(label: Text(k))).toList(),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: keywords.map((k) => Padding(
+                padding: const EdgeInsets.only(right: 4.0),
+                child: Chip(label: Text(k)),
+              )).toList(),
+            ),
           ),
         ],
       ),
