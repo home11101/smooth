@@ -105,7 +105,7 @@ class _FlipableChatAnalysisCardState extends State<FlipableChatAnalysisCard> wit
 
   Widget _buildFront(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(32),
+      borderRadius: BorderRadius.zero,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: AnimatedBuilder(
@@ -123,7 +123,7 @@ class _FlipableChatAnalysisCardState extends State<FlipableChatAnalysisCard> wit
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.zero,
                 border: Border.all(
                   color: Colors.white.withAlpha(89),
                   width: 2.5,
@@ -146,7 +146,7 @@ class _FlipableChatAnalysisCardState extends State<FlipableChatAnalysisCard> wit
 
   Widget _buildBack(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(32),
+      borderRadius: BorderRadius.zero,
       child: widget.uploadedImageBytes != null
           ? Image.memory(
               widget.uploadedImageBytes!,
