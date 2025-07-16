@@ -3,13 +3,13 @@ import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, TextField, InputAdornment, IconButton, Button, MenuItem, Select, Grid, Divider, Tabs, Tab } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import DownloadIcon from '@mui/icons-material/Download';
 import Loader from '../../components/Loader';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, CartesianGrid, Line } from 'recharts';
 import React from 'react';
+import Image from 'next/image';
 
 const supabaseUrl = 'https://qlomkoexurbxqsezavdi.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsb21rb2V4dXJieHFzZXphdmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEzODYxOTYsImV4cCI6MjA2Njk2MjE5Nn0.eVV4vRp1a_5FVMqqRcSHFC5cjaBEOKCODHZQ76fpED8';
@@ -390,7 +390,7 @@ export default function ReferralsPage() {
             <MenuItem value="pending">En attente</MenuItem>
             <MenuItem value="rewarded">Attribuée</MenuItem>
           </Select>
-          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportCSV}>
+          <Button variant="outlined" startIcon={<Image src="/app/assets/images/logo.png" alt="Export" width={20} height={20} />} onClick={exportCSV}>
             Export CSV
           </Button>
         </div>
@@ -490,7 +490,7 @@ export default function ReferralsPage() {
               onChange={handleCoinSearchChange}
               size="small"
             />
-            <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportCoinCSV}>
+            <Button variant="outlined" startIcon={<Image src="/app/assets/images/logo.png" alt="Export" width={20} height={20} />} onClick={exportCoinCSV}>
               Export CSV
             </Button>
           </div>
@@ -547,7 +547,7 @@ export default function ReferralsPage() {
                   onChange={handleLotterySearchChange}
                   size="small"
                 />
-                <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportLotteryCSV}>
+                <Button variant="outlined" startIcon={<Image src="/app/assets/images/logo.png" alt="Export" width={20} height={20} />} onClick={exportLotteryCSV}>
                   Export CSV
                 </Button>
                 <Button variant="outlined" onClick={() => setLotteryGrouped((g: boolean) => !g)}>
