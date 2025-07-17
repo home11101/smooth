@@ -4,18 +4,12 @@ import 'dart:async';
 import 'notification_service.dart';
 
 class SubscriptionService {
-  static const String _trialStartKey = 'trial_start_date';
   static const String _subscriptionStatusKey = 'subscription_status';
   static const String _purchaseDateKey = 'purchase_date';
   static const String _expiryDateKey = 'expiry_date';
   static const String _isPremiumKey = 'is_premium';
   static const String _subscriptionExpiryKey = 'subscription_expiry';
-  
-  static const String _premiumProductId = 'smooth_ai_premium_monthly';
-  static const String _premiumYearlyProductId = 'smooth_ai_premium_yearly';
-  
-  static const int trialDurationDays = 3;
-  
+  static const String _premiumProductId = 'smooth_ai_premium_weekly_v2';
   static final SubscriptionService _instance = SubscriptionService._internal();
   factory SubscriptionService() => _instance;
   SubscriptionService._internal();
@@ -38,11 +32,6 @@ class SubscriptionService {
     // Initialiser le service de notifications
     await _notificationService.initialize();
     
-    // Si c'est la première fois, démarrer la période d'essai
-    if (!_prefs.containsKey(_trialStartKey)) {
-      await _startTrial();
-    }
-    
     _isInitialized = true;
 
     _subscription = _inAppPurchase.purchaseStream.listen(
@@ -53,22 +42,6 @@ class SubscriptionService {
     
     // Configurer les notifications selon le statut actuel
     await _updateNotificationsBasedOnCurrentStatus();
-  }
-
-  /// Démarre la période d'essai de 3 jours
-  Future<void> _startTrial() async {
-    final now = DateTime.now();
-    final trialEndDate = now.add(const Duration(days: trialDurationDays));
-    
-    await _prefs.setString(_trialStartKey, now.toIso8601String());
-    await _prefs.setBool(_isPremiumKey, true);
-    await _prefs.setString(_subscriptionExpiryKey, trialEndDate.toIso8601String());
-    
-    // Configurer les notifications d'essai
-    await _notificationService.setupTrialNotifications(trialEndDate);
-    
-    // Envoyer une notification de bienvenue
-    await _notificationService.sendWelcomeNotification();
   }
 
   /// Vérifie si l'utilisateur a un accès premium (essai ou abonnement)
@@ -91,45 +64,7 @@ class SubscriptionService {
       }
     }
     
-    // Vérifier l'essai gratuit
-    return await isInTrial();
-  }
-
-  /// Vérifie si l'utilisateur est en période d'essai
-  Future<bool> isInTrial() async {
-    if (!_isInitialized) await initialize();
-    
-    final trialStartStr = _prefs.getString(_trialStartKey);
-    if (trialStartStr == null) {
-      // Premier lancement, démarrer l'essai
-      await _prefs.setString(_trialStartKey, DateTime.now().toIso8601String());
-      return true;
-    }
-    
-    final trialStart = DateTime.parse(trialStartStr);
-    final trialEnd = trialStart.add(const Duration(days: trialDurationDays));
-    
-    return DateTime.now().isBefore(trialEnd);
-  }
-
-  /// Obtient le nombre de jours restants dans l'essai
-  Future<int> getTrialDaysRemaining() async {
-    final prefs = await SharedPreferences.getInstance();
-    final trialStartStr = prefs.getString(_trialStartKey);
-    
-    if (trialStartStr == null) {
-      return trialDurationDays;
-    }
-    
-    final trialStart = DateTime.parse(trialStartStr);
-    final trialEnd = trialStart.add(const Duration(days: trialDurationDays));
-    final now = DateTime.now();
-    
-    if (now.isAfter(trialEnd)) {
-      return 0;
-    }
-    
-    return trialEnd.difference(now).inDays;
+    return false;
   }
 
   /// Obtient la date d'expiration de l'abonnement
@@ -151,9 +86,6 @@ class SubscriptionService {
     
     // Configurer les notifications de renouvellement
     await _notificationService.setupRenewalNotifications(expiryDate);
-    
-    // Annuler les notifications d'essai
-    await _notificationService.cancelTrialNotifications();
   }
 
   /// Désactive l'abonnement premium
@@ -183,10 +115,7 @@ class SubscriptionService {
       return [];
     }
 
-    const Set<String> kIds = <String>{
-      _premiumProductId,
-      _premiumYearlyProductId,
-    };
+    const Set<String> kIds = <String>{_premiumProductId};
 
     final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails(kIds);
     
@@ -207,7 +136,7 @@ class SubscriptionService {
     final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
     
     try {
-      if (product.id.contains('monthly') || product.id.contains('yearly')) {
+      if (product.id.contains('weekly_v2')) {
         return await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
       } else {
         return await _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
@@ -256,10 +185,11 @@ class SubscriptionService {
     DateTime expiryDate;
     
     // Calculer la date d'expiration selon le type d'abonnement
-    if (purchaseDetails.productID.contains('yearly')) {
-      expiryDate = DateTime.now().add(const Duration(days: 365));
+    if (purchaseDetails.productID.contains('weekly_v2')) {
+      expiryDate = DateTime.now().add(const Duration(days: 7));
     } else {
-      expiryDate = DateTime.now().add(const Duration(days: 30));
+      // Achat unique ou inconnu
+      expiryDate = DateTime.now().add(const Duration(days: 7));
     }
     
     await activatePremium(expiryDate);
@@ -269,16 +199,11 @@ class SubscriptionService {
   /// Obtient le statut de l'abonnement en format texte
   Future<String> getSubscriptionStatusText() async {
     if (await isPremium()) {
-      if (await isInTrial()) {
-        final daysLeft = await getTrialDaysRemaining();
-        return 'Essai gratuit - $daysLeft jours restants';
-      } else {
         final expiry = await getSubscriptionExpiry();
         if (expiry != null) {
           return 'Premium - Expire le ${expiry.day}/${expiry.month}/${expiry.year}';
         }
         return 'Premium actif';
-      }
     } else {
       return 'Essai expiré - Abonnement requis';
     }
@@ -332,9 +257,9 @@ class SubscriptionService {
     
     // Calculer la date d'expiration
     final now = DateTime.now();
-    final expiryDate = purchaseDetails.productID.contains('yearly') 
-        ? now.add(const Duration(days: 365))
-        : now.add(const Duration(days: 30));
+    final expiryDate = purchaseDetails.productID.contains('weekly_v2') 
+        ? now.add(const Duration(days: 7))
+        : now.add(const Duration(days: 7));
     
     await prefs.setString(_expiryDateKey, expiryDate.toIso8601String());
     await prefs.setString(_subscriptionStatusKey, 'active');
@@ -368,39 +293,6 @@ class SubscriptionService {
   /// Charge les paramètres de notifications
   Future<Map<String, bool>> loadNotificationSettings() async {
     return await _notificationService.loadNotificationSettings();
-  }
-
-  /// Prolonge la période d'essai gratuite de [days] jours supplémentaires
-  Future<void> extendTrial(int days) async {
-    if (!_isInitialized) await initialize();
-
-    final trialStartStr = _prefs.getString(_trialStartKey);
-    DateTime trialStart;
-    if (trialStartStr == null) {
-      // Si pas d'essai, on démarre maintenant
-      trialStart = DateTime.now();
-      await _prefs.setString(_trialStartKey, trialStart.toIso8601String());
-    } else {
-      trialStart = DateTime.parse(trialStartStr);
-    }
-
-    // Calculer la date de fin d'essai actuelle
-    final currentTrialEnd = trialStart.add(const Duration(days: trialDurationDays));
-    final now = DateTime.now();
-    DateTime newTrialEnd;
-    if (now.isAfter(currentTrialEnd)) {
-      // Si l'essai est déjà expiré, on repart de maintenant
-      newTrialEnd = now.add(Duration(days: days));
-      await _prefs.setString(_trialStartKey, now.toIso8601String());
-    } else {
-      // Sinon, on prolonge la date de fin d'essai actuelle
-      newTrialEnd = currentTrialEnd.add(Duration(days: days));
-    }
-    await _prefs.setString(_subscriptionExpiryKey, newTrialEnd.toIso8601String());
-    await _prefs.setBool(_isPremiumKey, true); // L'utilisateur reste premium pendant l'essai
-
-    // Configurer les notifications d'essai
-    await _notificationService.setupTrialNotifications(newTrialEnd);
   }
 
   void dispose() {

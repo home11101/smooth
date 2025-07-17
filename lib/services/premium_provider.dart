@@ -90,18 +90,11 @@ class PremiumProvider extends ChangeNotifier {
     if (purchase.status == PurchaseStatus.purchased || 
         purchase.status == PurchaseStatus.restored) {
       
-      // Pour un abonnement mensuel (30 jours)
-      if (purchase.productID.contains('monthly')) {
-        final expiry = DateTime.now().add(const Duration(days: 30));
+      // Pour un abonnement hebdomadaire (7 jours)
+      if (purchase.productID.contains('weekly_v2')) {
+        final expiry = DateTime.now().add(const Duration(days: 7));
         await setPremium(true, expiryDate: expiry);
-      } 
-      // Pour un abonnement annuel (365 jours)
-      else if (purchase.productID.contains('yearly')) {
-        final expiry = DateTime.now().add(const Duration(days: 365));
-        await setPremium(true, expiryDate: expiry);
-      }
-      // Pour un achat unique
-      else {
+      } else {
         await setPremium(true);
       }
     } else if (purchase.status == PurchaseStatus.error) {

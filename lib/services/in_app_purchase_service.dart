@@ -12,9 +12,7 @@ import 'notification_service.dart';
 
 class InAppPurchaseService {
   // IDs des produits
-  static const String premiumWeekly = 'smooth_ai_premium_weekly';
-  static const String premiumMonthly = 'smooth_ai_premium_monthly';
-  static const String premiumYearly = 'smooth_ai_premium_yearly';
+  static const String premiumWeekly = 'smooth_ai_premium_weekly_v2';
 
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
@@ -68,28 +66,35 @@ class InAppPurchaseService {
 
   /// Charge les produits depuis la boutique (App Store / Play Store)
   Future<void> loadProducts() async {
-    const Set<String> kIds = <String>{premiumWeekly, premiumMonthly, premiumYearly};
+    debugPrint('[IAP] Chargement du produit smooth_ai_premium_weekly...');
+    const Set<String> kIds = <String>{premiumWeekly};
+    final bool isAvailable = await _inAppPurchase.isAvailable();
+    debugPrint('[IAP] Store disponible: $isAvailable');
+    if (!isAvailable) {
+      premiumProvider.setErrorMessage('Les achats intégrés ne sont pas disponibles sur cet appareil.');
+      return;
+    }
     final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails(kIds);
-
     if (response.error != null) {
-      debugPrint('Erreur de chargement des produits: ${response.error}');
-      premiumProvider.setErrorMessage('Erreur lors du chargement des abonnements.');
+      debugPrint('[IAP] Erreur de chargement du produit: ${response.error}');
+      premiumProvider.setErrorMessage('Erreur lors du chargement de l\'abonnement.');
       _products = [];
       return;
     }
-
     if (response.notFoundIDs.isNotEmpty) {
-      debugPrint('IDs d\'achats intégrés non trouvés: ${response.notFoundIDs}');
-      premiumProvider.setErrorMessage(
-        'Aucun abonnement n\'a été trouvé. Vérifiez la configuration de vos achats intégrés sur App Store Connect.\nIDs manquants: ${response.notFoundIDs.join(", ")}'
-      );
-    } else if (response.productDetails.isEmpty) {
-      debugPrint('Aucun produit trouvé.');
-      premiumProvider.setErrorMessage('Aucun abonnement n\'a été trouvé. Vérifiez la configuration de vos achats intégrés sur App Store Connect.');
+      debugPrint('[IAP] Produit non trouvé: ${response.notFoundIDs}');
+      premiumProvider.setErrorMessage('Aucun abonnement n\'a été trouvé. Vérifiez la configuration sur App Store Connect.');
+      _products = [];
+      return;
     }
-    
+    if (response.productDetails.isEmpty) {
+      debugPrint('[IAP] Aucun produit trouvé.');
+      premiumProvider.setErrorMessage('Aucun abonnement n\'a été trouvé.');
+      _products = [];
+      return;
+    }
     _products = response.productDetails;
-    // Notifier l'UI que les produits sont chargés (ou non)
+    debugPrint('[IAP] Produit chargé: ${_products.first.title} - ${_products.first.price}');
     premiumProvider.notifyListeners(); 
   }
 
@@ -257,11 +262,7 @@ class InAppPurchaseService {
     try {
       DateTime expiryDate;
       // Calculer la date d'expiration selon le type d'abonnement
-      if (purchase.productID == premiumYearly) {
-        expiryDate = DateTime.now().add(const Duration(days: 365));
-      } else if (purchase.productID == premiumMonthly) {
-        expiryDate = DateTime.now().add(const Duration(days: 30));
-      } else if (purchase.productID == premiumWeekly) {
+      if (purchase.productID == premiumWeekly) {
         expiryDate = DateTime.now().add(const Duration(days: 7));
       } else {
         // Achat unique - pas de notifications de renouvellement

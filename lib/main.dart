@@ -11,7 +11,6 @@ import 'services/notification_service.dart';
 import 'utils/constants.dart';
 import 'utils/app_theme.dart';
 import 'screens/onboarding/splash_screen_1.dart';
-import 'screens/onboarding/trial_onboarding_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,9 +66,7 @@ class _SmoothAIAppState extends State<SmoothAIApp> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       home: const SplashScreen1(),
-      routes: {
-        '/onboarding': (context) => const TrialOnboardingScreen(),
-      },
+      routes: {},
     );
   }
   
@@ -82,23 +79,5 @@ class _SmoothAIAppState extends State<SmoothAIApp> {
     inAppPurchaseService.initialize(premiumProvider);
     subscriptionService.initialize();
     notificationService.initialize();
-    _checkSubscriptionStatus(premiumProvider, subscriptionService);
-  }
-  
-  Future<void> _checkSubscriptionStatus(PremiumProvider premiumProvider, SubscriptionService subscriptionService) async {
-    try {
-      final isPremium = premiumProvider.isPremium;
-      if (!isPremium) {
-        final isInTrial = await subscriptionService.isInTrial();
-        if (isInTrial) {
-          final remainingDays = await subscriptionService.getTrialDaysRemaining();
-          debugPrint('Période d\'essai active - $remainingDays jours restants');
-        } else {
-          debugPrint('Aucun abonnement actif ou période d\'essai expirée');
-        }
-      }
-    } catch (e) {
-      debugPrint('Erreur lors de la vérification de l\'abonnement: $e');
-    }
   }
 }

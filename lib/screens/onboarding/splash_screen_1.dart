@@ -146,28 +146,25 @@ class _SplashScreen1State extends State<SplashScreen1>
   Future<void> _checkOnboardingStatus() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
-      
-      print('🔍 DEBUG: has_seen_onboarding = $hasSeenOnboarding');
-      
+      // Forcer l'onboarding comme vu
+      await prefs.setBool('has_seen_onboarding', true);
       if (mounted) {
-        if (hasSeenOnboarding) {
-          print('🚀 DEBUG: Aller directement à l\'écran principal');
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const MainNavigationScreen(),
-            ),
-          );
-        } else {
-          print('📱 DEBUG: Afficher l\'onboarding');
-          Navigator.pushReplacementNamed(context, '/onboarding');
-        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MainNavigationScreen(),
+          ),
+        );
       }
     } catch (e) {
       print('❌ DEBUG: Erreur lors de la vérification: $e');
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/onboarding');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MainNavigationScreen(),
+          ),
+        );
       }
     }
   }

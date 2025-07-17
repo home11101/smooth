@@ -15,7 +15,6 @@ class NotificationService {
   bool _isInitialized = false;
 
   // IDs des notifications
-  static const int _trialExpiryId = 1;
   static const int _subscriptionExpiryId = 2;
   static const int _renewalReminderId = 3;
   static const int _welcomeNotificationId = 4;
@@ -100,26 +99,6 @@ class NotificationService {
     }
   }
 
-  /// Configure les notifications d'essai gratuit
-  Future<void> setupTrialNotifications(DateTime trialEndDate) async {
-    if (!_isInitialized) await initialize();
-
-    // Annuler les anciennes notifications d'essai
-    await _notifications.cancel(_trialExpiryId);
-
-    // Notification 1 jour avant la fin de l'essai
-    final oneDayBefore = trialEndDate.subtract(const Duration(days: 1));
-    if (oneDayBefore.isAfter(DateTime.now())) {
-      await _scheduleNotification(
-        id: _trialExpiryId,
-        title: 'Votre essai gratuit se termine demain',
-        body: 'Abonnez-vous maintenant pour continuer à profiter de toutes les fonctionnalités premium de Smooth AI.',
-        scheduledDate: oneDayBefore,
-        payload: 'trial_ending',
-      );
-    }
-  }
-
   /// Notification de bienvenue pour les nouveaux utilisateurs
   Future<void> sendWelcomeNotification() async {
     if (!_isInitialized) await initialize();
@@ -151,13 +130,6 @@ class NotificationService {
     await _notifications.cancel(_renewalReminderId);
     await _notifications.cancel(_renewalReminderId + 1);
     await _notifications.cancel(_subscriptionExpiryId);
-  }
-
-  /// Annule toutes les notifications d'essai
-  Future<void> cancelTrialNotifications() async {
-    if (!_isInitialized) await initialize();
-
-    await _notifications.cancel(_trialExpiryId);
   }
 
   /// Annule toutes les notifications
@@ -259,9 +231,6 @@ class NotificationService {
       case 'subscription_expired':
         // Naviguer vers l'écran premium
         break;
-      case 'trial_ending':
-        // Naviguer vers l'écran premium
-        break;
       case 'welcome':
         // Naviguer vers l'écran d'accueil
         break;
@@ -274,29 +243,10 @@ class NotificationService {
   /// Vérifie et met à jour les notifications selon le statut premium
   Future<void> updateNotificationsBasedOnStatus(bool isPremium, DateTime? expiryDate) async {
     if (!_isInitialized) await initialize();
-
     if (isPremium && expiryDate != null) {
-      // Utilisateur premium - configurer les notifications de renouvellement
       await setupRenewalNotifications(expiryDate);
-      await cancelTrialNotifications();
     } else {
-      // Utilisateur non premium - vérifier s'il est en essai
-      final prefs = await SharedPreferences.getInstance();
-      final trialStartStr = prefs.getString('trial_start_date');
-      
-      if (trialStartStr != null) {
-        final trialStart = DateTime.parse(trialStartStr);
-        final trialEnd = trialStart.add(const Duration(days: 3));
-        
-        if (DateTime.now().isBefore(trialEnd)) {
-          // En essai - configurer les notifications d'essai
-          await setupTrialNotifications(trialEnd);
-          await cancelRenewalNotifications();
-        } else {
-          // Essai expiré - annuler toutes les notifications
-          await cancelAllNotifications();
-        }
-      }
+      await cancelAllNotifications();
     }
   }
 

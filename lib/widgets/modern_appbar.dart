@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:your_app_name/theme/app_theme.dart'; // Added import for AppTheme
 
 class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
@@ -19,12 +20,13 @@ class ModernAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       leading: IconButton(
         icon: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: AppTheme.lightBlue,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.lightBlueBorder, width: 1),
           ),
-          child: const Icon(Icons.menu, color: Colors.black, size: 24),
+          child: const Icon(Icons.menu, color: AppTheme.primaryBlue, size: 22),
         ),
         onPressed: onMenuPressed,
       ),

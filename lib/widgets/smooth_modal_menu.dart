@@ -6,7 +6,6 @@ import 'dart:io' show Platform;
 import 'package:url_launcher/url_launcher.dart'
     show canLaunchUrl, launchUrl, LaunchMode;
 
-import '../screens/premium_screen.dart';
 import '../widgets/smooth_coin_info_bottom_sheet.dart';
 
 // Classe principale du menu modal
@@ -171,26 +170,10 @@ class SmoothModalMenu extends StatelessWidget {
                             ),
                           ]),
 
-                          const SizedBox(height: 8),
-                          const Divider(
-                              height: 1,
-                              thickness: 0.5,
-                              indent: 16,
-                              endIndent: 16),
-                          const SizedBox(height: 8),
+
 
                           // Section Application
                           _buildMenuSection([
-                            _SmoothMenuItem(
-                              icon: Icons.diamond_outlined,
-                              label: 'Mettre à niveau',
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                if (onUpgrade != null) {
-                                  Future.delayed(const Duration(milliseconds: 200), onUpgrade!);
-                                }
-                              },
-                            ),
                             _SmoothMenuItem(
                               icon: Icons.monetization_on_outlined,
                               label: 'Smooth Coin',

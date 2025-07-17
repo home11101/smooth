@@ -65,7 +65,7 @@ class HelpFaqScreen extends StatelessWidget {
       },
       {
         'question': 'Comment mettre à niveau vers la version Premium ?',
-        'reponse': 'Allez dans le menu et sélectionnez "Mettre à niveau". Choisissez l\'abonnement qui vous convient pour débloquer toutes les fonctionnalités avancées.'
+        'reponse': 'Allez dans le menu et sélectionnez "Premium". Choisissez l\'abonnement qui vous convient pour débloquer toutes les fonctionnalités avancées.'
       },
     ];
 

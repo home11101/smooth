@@ -6,7 +6,6 @@ import '../widgets/custom_bottom_nav.dart';
 import '../widgets/smooth_modal_menu.dart';
 import 'main_screen_1.dart';
 import 'main_screen_2.dart';
-import 'premium_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -29,14 +28,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withOpacity(0.3),
-      builder: (modalContext) => SmoothModalMenu(
-        onUpgrade: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const PremiumScreen(),
-            ),
-          );
-        },
+      builder: (modalContext) => const SmoothModalMenu(
+        onUpgrade: null, // Désactivé, car il n'y a plus d'écran PremiumScreen
       ),
     );
   }
@@ -60,7 +53,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.black, size: 24),
+                      icon: const Icon(Icons.menu, color: AppTheme.primaryBlue, size: 24),
                       onPressed: _openMenu,
                     ),
                     Expanded(

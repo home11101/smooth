@@ -190,7 +190,7 @@ class _SmoothCoinInfoBottomSheetState extends State<SmoothCoinInfoBottomSheet>
                       icon: Icons.download_rounded,
                       iconColor: const Color(0xFF60A5FA),
                       title: '1 Smooth Coin',
-                      subtitle: 'par téléchargement via ton lien',
+                      subtitle: 'Par téléchargement via ton lien',
                       gradient: const LinearGradient(
                         colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
                       ),
@@ -200,7 +200,7 @@ class _SmoothCoinInfoBottomSheetState extends State<SmoothCoinInfoBottomSheet>
                       icon: Icons.star,
                       iconColor: const Color(0xFFF59E0B),
                       title: '+5 Smooth Coin',
-                      subtitle: 'si ton filleul devient premium',
+                      subtitle: 'Si ton filleul devient premium',
                       gradient: const LinearGradient(
                         colors: [Color(0xFFD97706), Color(0xFFF59E0B)],
                       ),
@@ -210,7 +210,7 @@ class _SmoothCoinInfoBottomSheetState extends State<SmoothCoinInfoBottomSheet>
                       icon: Icons.emoji_events,
                       iconColor: const Color(0xFF8B5CF6),
                       title: 'Tirage au sort',
-                      subtitle: 'tous les 30 Smooth Coin',
+                      subtitle: 'Tous les 30 Smooth Coin',
                       gradient: const LinearGradient(
                         colors: [Color(0xFF7C3AED), Color(0xFF8B5CF6)],
                       ),
