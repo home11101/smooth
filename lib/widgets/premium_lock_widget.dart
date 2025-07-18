@@ -178,7 +178,7 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay> with TickerProv
                   return Transform.translate(
                     offset: Offset(0, _parallaxAnimation.value * 10),
                     child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                       child: Container(
                         color: Colors.black.withOpacity(0.3),
                         child: Container(color: Colors.transparent),
@@ -224,7 +224,7 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay> with TickerProv
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            margin: const EdgeInsets.only(top: 16, bottom: 16),
+            margin: const EdgeInsets.only(top: 16, bottom: 8),
             padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
             decoration: const BoxDecoration(
               color: Colors.black,
@@ -261,10 +261,10 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay> with TickerProv
                   child: Container(
                     width: cardWidth,
                     constraints: const BoxConstraints(minHeight: 80),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(0),
                     decoration: BoxDecoration(
+                      gradient: AppTheme.primaryGradient,
                       borderRadius: BorderRadius.circular(44),
-                      color: Colors.black,
                       boxShadow: [
                         BoxShadow(
                           color: AppTheme.primaryBlue.withOpacity(0.25),
@@ -277,153 +277,162 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay> with TickerProv
                           spreadRadius: 32,
                         ),
                       ],
-                      border: Border.all(
-                        width: 2.5,
-                        color: AppTheme.primaryBlue,
-                      ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Badge animé
-                        AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: _pulseAnimation.value,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(36),
-                                  gradient: const LinearGradient(
-                                    colors: [AppTheme.lightBlue, AppTheme.secondaryBlue],
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppTheme.primaryBlue.withOpacity(0.22),
-                                      blurRadius: 18,
-                                      spreadRadius: 2,
+                    child: Container(
+                      margin: const EdgeInsets.all(3), // épaisseur de la "bordure"
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(41),
+                        color: Colors.black,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Badge animé
+                          AnimatedBuilder(
+                            animation: _pulseAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _pulseAnimation.value,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(36),
+                                    gradient: const LinearGradient(
+                                      colors: [AppTheme.lightBlue, AppTheme.secondaryBlue],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
                                     ),
-                                  ],
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppTheme.primaryBlue.withOpacity(0.22),
+                                        blurRadius: 18,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Icon(Icons.flash_on, color: Colors.white, size: 20),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Smooth God',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          letterSpacing: 0.5,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                          // Titre premium (fixe)
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [AppTheme.lightBlue, AppTheme.secondaryBlue],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ).createShader(bounds),
+                            child: const Text(
+                              'Envoyer la réponse parfaite',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                decoration: TextDecoration.none,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Bouton principal animé (fixe)
+                          AnimatedBuilder(
+                            animation: _pulseAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _pulseAnimation.value,
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.flash_on, color: Colors.white, size: 20),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Smooth God',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                        letterSpacing: 0.5,
-                                        decoration: TextDecoration.none,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: cardWidth * 0.8, // 70% de la largeur de la carte
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        gradient: AppTheme.primaryGradient,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppTheme.primaryBlue.withOpacity(0.28),
+                                            blurRadius: 24,
+                                            spreadRadius: 4,
+                                          ),
+                                        ],
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: _loading ? null : _onBuyPressed,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(16),
+                                          ),
+                                          elevation: 0,
+                                        ),
+                                        child: _loading
+                                            ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                              )
+                                            : Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: const [
+                                                  Icon(Icons.lock_open, size: 20, color: Colors.white),
+                                                  SizedBox(width: 10),
+                                                  Text(
+                                                    "S'abonner",
+                                                    style: TextStyle(
+                                                      fontSize: 17,
+                                                      fontWeight: FontWeight.w700,
+                                                      decoration: TextDecoration.none,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        // Titre premium (fixe)
-                        ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [AppTheme.lightBlue, AppTheme.secondaryBlue],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ).createShader(bounds),
-                          child: const Text(
-                            'Envoyer la réponse parfaite',
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          // Texte d'information sous le bouton
+                          const Text(
+                            'essai sans risque, puis 7,99€/semaine',
                             style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              fontSize: 13,
+                              color: Colors.white70,
                               decoration: TextDecoration.none,
                             ),
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Bouton principal animé (fixe)
-                        AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: _pulseAnimation.value,
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  gradient: AppTheme.primaryGradient,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppTheme.primaryBlue.withOpacity(0.28),
-                                      blurRadius: 24,
-                                      spreadRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: _loading ? null : _onBuyPressed,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: _loading
-                                      ? const SizedBox(
-                                          width: 24,
-                                          height: 24,
-                                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                        )
-                                      : Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: const [
-                                            Icon(Icons.lock_open, size: 20, color: Colors.white),
-                                            SizedBox(width: 10),
-                                            Text(
-                                              "Débloquer l’essai gratuit",
-                                              style: TextStyle(
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.w700,
-                                                decoration: TextDecoration.none,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        // Texte d'information sous le bouton
-                        const Text(
-                          'essai sans risque, puis 7,99€/semaine',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.white70,
-                            decoration: TextDecoration.none,
-                          ),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                        ),
-                        const SizedBox(height: 16),
-                        // Liens et restauration (SUPPRIMÉ D'ICI)
-                        // ... existing code ...
-                      ],
+                          const SizedBox(height: 16),
+                          // Liens et restauration (SUPPRIMÉ D'ICI)
+                          // ... existing code ...
+                        ],
+                      ),
                     ),
                   ),
                 ),

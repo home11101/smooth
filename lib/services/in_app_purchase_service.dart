@@ -12,7 +12,7 @@ import 'notification_service.dart';
 
 class InAppPurchaseService {
   // IDs des produits
-  static const String premiumWeekly = 'smooth_ai_premium_weekly_v2';
+  static const String premiumWeekly = 'smooth_ai_premium_weekly_v3';
 
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
@@ -27,6 +27,9 @@ class InAppPurchaseService {
   List<ProductDetails> get products => _products;
 
   double? _lastPurchaseAmount;
+
+  // Nouveau : context du dernier achat/restauration
+  BuildContext? _lastPurchaseContext;
 
   // Singleton
   static final InAppPurchaseService _instance = InAppPurchaseService._internal();
@@ -50,7 +53,11 @@ class InAppPurchaseService {
     // Écoute des mises à jour d'achat
     _purchaseSubscription = _inAppPurchase.purchaseStream.listen(
       (purchaseDetailsList) {
-        _handlePurchaseUpdates(purchaseDetailsList);
+        if (_lastPurchaseContext != null) {
+          _handlePurchaseUpdates(purchaseDetailsList, _lastPurchaseContext!);
+        } else {
+          debugPrint('[IAP] Erreur : context null lors de l\'affichage du SnackBar.');
+        }
       },
       onDone: () {
         _purchaseSubscription?.cancel();
@@ -99,12 +106,27 @@ class InAppPurchaseService {
   }
 
   /// Lance le processus d'achat pour un produit
-  Future<void> buyProduct(ProductDetails productDetails) async {
+  Future<void> buyProduct(ProductDetails productDetails, BuildContext context) async {
     premiumProvider.setProcessing(true);
+    
+    // Vérifier que les produits sont chargés
+    if (_products.isEmpty) {
+      await loadProducts();
+      if (_products.isEmpty) {
+        premiumProvider.setErrorMessage('Aucun abonnement disponible. Veuillez réessayer.');
+        premiumProvider.setProcessing(false);
+        return;
+      }
+    }
+    
+    debugPrint('[IAP] Tentative d\'achat pour: ${productDetails.id}');
+    debugPrint('[IAP] Prix: ${productDetails.price}');
+    
     final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
     try {
       // Stocke le montant réel du produit (en nombre)
       _lastPurchaseAmount = double.tryParse(productDetails.price.replaceAll(RegExp(r'[^0-9.]'), ''));
+      _lastPurchaseContext = context;
       await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
     } catch (e) {
       debugPrint('Erreur lors du lancement de l\'achat: $e');
@@ -114,9 +136,10 @@ class InAppPurchaseService {
   }
 
   /// Lance le processus de restauration des achats
-  Future<void> restorePurchases() async {
+  Future<void> restorePurchases(BuildContext context) async {
     premiumProvider.setProcessing(true);
     try {
+      _lastPurchaseContext = context;
       await _inAppPurchase.restorePurchases();
     } catch (e) {
       debugPrint('Erreur lors de la restauration: $e');
@@ -205,7 +228,7 @@ class InAppPurchaseService {
   /// Valide le reçu via le backend et met à jour le statut premium
   Future<bool> _validateAndGrantPremium(PurchaseDetails purchase) async {
     const String validationUrl = 'https://qlomkoexurbxqsezavdi.supabase.co/functions/v1/validate-receipt';
-    
+    debugPrint('[IAP] Début validation backend pour ${purchase.productID}');
     try {
       final user = Supabase.instance.client.auth.currentUser;
       final userId = user?.id;
@@ -232,29 +255,50 @@ class InAppPurchaseService {
         body: jsonEncode(requestBody),
       );
 
+      debugPrint('[IAP] Réponse backend status: ${response.statusCode}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        debugPrint('[IAP] Données backend: $data');
         if (data['isValid'] == true) {
           // Le backend a confirmé la validité
           await premiumProvider.updatePremiumStatus(purchase);
           premiumProvider.setErrorMessage(null); // Succès, on nettoie les erreurs
-          
-          // Configurer les notifications de renouvellement
           await _setupRenewalNotifications(purchase);
-          
-          // Enregistrement du paiement dans Supabase avec le vrai montant
           await savePaymentToSupabase(purchase, _lastPurchaseAmount ?? 0.0);
-          
           return true;
+        } else {
+          // Affichage d'un message d'erreur détaillé selon la raison backend
+          String reason = data['reason'] ?? 'Erreur inconnue lors de la validation.';
+          debugPrint('[IAP] Validation échouée: $reason');
+          premiumProvider.setErrorMessage(reason);
         }
+      } else {
+        debugPrint('[IAP] Statut HTTP inattendu: ${response.statusCode}');
+        premiumProvider.setErrorMessage('Erreur de communication avec le serveur. Veuillez réessayer.');
       }
-      // Si le statut n'est pas 200 ou si isValid est false
       return false;
     } catch (e) {
-      debugPrint('Erreur de validation réseau: $e');
-      premiumProvider.setErrorMessage('Erreur de connexion lors de la validation.');
+      debugPrint('[IAP] Erreur de validation réseau: $e');
+      premiumProvider.setErrorMessage('Erreur de connexion lors de la validation. Vérifiez votre réseau.');
       return false;
     }
+  }
+
+  void _showValidationErrorSnackBar(String message, BuildContext context, PurchaseDetails purchase) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'Réessayer',
+          textColor: Colors.white,
+          onPressed: () async {
+            await _validateAndGrantPremium(purchase, context);
+          },
+        ),
+      ),
+    );
   }
 
   /// Configure les notifications de renouvellement après un achat réussi

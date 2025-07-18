@@ -9,7 +9,7 @@ class SubscriptionService {
   static const String _expiryDateKey = 'expiry_date';
   static const String _isPremiumKey = 'is_premium';
   static const String _subscriptionExpiryKey = 'subscription_expiry';
-  static const String _premiumProductId = 'smooth_ai_premium_weekly_v2';
+  static const String _premiumProductId = 'smooth_ai_premium_weekly_v3';
   static final SubscriptionService _instance = SubscriptionService._internal();
   factory SubscriptionService() => _instance;
   SubscriptionService._internal();
