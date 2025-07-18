@@ -7,33 +7,55 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
 
 console.log('Fonction de validation de reçu initialisée');
 
+// Utilitaire fetch avec timeout
+async function fetchWithTimeout(url: string, options: any, timeout = 8000) {
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+  ]);
+}
+
 // Utilitaire pour valider un reçu Apple
 async function validateAppleReceipt(receipt: string, productId: string): Promise<{ isValid: boolean; reason?: string; expiryDate?: number }> {
-  // Utilise l'endpoint de production Apple
   const APPLE_PROD_URL = 'https://buy.itunes.apple.com/verifyReceipt';
   const APPLE_SANDBOX_URL = 'https://sandbox.itunes.apple.com/verifyReceipt';
-
-  // Prépare la requête
   const body = JSON.stringify({ 'receipt-data': receipt });
-  let response = await fetch(APPLE_PROD_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body,
-  });
-  let data = await response.json();
 
-  // Si reçu de sandbox envoyé sur prod, réessayer sur sandbox
-  if (data.status === 21007) {
-    response = await fetch(APPLE_SANDBOX_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-    });
+  let response, data;
+  try {
+    response = await fetchWithTimeout(APPLE_PROD_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     data = await response.json();
+    console.log('[AppleReceipt] Réponse production:', data.status);
+  } catch (e) {
+    console.error('[AppleReceipt] Erreur réseau Apple (prod):', e);
+    return { isValid: false, reason: 'Erreur réseau Apple (prod): ' + e.message };
   }
 
-  // Statut 0 = succès
+  // Gestion des statuts Apple
+  if (data.status === 21007) {
+    // Sandbox receipt envoyé sur prod
+    try {
+      response = await fetchWithTimeout(APPLE_SANDBOX_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+      data = await response.json();
+      console.log('[AppleReceipt] Réponse sandbox (après 21007):', data.status);
+    } catch (e) {
+      console.error('[AppleReceipt] Erreur réseau Apple (sandbox):', e);
+      return { isValid: false, reason: 'Erreur réseau Apple (sandbox): ' + e.message };
+    }
+  } else if (data.status === 21008) {
+    // Production receipt envoyé sur sandbox (rare, mais possible)
+    try {
+      response = await fetchWithTimeout(APPLE_PROD_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+      data = await response.json();
+      console.log('[AppleReceipt] Réponse production (après 21008):', data.status);
+    } catch (e) {
+      console.error('[AppleReceipt] Erreur réseau Apple (prod 2):', e);
+      return { isValid: false, reason: 'Erreur réseau Apple (prod 2): ' + e.message };
+    }
+  }
+
   if (data.status !== 0) {
+    console.warn('[AppleReceipt] Statut Apple non 0:', data.status);
     return { isValid: false, reason: `Apple status: ${data.status}` };
   }
 
@@ -59,6 +81,7 @@ async function validateAppleReceipt(receipt: string, productId: string): Promise
   }
 
   if (!found) {
+    console.warn('[AppleReceipt] Produit non trouvé dans le reçu:', productId);
     return { isValid: false, reason: 'Produit non trouvé dans le reçu.' };
   }
 
@@ -66,6 +89,7 @@ async function validateAppleReceipt(receipt: string, productId: string): Promise
   if (expirationDateMs) {
     const now = Date.now();
     if (parseInt(expirationDateMs) < now) {
+      console.warn('[AppleReceipt] Abonnement expiré:', expirationDateMs);
       return { isValid: false, reason: 'Abonnement expiré.' };
     }
     return { isValid: true, expiryDate: parseInt(expirationDateMs) };
