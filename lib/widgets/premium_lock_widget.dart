@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../services/subscription_service.dart';
-import '../utils/app_theme.dart';
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/in_app_purchase_service.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import '../services/subscription_service.dart';
+import '../services/in_app_purchase_service.dart';
+import '../utils/app_theme.dart';
 
 class PremiumLockOverlay extends StatefulWidget {
   final String feature;
@@ -27,16 +27,15 @@ class PremiumLockOverlay extends StatefulWidget {
   State<PremiumLockOverlay> createState() => _PremiumLockOverlayState();
 }
 
-class _PremiumLockOverlayState extends State<PremiumLockOverlay>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late AnimationController _parallaxController;
-  late AnimationController _pulseController;
-  late Animation<double> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _parallaxAnimation;
-  late Animation<double> _pulseAnimation;
+class _PremiumLockOverlayState extends State<PremiumLockOverlay> with TickerProviderStateMixin {
+  late final AnimationController _animationController;
+  late final AnimationController _parallaxController;
+  late final AnimationController _pulseController;
+  late final Animation<double> _slideAnimation;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
+  late final Animation<double> _parallaxAnimation;
+  late final Animation<double> _pulseAnimation;
   bool _loading = false;
 
   @override
@@ -88,6 +87,14 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay>
     _animationController.forward();
     _parallaxController.repeat(reverse: true);
     _pulseController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _parallaxController.dispose();
+    _pulseController.dispose();
+    super.dispose();
   }
 
   Future<void> _onBuyPressed() async {
@@ -147,14 +154,6 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay>
   }
 
   @override
-  void dispose() {
-    _animationController.dispose();
-    _parallaxController.dispose();
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
       future: SubscriptionService().canAccessFeature(widget.feature),
@@ -168,11 +167,11 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay>
         }
         return Stack(
           children: [
-            // Background with tap to dismiss
+            // Contenu original (widget.child)
+            widget.child,
+            // Fond flouté dismissible
             GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
+              onTap: () => Navigator.of(context).pop(),
               child: AnimatedBuilder(
                 animation: _parallaxController,
                 builder: (context, child) {
@@ -181,17 +180,15 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay>
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                       child: Container(
-                        color: Colors.white.withOpacity(0.1),
-                        child: Opacity(
-                          opacity: 0.2,
-                          child: widget.child,
-                        ),
+                        color: Colors.black.withOpacity(0.3),
+                        child: Container(color: Colors.transparent),
                       ),
                     ),
                   );
                 },
               ),
             ),
+            // Lock widget animé en bas
             Positioned(
               bottom: 0,
               left: 0,
@@ -205,10 +202,7 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay>
                       scale: _scaleAnimation.value,
                       child: FadeTransition(
                         opacity: _fadeAnimation,
-                        child: GestureDetector(
-                          onTap: () {},
-                          child: _buildLockWidget(context),
-                        ),
+                        child: _buildLockWidget(context),
                       ),
                     ),
                   );
@@ -222,262 +216,286 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay>
   }
 
   Widget _buildLockWidget(BuildContext context) {
+    final double cardWidth = MediaQuery.of(context).size.width * 0.88;
     return Container(
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryBlue.withOpacity(0.35),
-            blurRadius: 32,
-            spreadRadius: 2,
-          ),
-          BoxShadow(
-            color: AppTheme.primaryPurple.withOpacity(0.22),
-            blurRadius: 48,
-            spreadRadius: 8,
-          ),
-        ],
-      ),
-      child: Stack(
+      width: double.infinity,
+      color: Colors.black,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Positioned(
-            top: 4,
-            left: 4,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.close,
-                  color: Color(0x80FFFFFF),
-                  size: 12,
-                ),
+          Container(
+            margin: const EdgeInsets.only(top: 16, bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(32),
+                topRight: Radius.circular(32),
               ),
             ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Rectangle lumineux avec tout le contenu principal
-              Center(
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.8, // 80% de la largeur
-                  padding: const EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(
-                      width: 2.2,
-                      color: Colors.transparent,
+            child: Stack(
+              children: [
+                // Bouton de fermeture
+                Positioned(
+                  top: 4,
+                  left: 4,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Color(0xB0FFFFFF),
+                        size: 16,
+                      ),
                     ),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(28),
-                              border: Border.all(width: 2.2, color: Colors.transparent),
-                            ),
-                            child: ShaderMask(
-                              shaderCallback: (Rect bounds) {
-                                return const LinearGradient(
-                                  colors: [AppTheme.primaryBlue, AppTheme.primaryPurple],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ).createShader(bounds);
-                              },
-                              blendMode: BlendMode.srcATop,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(28),
-                                  border: Border.all(width: 2.2, color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AnimatedBuilder(
-                            animation: _pulseAnimation,
-                            builder: (context, child) {
-                              return Transform.scale(
-                                scale: _pulseAnimation.value,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(32),
-                                    gradient: const LinearGradient(
-                                      colors: [AppTheme.lightBlue, AppTheme.secondaryBlue],
-                                      begin: Alignment.centerLeft,
-                                      end: Alignment.centerRight,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppTheme.primaryBlue.withOpacity(0.18),
-                                        blurRadius: 12,
-                                        spreadRadius: 1,
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Text(
-                                    'Smooth God',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
-                              colors: [AppTheme.lightBlue, AppTheme.secondaryBlue],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ).createShader(bounds),
-                            child: const Text(
-                              'Envoyer la réponse parfaite',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          AnimatedBuilder(
-                            animation: _pulseAnimation,
-                            builder: (context, child) {
-                              return Transform.scale(
-                                scale: _pulseAnimation.value,
-                                child: Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    gradient: AppTheme.primaryGradient,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppTheme.primaryBlue.withOpacity(0.22),
-                                        blurRadius: 18,
-                                        spreadRadius: 2,
-                                      ),
-                                    ],
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: _loading ? null : _onBuyPressed,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                    child: _loading
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                          )
-                                        : Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              const Icon(Icons.lock_open, size: 18),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                "S'abonner",
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      launchUrlString('https://smoothia.app/terms.html');
-                    },
-                    child: Text(
-                      'Termes',
-                      style: TextStyle(
-                        color: Colors.white54,
-                        decoration: TextDecoration.underline,
-                        fontSize: 12,
+                // Carte centrale premium
+                Center(
+                  child: Container(
+                    width: cardWidth,
+                    constraints: const BoxConstraints(minHeight: 80),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(44),
+                      color: Colors.black,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primaryBlue.withOpacity(0.25),
+                          blurRadius: 60,
+                          spreadRadius: 12,
+                        ),
+                        BoxShadow(
+                          color: AppTheme.primaryPurple.withOpacity(0.18),
+                          blurRadius: 90,
+                          spreadRadius: 32,
+                        ),
+                      ],
+                      border: Border.all(
+                        width: 2.5,
+                        color: AppTheme.primaryBlue,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 20),
-                  GestureDetector(
-                    onTap: () {
-                      launchUrlString('https://smoothia.app/privacy.html');
-                    },
-                    child: Text(
-                      'Confidentialité',
-                      style: TextStyle(
-                        color: Colors.white54,
-                        decoration: TextDecoration.underline,
-                        fontSize: 12,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Badge animé
+                        AnimatedBuilder(
+                          animation: _pulseAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _pulseAnimation.value,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(36),
+                                  gradient: const LinearGradient(
+                                    colors: [AppTheme.lightBlue, AppTheme.secondaryBlue],
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppTheme.primaryBlue.withOpacity(0.22),
+                                      blurRadius: 18,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    Icon(Icons.flash_on, color: Colors.white, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Smooth God',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        letterSpacing: 0.5,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        // Titre premium (fixe)
+                        ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [AppTheme.lightBlue, AppTheme.secondaryBlue],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ).createShader(bounds),
+                          child: const Text(
+                            'Envoyer la réponse parfaite',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              decoration: TextDecoration.none,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Bouton principal animé (fixe)
+                        AnimatedBuilder(
+                          animation: _pulseAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _pulseAnimation.value,
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  gradient: AppTheme.primaryGradient,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppTheme.primaryBlue.withOpacity(0.28),
+                                      blurRadius: 24,
+                                      spreadRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: _loading ? null : _onBuyPressed,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: _loading
+                                      ? const SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                        )
+                                      : Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: const [
+                                            Icon(Icons.lock_open, size: 20, color: Colors.white),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              "Débloquer l’essai gratuit",
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w700,
+                                                decoration: TextDecoration.none,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        // Texte d'information sous le bouton
+                        const Text(
+                          'essai sans risque, puis 7,99€/semaine',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white70,
+                            decoration: TextDecoration.none,
+                          ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 16),
+                        // Liens et restauration (SUPPRIMÉ D'ICI)
+                        // ... existing code ...
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 20),
-                  GestureDetector(
-                    onTap: _loading ? null : _onRestorePressed,
-                    child: Text(
-                      'Restaurer',
-                      style: TextStyle(
-                        color: Colors.white54,
-                        decoration: TextDecoration.underline,
-                        fontSize: 12,
-                      ),
+                ),
+              ],
+            ),
+          ),
+          // Liens et restauration (sous la carte)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () => launchUrlString('https://smoothia.app/contact.html'),
+                  child: const Text(
+                    'Contact',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      decoration: TextDecoration.none,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w600,
+                      shadows: [Shadow(blurRadius: 2, color: Colors.black26)],
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(width: 28),
+                GestureDetector(
+                  onTap: () => launchUrlString('https://smoothia.app/terms.html'),
+                  child: const Text(
+                    'Termes',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      decoration: TextDecoration.none,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      shadows: [Shadow(blurRadius: 2, color: Colors.black26)],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 28),
+                GestureDetector(
+                  onTap: () => launchUrlString('https://smoothia.app/privacy.html'),
+                  child: const Text(
+                    'Confidentialité',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      decoration: TextDecoration.none,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      shadows: [Shadow(blurRadius: 2, color: Colors.black26)],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 28),
+                GestureDetector(
+                  onTap: _loading ? null : _onRestorePressed,
+                  child: const Text(
+                    'Restaurer',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      decoration: TextDecoration.none,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      shadows: [Shadow(blurRadius: 2, color: Colors.black26)],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
-} 
+}
