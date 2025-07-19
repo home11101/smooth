@@ -149,7 +149,7 @@ class InAppPurchaseService {
   }
 
   /// Gère les mises à jour de statut des achats (le cœur de la logique)
-  Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchaseDetailsList) async {
+  Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchaseDetailsList, BuildContext context) async {
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
       switch (purchaseDetails.status) {
         case PurchaseStatus.pending:
@@ -164,7 +164,7 @@ class InAppPurchaseService {
           break;
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
-          final bool valid = await _validateAndGrantPremium(purchaseDetails);
+          final bool valid = await _validateAndGrantPremium(purchaseDetails, context);
           if (!valid) {
              premiumProvider.setErrorMessage('La validation de votre achat a échoué. Veuillez contacter le support.');
           }
@@ -226,7 +226,7 @@ class InAppPurchaseService {
   }
 
   /// Valide le reçu via le backend et met à jour le statut premium
-  Future<bool> _validateAndGrantPremium(PurchaseDetails purchase) async {
+  Future<bool> _validateAndGrantPremium(PurchaseDetails purchase, BuildContext context) async {
     const String validationUrl = 'https://qlomkoexurbxqsezavdi.supabase.co/functions/v1/validate-receipt';
     debugPrint('[IAP] Début validation backend pour ${purchase.productID}');
     try {
@@ -270,16 +270,17 @@ class InAppPurchaseService {
           // Affichage d'un message d'erreur détaillé selon la raison backend
           String reason = data['reason'] ?? 'Erreur inconnue lors de la validation.';
           debugPrint('[IAP] Validation échouée: $reason');
-          premiumProvider.setErrorMessage(reason);
+          _showValidationErrorSnackBar(reason, context, purchase);
         }
       } else {
         debugPrint('[IAP] Statut HTTP inattendu: ${response.statusCode}');
-        premiumProvider.setErrorMessage('Erreur de communication avec le serveur. Veuillez réessayer.');
+        _showValidationErrorSnackBar('Erreur de communication avec le serveur. Veuillez réessayer.', context, purchase);
       }
       return false;
     } catch (e) {
       debugPrint('[IAP] Erreur de validation réseau: $e');
-      premiumProvider.setErrorMessage('Erreur de connexion lors de la validation. Vérifiez votre réseau.');
+      _showValidationErrorSnackBar('Erreur de connexion lors de la validation. Vérifiez votre réseau.', context, purchase);
+      premiumProvider.setErrorMessage('Erreur de connexion lors de la validation.');
       return false;
     }
   }
