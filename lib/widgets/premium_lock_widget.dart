@@ -108,7 +108,7 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay> with TickerProv
     if (purchaseService.products.isNotEmpty) {
       final product = purchaseService.products.first;
       try {
-        await purchaseService.buyProduct(product);
+        await purchaseService.buyProduct(product, context);
         feedbackMsg = 'Achat réussi ! Vous êtes maintenant premium.';
         success = true;
       } catch (e) {
@@ -135,7 +135,7 @@ class _PremiumLockOverlayState extends State<PremiumLockOverlay> with TickerProv
     String feedbackMsg = '';
     bool success = false;
     try {
-      await purchaseService.restorePurchases();
+      await purchaseService.restorePurchases(context);
       feedbackMsg = 'Achats restaurés avec succès !';
       success = true;
     } catch (e) {
